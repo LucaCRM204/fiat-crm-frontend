@@ -54,15 +54,12 @@ function buildIndex(users) {
 function getDescendantUserIds(rootId, childrenIndex) {
   const out = [];
   const stack = [...(childrenIndex.get(rootId) || [])];
-  console.log(`=== getDescendantUserIds para ID ${rootId} ===`);
-  console.log('Hijos directos:', childrenIndex.get(rootId));
   while (stack.length) {
     const id = stack.pop();
     out.push(id);
     const kids = childrenIndex.get(id) || [];
     for (const k of kids) stack.push(k);
   }
-  console.log('Descendientes totales:', out);
   return out;
 }
 
@@ -75,33 +72,32 @@ const roles = {
 };
 
 const estados = {
-  nuevo: { label: "Nuevo", color: "bg-blue-500" },
-  contactado: { label: "Contactado", color: "bg-yellow-500" },
+  nuevo: { label: "Nuevo", color: "bg-blue-600" },
+  contactado: { label: "Contactado", color: "bg-amber-500" },
   interesado: { label: "Interesado", color: "bg-orange-500" },
-  negociacion: { label: "Negociación", color: "bg-purple-500" },
-  vendido: { label: "Vendido", color: "bg-green-600" },
-  perdido: { label: "Perdido", color: "bg-red-500" },
-  numero_invalido: { label: "Número inválido", color: "bg-gray-500" },
-  no_contesta_1: { label: "No contesta 1", color: "bg-amber-500" },
-  no_contesta_2: { label: "No contesta 2", color: "bg-orange-600" },
-  no_contesta_3: { label: "No contesta 3", color: "bg-red-600" },
+  negociacion: { label: "Negociación", color: "bg-purple-600" },
+  vendido: { label: "Vendido", color: "bg-emerald-600" },
+  perdido: { label: "Perdido", color: "bg-rose-600" },
+  numero_invalido: { label: "Número inválido", color: "bg-slate-500" },
+  no_contesta_1: { label: "No contesta 1", color: "bg-amber-600" },
+  no_contesta_2: { label: "No contesta 2", color: "bg-orange-700" },
+  no_contesta_3: { label: "No contesta 3", color: "bg-red-700" },
 };
 
 const fuentes = {
   meta: { label: "Meta/Facebook", color: "bg-blue-600", icon: "📱" },
-  whatsapp: { label: "WhatsApp Bot", color: "bg-green-500", icon: "💬" },
-  whatsapp_100: { label: "WhatsApp Bot 100", color: "bg-green-700", icon: "💬" },
-  sitio_web: { label: "Sitio Web", color: "bg-purple-600", icon: "🌐" },
-  referido: { label: "Referido", color: "bg-orange-500", icon: "👥" },
-  telefono: { label: "Llamada", color: "bg-indigo-500", icon: "📞" },
-  showroom: { label: "Showroom", color: "bg-gray-600", icon: "🏢" },
-  google: { label: "Google Ads", color: "bg-red-500", icon: "🎯" },
-  instagram: { label: "Instagram", color: "bg-pink-500", icon: "📸" },
-  otro: { label: "Otro", color: "bg-gray-400", icon: "❓" },
-  creado_por: { label: "Creado por", color: "bg-teal-500", icon: "👤" },
+  whatsapp: { label: "WhatsApp Bot", color: "bg-emerald-600", icon: "💬" },
+  whatsapp_100: { label: "WhatsApp Bot 100", color: "bg-emerald-700", icon: "💬" },
+  sitio_web: { label: "Sitio Web", color: "bg-violet-600", icon: "🌐" },
+  referido: { label: "Referido", color: "bg-orange-600", icon: "👥" },
+  telefono: { label: "Llamada", color: "bg-indigo-600", icon: "📞" },
+  showroom: { label: "Showroom", color: "bg-slate-600", icon: "🏢" },
+  google: { label: "Google Ads", color: "bg-red-600", icon: "🎯" },
+  instagram: { label: "Instagram", color: "bg-pink-600", icon: "📸" },
+  otro: { label: "Otro", color: "bg-gray-500", icon: "❓" },
+  creado_por: { label: "Creado por", color: "bg-teal-600", icon: "👤" },
 };
 
-// Configuración de bots
 const botConfig = {
   whatsapp_bot_cm1: { targetTeam: "sauer", label: "Bot CM 1" },
   whatsapp_bot_cm2: { targetTeam: "daniel", label: "Bot CM 2" },
@@ -232,52 +228,43 @@ export default function CRM() {
   const [selectedEstado, setSelectedEstado] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState("todos");
 
-  // Estados para búsqueda y filtrado de leads
   const [searchText, setSearchText] = useState("");
   const [selectedVendedorFilter, setSelectedVendedorFilter] = useState(null);
   const [selectedEstadoFilter, setSelectedEstadoFilter] = useState("");
   const [selectedFuenteFilter, setSelectedFuenteFilter] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
-  // Estados para filtrado de usuarios
   const [userSearchText, setUserSearchText] = useState("");
   const [selectedTeamFilter, setSelectedTeamFilter] = useState("todos");
   const [selectedRoleFilter, setSelectedRoleFilter] = useState("todos");
   const [userSortBy, setUserSortBy] = useState("team");
   const [showUserFilters, setShowUserFilters] = useState(false);
 
-  // Estados para reasignación
   const [showReassignModal, setShowReassignModal] = useState(false);
   const [leadToReassign, setLeadToReassign] = useState(null);
   const [selectedVendorForReassign, setSelectedVendorForReassign] = useState(null);
 
-  // Estados para confirmación de eliminación
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
 
-  // Estados para confirmación de eliminación de leads
   const [showDeleteLeadConfirmModal, setShowDeleteLeadConfirmModal] = useState(false);
   const [leadToDelete, setLeadToDelete] = useState(null);
 
-  // Estados para modales
   const [showNewLeadModal, setShowNewLeadModal] = useState(false);
   const [showObservacionesModal, setShowObservacionesModal] = useState(false);
   const [showHistorialModal, setShowHistorialModal] = useState(false);
   const [editingLeadObservaciones, setEditingLeadObservaciones] = useState(null);
   const [viewingLeadHistorial, setViewingLeadHistorial] = useState(null);
 
-  // Estados para calendario
   const [events, setEvents] = useState([]);
   const [selectedCalendarUserId, setSelectedCalendarUserId] = useState(null);
   const [showNewEventModal, setShowNewEventModal] = useState(false);
 
-  // Estados para gestión de usuarios
   const [showUserModal, setShowUserModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [modalRole, setModalRole] = useState("vendedor");
   const [modalReportsTo, setModalReportsTo] = useState(null);
 
-  // Estados para presupuestos
   const [presupuestos, setPresupuestos] = useState([]);
   const [showPresupuestoModal, setShowPresupuestoModal] = useState(false);
   const [editingPresupuesto, setEditingPresupuesto] = useState(null);
@@ -1057,7 +1044,7 @@ export default function CRM() {
         pushAlert(
           mapped.vendedor,
           "lead_assigned",
-          `Nuevo lead asignado: ${mapped.nombre} (creado por ${currentUser?.name})`
+          `Nuevo lead asignado: ${mapped.nombre}`
         );
       }
       
@@ -1272,15 +1259,15 @@ export default function CRM() {
   // ===== UI: Login =====
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-600 via-red-700 to-red-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-4">
-              <div className="w-16 h-16 bg-red-600 rounded-lg flex items-center justify-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center shadow-lg">
                 <span className="text-white font-bold text-2xl">FIAT</span>
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">FIAT Auto del sol</h1>
+            <h1 className="text-2xl font-bold text-gray-800">FIAT Auto del Sol</h1>
             <p className="text-gray-600">Sistema de gestión CRM</p>
           </div>
 
@@ -1290,8 +1277,8 @@ export default function CRM() {
               <input
                 type="email"
                 id="email"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
-                placeholder="tu@fiat.com"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-colors"
+                placeholder="email@ejemplo.com"
               />
             </div>
             <div>
@@ -1299,7 +1286,7 @@ export default function CRM() {
               <input
                 type="password"
                 id="password"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-colors"
                 placeholder="••••••••"
               />
             </div>
@@ -1316,7 +1303,7 @@ export default function CRM() {
                   document.getElementById("password").value
                 )
               }
-              className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-4 rounded-lg font-semibold hover:from-red-700 hover:to-red-800"
+              className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-4 rounded-lg font-semibold hover:from-red-700 hover:to-red-800 transition-all shadow-md hover:shadow-lg"
             >
               Iniciar Sesión
             </button>
@@ -1328,28 +1315,28 @@ export default function CRM() {
 
   // ===== UI autenticada =====
   return (
-    <div className="min-h-screen bg-gray-100 flex">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex">
       {/* Sidebar */}
-      <div className="bg-red-900 text-white w-64 min-h-screen p-4">
+      <div className="bg-gradient-to-b from-slate-900 to-slate-800 text-white w-64 min-h-screen p-4 shadow-2xl">
         <div className="mb-8">
           <div className="flex items-center mb-4">
-            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
-              <span className="text-red-600 font-bold text-lg">FIAT</span>
+            <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-red-700 rounded-lg flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-lg">F</span>
             </div>
             <div className="ml-3">
               <h1 className="text-xl font-bold text-white">FIAT</h1>
-              <p className="text-xs text-red-300">Argentina</p>
+              <p className="text-xs text-gray-300">Auto del Sol</p>
             </div>
           </div>
 
-          <div className="text-sm text-gray-300">
-            <p>{currentUser?.name || currentUser?.email}</p>
-            <p className="text-red-300">
+          <div className="text-sm bg-slate-800/50 rounded-lg p-3">
+            <p className="font-medium text-white">{currentUser?.name || currentUser?.email}</p>
+            <p className="text-gray-300 text-xs">
               {roles[currentUser?.role] || currentUser?.role}
             </p>
             {!currentUser?.active && (
-              <p className="text-yellow-300 text-xs mt-1">
-                ⚠️ Usuario desactivado - No recibe leads nuevos
+              <p className="text-amber-400 text-xs mt-1">
+                Usuario desactivado
               </p>
             )}
           </div>
@@ -1373,18 +1360,18 @@ export default function CRM() {
             <button
               key={key}
               onClick={() => setActiveSection(key)}
-              className={`w-full flex items-center justify-between space-x-3 px-3 py-2 rounded-lg transition-colors ${
+              className={`w-full flex items-center justify-between space-x-3 px-3 py-2.5 rounded-lg transition-all ${
                 activeSection === key
-                  ? "bg-red-700 text-white"
-                  : "text-gray-300 hover:bg-red-800"
+                  ? "bg-red-600 text-white shadow-md"
+                  : "text-gray-300 hover:bg-slate-700/50 hover:text-white"
               }`}
             >
               <div className="flex items-center space-x-3">
                 <Icon size={20} />
-                <span>{label}</span>
+                <span className="font-medium">{label}</span>
               </div>
               {badge !== undefined && badge > 0 && (
-                <span className="bg-yellow-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center">
+                <span className="bg-amber-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center font-bold">
                   {badge}
                 </span>
               )}
@@ -1392,8 +1379,7 @@ export default function CRM() {
           ))}
         </nav>
 
-        {/* Botón de Cerrar Sesión */}
-        <div className="mt-auto pt-4 border-t border-red-800">
+        <div className="mt-auto pt-4 border-t border-slate-700">
           <button
             onClick={async () => {
               try {
@@ -1413,7 +1399,7 @@ export default function CRM() {
                 window.location.reload();
               }
             }}
-            className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-red-300 hover:bg-red-800 transition-colors"
+            className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-slate-700/50 hover:text-white transition-all"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -1425,18 +1411,18 @@ export default function CRM() {
         </div>
       </div>
 
-      {/* Main Content Area - Dashboard */}
-      <div className="flex-1 p-6">
+      {/* Main Content Area */}
+      <div className="flex-1 p-6 overflow-y-auto">
         {activeSection === "dashboard" && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-gray-800">Dashboard</h2>
+              <h2 className="text-3xl font-bold text-gray-900">Dashboard</h2>
               <div className="flex items-center space-x-3">
                 {["owner", "gerente_general", "dueño"].includes(currentUser?.role) && (
                   <select
                     value={selectedTeam}
                     onChange={(e) => setSelectedTeam(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-lg bg-white"
+                    className="px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm hover:border-gray-400 focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                   >
                     <option value="todos">Todos los equipos</option>
                     {users
@@ -1451,23 +1437,23 @@ export default function CRM() {
                 {canCreateLeads() && (
                   <button
                     onClick={() => setShowNewLeadModal(true)}
-                    className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                    className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all"
                   >
                     <Plus size={20} />
-                    <span>Nuevo Lead</span>
+                    <span className="font-medium">Nuevo Lead</span>
                   </button>
                 )}
               </div>
             </div>
 
             {!currentUser?.active && (
-              <div className="bg-orange-50 border-l-4 border-orange-400 p-4">
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-500 p-4 rounded-lg shadow-sm">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <Bell className="h-5 w-5 text-orange-400" />
+                    <Bell className="h-5 w-5 text-amber-600" />
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm text-orange-700">
+                    <p className="text-sm text-amber-800">
                       <strong>Usuario Desactivado:</strong> No recibirás nuevos leads automáticamente. 
                       Solo podrás gestionar los leads que ya tienes asignados.
                     </p>
@@ -1485,43 +1471,43 @@ export default function CRM() {
                 const stats = getDashboardStats(teamFilter);
                 return (
                   <>
-                    <div className="bg-white rounded-xl shadow-lg p-6">
+                    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-xl shadow-md hover:shadow-lg transition-all p-6">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium text-gray-600">Total Leads</p>
-                          <p className="text-3xl font-bold text-gray-900">
+                          <p className="text-3xl font-bold text-gray-900 mt-1">
                             {stats.totalLeads}
                           </p>
                         </div>
-                        <div className="bg-red-500 p-3 rounded-full">
+                        <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-4 rounded-xl shadow-md">
                           <Users className="h-6 w-6 text-white" />
                         </div>
                       </div>
                     </div>
-                    <div className="bg-white rounded-xl shadow-lg p-6">
+                    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-6">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium text-gray-600">Ventas</p>
-                          <p className="text-3xl font-bold text-green-600">
+                          <p className="text-3xl font-bold text-emerald-600 mt-1">
                             {stats.vendidos}
                           </p>
                         </div>
-                        <div className="bg-green-500 p-3 rounded-full">
+                        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-4 rounded-xl shadow-md">
                           <Trophy className="h-6 w-6 text-white" />
                         </div>
                       </div>
                     </div>
-                    <div className="bg-white rounded-xl shadow-lg p-6">
+                    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-6">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium text-gray-600">
                             Conversión
                           </p>
-                          <p className="text-3xl font-bold text-red-600">
+                          <p className="text-3xl font-bold text-red-600 mt-1">
                             {stats.conversion}%
                           </p>
                         </div>
-                        <div className="bg-red-500 p-3 rounded-full">
+                        <div className="bg-gradient-to-br from-red-600 to-red-700 p-4 rounded-xl shadow-md">
                           <BarChart3 className="h-6 w-6 text-white" />
                         </div>
                       </div>
@@ -1532,13 +1518,13 @@ export default function CRM() {
             </div>
 
             {/* Estados de Leads */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex items-center justify-between mb-4">
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-semibold text-gray-800">Estados de Leads</h3>
                 <div className="flex items-center space-x-2">
                   {["owner", "gerente_general"].includes(currentUser?.role) && (
                     <>
-                      <span className="text-sm text-gray-600">Descargar Excel:</span>
+                      <span className="text-sm text-gray-600 font-medium">Descargar Excel:</span>
                       <button
                         onClick={() => {
                           const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
@@ -1549,10 +1535,10 @@ export default function CRM() {
                             : getFilteredLeads();
                           downloadAllLeadsExcel(filteredLeads, userById, fuentes);
                         }}
-                        className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 flex items-center space-x-1"
+                        className="px-3 py-1.5 bg-emerald-600 text-white text-xs rounded-lg hover:bg-emerald-700 transition-colors flex items-center space-x-1 shadow-sm"
                         title="Descargar Excel completo"
                       >
-                        <Download size={12} />
+                        <Download size={14} />
                         <span>Todos</span>
                       </button>
                     </>
@@ -1560,7 +1546,7 @@ export default function CRM() {
                   {selectedEstado && (
                     <button
                       onClick={() => setSelectedEstado(null)}
-                      className="text-sm text-red-600 hover:text-red-800 flex items-center space-x-1"
+                      className="text-sm text-red-600 hover:text-red-800 flex items-center space-x-1 font-medium"
                     >
                       <X size={16} />
                       <span>Cerrar filtro</span>
@@ -1585,14 +1571,14 @@ export default function CRM() {
                     <div key={key} className="relative group">
                       <button
                         onClick={() => setSelectedEstado(selectedEstado === key ? null : key)}
-                        className={`w-full text-center transition-all duration-200 transform hover:scale-105 ${
-                          selectedEstado === key ? "ring-4 ring-red-300 ring-opacity-50" : ""
+                        className={`w-full text-center transition-all duration-200 ${
+                          selectedEstado === key ? "ring-4 ring-red-400 ring-opacity-50 scale-105" : "hover:scale-105"
                         }`}
                         title={`Ver todos los leads en estado: ${estado.label}`}
                       >
-                        <div className={`${estado.color} text-white rounded-lg p-4 mb-2 relative cursor-pointer hover:opacity-90 transition-opacity`}>
+                        <div className={`${estado.color} text-white rounded-xl p-4 mb-2 relative cursor-pointer shadow-md hover:shadow-lg transition-all`}>
                           <div className="text-2xl font-bold">{count}</div>
-                          <div className="text-xs opacity-75">{percentage}%</div>
+                          <div className="text-xs opacity-90">{percentage}%</div>
                           
                           {["owner", "dueño"].includes(currentUser?.role) && count > 0 && (
                             <button
@@ -1606,15 +1592,15 @@ export default function CRM() {
                                   : getFilteredLeads();
                                 downloadLeadsByStateExcel(filteredLeads, key, userById, fuentes);
                               }}
-                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white bg-opacity-20 hover:bg-opacity-40 rounded p-1"
+                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 hover:bg-white/40 rounded-lg p-1.5"
                               title={`Descargar Excel: ${estado.label}`}
                             >
-                              <Download size={12} />
+                              <Download size={14} />
                             </button>
                           )}
                         </div>
                       </button>
-                      <div className="text-sm text-gray-600 text-center font-medium">
+                      <div className="text-sm text-gray-700 text-center font-medium">
                         {estado.label}
                       </div>
                     </div>
@@ -1660,28 +1646,28 @@ export default function CRM() {
                         <table className="w-full text-sm">
                           <thead className="bg-gray-50">
                             <tr>
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                 Cliente
                               </th>
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                 Contacto
                               </th>
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                 Vehículo
                               </th>
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                 Estado
                               </th>
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                 Fuente
                               </th>
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                 Vendedor
                               </th>
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                 Fecha
                               </th>
-                              <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
                                 Acciones
                               </th>
                             </tr>
@@ -1698,19 +1684,19 @@ export default function CRM() {
                                   getVisibleUsers().some((u) => u.id === lead.vendedor));
                               
                               return (
-                                <tr key={lead.id} className="hover:bg-gray-50">
-                                  <td className="px-4 py-2">
+                                <tr key={lead.id} className="hover:bg-gray-50 transition-colors">
+                                  <td className="px-4 py-3">
                                     <div className="font-medium text-gray-900">
                                       {lead.nombre}
                                     </div>
                                   </td>
-                                  <td className="px-4 py-2">
+                                  <td className="px-4 py-3">
                                     <div className="flex items-center space-x-1">
-                                      <Phone size={12} className="text-gray-400" />
+                                      <Phone size={14} className="text-gray-400" />
                                       <span className="text-gray-700">{lead.telefono}</span>
                                     </div>
                                   </td>
-                                  <td className="px-4 py-2">
+                                  <td className="px-4 py-3">
                                     <div>
                                       <div className="font-medium text-gray-900">
                                         {lead.modelo}
@@ -1725,13 +1711,13 @@ export default function CRM() {
                                       )}
                                     </div>
                                   </td>
-                                  <td className="px-4 py-2">
+                                  <td className="px-4 py-3">
                                     <select
                                       value={lead.estado}
                                       onChange={(e) =>
                                         handleUpdateLeadStatus(lead.id, e.target.value)
                                       }
-                                      className={`text-xs font-medium rounded-full px-2 py-1 border-0 text-white ${estados[lead.estado].color}`}
+                                      className={`text-xs font-medium rounded-full px-3 py-1 border-0 text-white ${estados[lead.estado].color} cursor-pointer hover:opacity-90 transition-opacity`}
                                     >
                                       {Object.entries(estados).map(([key, estado]) => (
                                         <option key={key} value={key} className="text-black">
@@ -1740,7 +1726,7 @@ export default function CRM() {
                                       ))}
                                     </select>
                                   </td>
-                                  <td className="px-4 py-2">
+                                  <td className="px-4 py-3">
                                     <div className="flex items-center space-x-1">
                                       <span className="text-sm">
                                         {fuentes[lead.fuente]?.icon || "❓"}
@@ -1751,7 +1737,7 @@ export default function CRM() {
                                       </span>
                                     </div>
                                   </td>
-                                  <td className="px-4 py-2 text-gray-700">
+                                  <td className="px-4 py-3 text-gray-700">
                                     <div>
                                       {vendedor?.name || "Sin asignar"}
                                       {vendedor && !vendedor.active && (
@@ -1761,10 +1747,10 @@ export default function CRM() {
                                       )}
                                     </div>
                                   </td>
-                                  <td className="px-4 py-2 text-gray-500 text-xs">
+                                  <td className="px-4 py-3 text-gray-500 text-xs">
                                     {lead.fecha ? String(lead.fecha).slice(0, 10) : "—"}
                                   </td>
-                                  <td className="px-4 py-2 text-center">
+                                  <td className="px-4 py-3 text-center">
                                     <div className="flex items-center justify-center space-x-1">
                                       <button
                                         onClick={() => {
@@ -1775,7 +1761,7 @@ export default function CRM() {
                                           const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
                                           window.open(whatsappUrl, '_blank');
                                         }}
-                                        className="px-2 py-1 text-xs rounded bg-green-100 text-green-700 hover:bg-green-200 flex items-center space-x-1"
+                                        className="px-2 py-1 text-xs rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors flex items-center space-x-1"
                                         title="Chatear por WhatsApp"
                                       >
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
@@ -1788,7 +1774,7 @@ export default function CRM() {
                                           setSelectedLeadForPresupuesto(lead);
                                           setShowPresupuestoSelectModal(true);
                                         }}
-                                        className="px-2 py-1 text-xs rounded bg-red-100 text-red-700 hover:bg-red-200 flex items-center space-x-1"
+                                        className="px-2 py-1 text-xs rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors flex items-center space-x-1"
                                         title="Enviar presupuesto por WhatsApp"
                                       >
                                         <FileText size={12} />
@@ -1800,7 +1786,7 @@ export default function CRM() {
                                           setEditingLeadObservaciones(lead);
                                           setShowObservacionesModal(true);
                                         }}
-                                        className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                        className="px-2 py-1 text-xs rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
                                         title="Ver/Editar observaciones"
                                       >
                                         {lead.notas && lead.notas.length > 0 ? "Ver" : "Obs"}
@@ -1811,7 +1797,7 @@ export default function CRM() {
                                             e.stopPropagation();
                                             openReassignModal(lead);
                                           }}
-                                          className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700 hover:bg-purple-200"
+                                          className="px-2 py-1 text-xs rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors"
                                           title="Reasignar lead"
                                         >
                                           Reasignar
@@ -1823,7 +1809,7 @@ export default function CRM() {
                                             e.stopPropagation();
                                             openDeleteLeadConfirm(lead);
                                           }}
-                                          className="px-2 py-1 text-xs rounded bg-red-100 text-red-700 hover:bg-red-200"
+                                          className="px-2 py-1 text-xs rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
                                           title="Eliminar lead permanentemente"
                                         >
                                           <Trash2 size={12} />
@@ -1834,7 +1820,7 @@ export default function CRM() {
                                           e.stopPropagation();
                                           setActiveSection("leads");
                                         }}
-                                        className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                        className="px-2 py-1 text-xs rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
                                         title="Ver en tabla completa"
                                       >
                                         Ver
@@ -1854,7 +1840,7 @@ export default function CRM() {
             </div>
 
             {/* Métricas por fuente */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="bg-white rounded-xl shadow-md p-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">
                 Performance por Fuente
               </h3>
@@ -1864,22 +1850,22 @@ export default function CRM() {
                     ? selectedTeam
                     : undefined;
                   return getSourceMetrics(teamFilter).map((item) => (
-                    <div key={item.source} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <span className="text-lg">{item.icon}</span>
+                    <div key={item.source} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <span className="text-xl">{item.icon}</span>
                         <span className="font-medium text-gray-900">{item.label}</span>
                       </div>
-                      <div className="space-y-1 text-sm">
+                      <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
-                          <span>Total:</span>
-                          <span className="font-semibold">{item.total}</span>
+                          <span className="text-gray-600">Total:</span>
+                          <span className="font-semibold text-gray-900">{item.total}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>Ventas:</span>
-                          <span className="font-semibold text-green-600">{item.vendidos}</span>
+                          <span className="text-gray-600">Ventas:</span>
+                          <span className="font-semibold text-emerald-600">{item.vendidos}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>Conversión:</span>
+                          <span className="text-gray-600">Conversión:</span>
                           <span className="font-semibold text-red-600">
                             {item.conversion}%
                           </span>
@@ -1893,34 +1879,34 @@ export default function CRM() {
           </div>
         )}
 
-        {/* Sección Leads */}
+       {/* Sección Leads */}
         {activeSection === "leads" && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-gray-800">Gestión de Leads</h2>
+              <h2 className="text-3xl font-bold text-gray-900">Gestión de Leads</h2>
               {canCreateLeads() && (
                 <button
                   onClick={() => setShowNewLeadModal(true)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all"
                 >
                   <Plus size={20} />
-                  <span>Nuevo Lead</span>
+                  <span className="font-medium">Nuevo Lead</span>
                 </button>
               )}
             </div>
 
             {/* Barra de búsqueda y filtros */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="bg-white rounded-xl shadow-md p-6">
               <div className="flex flex-col lg:flex-row gap-4">
                 <div className="flex-1">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                     <input
                       type="text"
-                      placeholder="Buscar por cliente, teléfono, modelo, vendedor, observaciones..."
+                      placeholder="Buscar por cliente, teléfono, modelo, vendedor..."
                       value={searchText}
                       onChange={(e) => setSearchText(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                     />
                   </div>
                 </div>
@@ -1928,16 +1914,16 @@ export default function CRM() {
                 <div className="flex items-center space-x-3">
                   <button
                     onClick={() => setShowFilters(!showFilters)}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
+                    className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg border transition-all ${
                       showFilters || getActiveFiltersCount() > 0
                         ? "bg-red-100 border-red-300 text-red-700"
-                        : "bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100"
+                        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                     }`}
                   >
                     <Filter size={20} />
-                    <span>Filtros</span>
+                    <span className="font-medium">Filtros</span>
                     {getActiveFiltersCount() > 0 && (
-                      <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
+                      <span className="bg-red-600 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center font-bold">
                         {getActiveFiltersCount()}
                       </span>
                     )}
@@ -1946,15 +1932,15 @@ export default function CRM() {
                   {getActiveFiltersCount() > 0 && (
                     <button
                       onClick={clearFilters}
-                      className="flex items-center space-x-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
+                      className="flex items-center space-x-2 px-4 py-2.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
                     >
                       <X size={16} />
-                      <span>Limpiar</span>
+                      <span className="font-medium">Limpiar</span>
                     </button>
                   )}
 
                   <div className="text-sm text-gray-600">
-                    <span className="font-medium">{getFilteredAndSearchedLeads().length}</span> leads encontrados
+                    <span className="font-semibold text-gray-900">{getFilteredAndSearchedLeads().length}</span> leads
                   </div>
                 </div>
               </div>
@@ -1970,7 +1956,7 @@ export default function CRM() {
                       <select
                         value={selectedVendedorFilter || ""}
                         onChange={(e) => setSelectedVendedorFilter(e.target.value ? parseInt(e.target.value, 10) : null)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
                       >
                         <option value="">Todos los vendedores</option>
                         <option value="0">Sin asignar</option>
@@ -1994,7 +1980,7 @@ export default function CRM() {
                       <select
                         value={selectedEstadoFilter}
                         onChange={(e) => setSelectedEstadoFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
                       >
                         <option value="">Todos los estados</option>
                         {Object.entries(estados).map(([key, estado]) => (
@@ -2012,7 +1998,7 @@ export default function CRM() {
                       <select
                         value={selectedFuenteFilter}
                         onChange={(e) => setSelectedFuenteFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
                       >
                         <option value="">Todas las fuentes</option>
                         {Object.entries(fuentes).map(([key, fuente]) => (
@@ -2028,43 +2014,27 @@ export default function CRM() {
             </div>
 
             {/* Tabla de leads */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="bg-white rounded-xl shadow-md overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Cliente
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Contacto
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Vehículo
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Estado
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Fuente
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Vendedor
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Fecha
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                        Acciones
-                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Cliente</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Contacto</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Vehículo</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Estado</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Fuente</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Vendedor</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Fecha</th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {getFilteredAndSearchedLeads().length === 0 ? (
                       <tr>
-                        <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
+                        <td colSpan={8} className="px-4 py-12 text-center text-gray-500">
                           {searchText.trim() || selectedVendedorFilter || selectedEstadoFilter || selectedFuenteFilter
-                            ? "No se encontraron leads que coincidan con los filtros aplicados"
+                            ? "No se encontraron leads con los filtros aplicados"
                             : "No hay leads para mostrar"}
                         </td>
                       </tr>
@@ -2078,18 +2048,18 @@ export default function CRM() {
                             getVisibleUsers().some((u) => u.id === lead.vendedor));
 
                         return (
-                          <tr key={lead.id} className="hover:bg-gray-50">
+                          <tr key={lead.id} className="hover:bg-gray-50 transition-colors">
                             <td className="px-4 py-4">
                               <div className="font-medium text-gray-900">{lead.nombre}</div>
                               {lead.created_by && (
                                 <div className="text-xs text-gray-500">
-                                  Creado por: {userById.get(lead.created_by)?.name || 'Usuario eliminado'}
+                                  Creado por: {userById.get(lead.created_by)?.name || 'Sistema'}
                                 </div>
                               )}
                             </td>
                             <td className="px-4 py-4">
-                              <div className="flex items-center space-x-1">
-                                <Phone size={12} className="text-gray-400" />
+                              <div className="flex items-center space-x-2">
+                                <Phone size={14} className="text-gray-400" />
                                 <span className="text-gray-700">{lead.telefono}</span>
                               </div>
                             </td>
@@ -2098,19 +2068,15 @@ export default function CRM() {
                                 <div className="font-medium text-gray-900">{lead.modelo}</div>
                                 <div className="text-xs text-gray-500">{lead.formaPago}</div>
                                 {lead.infoUsado && (
-                                  <div className="text-xs text-orange-600">
-                                    Usado: {lead.infoUsado}
-                                  </div>
+                                  <div className="text-xs text-orange-600">Usado: {lead.infoUsado}</div>
                                 )}
                               </div>
                             </td>
                             <td className="px-4 py-4">
                               <select
                                 value={lead.estado}
-                                onChange={(e) =>
-                                  handleUpdateLeadStatus(lead.id, e.target.value)
-                                }
-                                className={`text-xs font-medium rounded-full px-2 py-1 border-0 text-white ${estados[lead.estado].color}`}
+                                onChange={(e) => handleUpdateLeadStatus(lead.id, e.target.value)}
+                                className={`text-xs font-medium rounded-full px-3 py-1 border-0 text-white ${estados[lead.estado].color} cursor-pointer hover:opacity-90 transition-opacity`}
                               >
                                 {Object.entries(estados).map(([key, estado]) => (
                                   <option key={key} value={key} className="text-black">
@@ -2121,28 +2087,24 @@ export default function CRM() {
                             </td>
                             <td className="px-4 py-4">
                               <div className="flex items-center space-x-1">
-                                <span className="text-sm">
-                                  {fuentes[lead.fuente]?.icon || "❓"}
-                                </span>
+                                <span>{fuentes[lead.fuente]?.icon || "❓"}</span>
                                 <span className="text-xs text-gray-600">
                                   {fuentes[lead.fuente]?.label || String(lead.fuente)}
                                 </span>
                               </div>
                             </td>
-                            <td className="px-4 py-4 text-gray-700">
+                            <td className="px-4 py-4">
                               <div>
-                                {vendedor?.name || "Sin asignar"}
+                                <span className="text-gray-900">{vendedor?.name || "Sin asignar"}</span>
                                 {vendedor && !vendedor.active && (
-                                  <div className="text-xs text-red-600">
-                                    (Desactivado)
-                                  </div>
+                                  <div className="text-xs text-red-600">(Desactivado)</div>
                                 )}
                               </div>
                             </td>
                             <td className="px-4 py-4 text-gray-500 text-xs">
                               {lead.fecha ? String(lead.fecha).slice(0, 10) : "—"}
                             </td>
-                            <td className="px-4 py-4 text-center">
+                            <td className="px-4 py-4">
                               <div className="flex items-center justify-center space-x-1">
                                 <button
                                   onClick={() => {
@@ -2150,13 +2112,12 @@ export default function CRM() {
                                     const message = encodeURIComponent(
                                       `Hola ${lead.nombre}, me contacto desde FIAT Auto del sol por su consulta sobre el ${lead.modelo}. ¿Cómo está?`
                                     );
-                                    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
-                                    window.open(whatsappUrl, '_blank');
+                                    window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
                                   }}
-                                  className="px-2 py-1 text-xs rounded bg-green-100 text-green-700 hover:bg-green-200 flex items-center space-x-1"
-                                  title="Chatear por WhatsApp"
+                                  className="px-2 py-1 text-xs rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors"
+                                  title="WhatsApp"
                                 >
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.89 3.587"/>
                                   </svg>
                                 </button>
@@ -2166,11 +2127,10 @@ export default function CRM() {
                                     setSelectedLeadForPresupuesto(lead);
                                     setShowPresupuestoSelectModal(true);
                                   }}
-                                  className="px-2 py-1 text-xs rounded bg-red-100 text-red-700 hover:bg-red-200 flex items-center space-x-1"
-                                  title="Enviar presupuesto por WhatsApp"
+                                  className="px-2 py-1 text-xs rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+                                  title="Presupuesto"
                                 >
                                   <FileText size={12} />
-                                  <span>Pres</span>
                                 </button>
                                 <button
                                   onClick={(e) => {
@@ -2178,10 +2138,10 @@ export default function CRM() {
                                     setEditingLeadObservaciones(lead);
                                     setShowObservacionesModal(true);
                                   }}
-                                  className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
-                                  title="Ver/Editar observaciones"
+                                  className="px-2 py-1 text-xs rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+                                  title="Observaciones"
                                 >
-                                  {lead.notas && lead.notas.length > 0 ? "Ver" : "Obs"}
+                                  Obs
                                 </button>
                                 {canReassign && (
                                   <button
@@ -2189,8 +2149,7 @@ export default function CRM() {
                                       e.stopPropagation();
                                       openReassignModal(lead);
                                     }}
-                                    className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700 hover:bg-purple-200"
-                                    title="Reasignar lead"
+                                    className="px-2 py-1 text-xs rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors"
                                   >
                                     Reasignar
                                   </button>
@@ -2201,8 +2160,7 @@ export default function CRM() {
                                       e.stopPropagation();
                                       openDeleteLeadConfirm(lead);
                                     }}
-                                    className="px-2 py-1 text-xs rounded bg-red-100 text-red-700 hover:bg-red-200"
-                                    title="Eliminar lead permanentemente"
+                                    className="px-2 py-1 text-xs rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
                                   >
                                     <Trash2 size={12} />
                                   </button>
@@ -2213,8 +2171,7 @@ export default function CRM() {
                                     setViewingLeadHistorial(lead);
                                     setShowHistorialModal(true);
                                   }}
-                                  className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                  title="Ver historial"
+                                  className="px-2 py-1 text-xs rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
                                 >
                                   Historial
                                 </button>
@@ -2235,7 +2192,7 @@ export default function CRM() {
         {activeSection === "calendar" && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-gray-800">Calendario</h2>
+              <h2 className="text-3xl font-bold text-gray-900">Calendario</h2>
               <div className="flex items-center space-x-3">
                 <select
                   value={selectedCalendarUserId ?? ""}
@@ -2244,7 +2201,7 @@ export default function CRM() {
                       e.target.value ? parseInt(e.target.value, 10) : null
                     )
                   }
-                  className="px-3 py-2 border border-gray-300 rounded-lg"
+                  className="px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm hover:border-gray-400 focus:ring-2 focus:ring-red-600 transition-all"
                 >
                   <option value="">Mi calendario</option>
                   {visibleUsers
@@ -2257,15 +2214,15 @@ export default function CRM() {
                 </select>
                 <button
                   onClick={() => setShowNewEventModal(true)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all"
                 >
                   <Plus size={20} />
-                  <span>Nuevo Evento</span>
+                  <span className="font-medium">Nuevo Evento</span>
                 </button>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="bg-white rounded-xl shadow-md p-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">
                 Próximos eventos -{" "}
                 {selectedCalendarUserId
@@ -2274,15 +2231,16 @@ export default function CRM() {
               </h3>
 
               {eventsForSelectedUser.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
-                  No hay eventos programados
-                </p>
+                <div className="text-center py-12">
+                  <Calendar size={48} className="mx-auto text-gray-300 mb-4" />
+                  <p className="text-gray-500">No hay eventos programados</p>
+                </div>
               ) : (
                 <div className="space-y-3">
                   {eventsForSelectedUser.map((event) => (
                     <div
                       key={event.id}
-                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:shadow-sm transition-all"
                     >
                       <div>
                         <h4 className="font-medium text-gray-900">{event.title}</h4>
@@ -2293,15 +2251,13 @@ export default function CRM() {
                           {userById.get(event.userId)?.name || "Usuario desconocido"}
                         </p>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => deleteEvent(event.id)}
-                          className="p-2 text-red-600 hover:text-red-800"
-                          title="Eliminar evento"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => deleteEvent(event.id)}
+                        className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Eliminar evento"
+                      >
+                        <Trash2 size={18} />
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -2314,17 +2270,17 @@ export default function CRM() {
         {activeSection === "presupuestos" && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-gray-800">Plantillas de Presupuesto</h2>
+              <h2 className="text-3xl font-bold text-gray-900">Plantillas de Presupuesto</h2>
               {isOwner() && (
                 <button
                   onClick={() => {
                     setEditingPresupuesto(null);
                     setShowPresupuestoModal(true);
                   }}
-                  className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all"
                 >
                   <Plus size={20} />
-                  <span>Nueva Plantilla</span>
+                  <span className="font-medium">Nueva Plantilla</span>
                 </button>
               )}
             </div>
@@ -2333,7 +2289,7 @@ export default function CRM() {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <p className="text-sm text-blue-700">
                   <strong>Nota:</strong> Solo puedes ver las plantillas de presupuesto. 
-                  Para enviar un presupuesto a un cliente, usa el botón de WhatsApp en la tabla de leads.
+                  Para enviar un presupuesto a un cliente, usa el botón en la tabla de leads.
                 </p>
               </div>
             )}
@@ -2349,7 +2305,7 @@ export default function CRM() {
                         setEditingPresupuesto(null);
                         setShowPresupuestoModal(true);
                       }}
-                      className="mt-4 text-red-600 hover:text-red-800"
+                      className="mt-4 text-red-600 hover:text-red-800 font-medium"
                     >
                       Crear la primera plantilla
                     </button>
@@ -2359,7 +2315,7 @@ export default function CRM() {
                 presupuestos.map((presupuesto) => (
                   <div
                     key={presupuesto.id}
-                    className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all"
                   >
                     {presupuesto.imagen_url && (
                       <div className="h-48 bg-gray-200 overflow-hidden">
@@ -2384,9 +2340,9 @@ export default function CRM() {
                       </div>
                       
                       {presupuesto.precio_contado && (
-                        <div className="mt-3 p-3 bg-green-50 rounded-lg">
-                          <p className="text-sm text-gray-600">Precio Contado</p>
-                          <p className="text-xl font-bold text-green-600">
+                        <div className="mt-3 p-3 bg-emerald-50 rounded-lg">
+                          <p className="text-xs text-gray-600">Precio Contado</p>
+                          <p className="text-xl font-bold text-emerald-600">
                             {presupuesto.precio_contado}
                           </p>
                         </div>
@@ -2405,7 +2361,7 @@ export default function CRM() {
                               setEditingPresupuesto(presupuesto);
                               setShowPresupuestoModal(true);
                             }}
-                            className="flex-1 px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200"
+                            className="flex-1 px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium"
                           >
                             <Edit3 size={14} className="inline mr-1" />
                             Editar
@@ -2422,7 +2378,7 @@ export default function CRM() {
                                 }
                               }
                             }}
-                            className="px-3 py-2 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
+                            className="px-3 py-2 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -2439,11 +2395,11 @@ export default function CRM() {
         {/* Sección Ranking */}
         {activeSection === "ranking" && (
           <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-gray-800">Ranking de Vendedores</h2>
+            <h2 className="text-3xl font-bold text-gray-900">Ranking de Vendedores</h2>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {isOwner() && (
-                <div className="bg-white rounded-xl shadow-lg p-6">
+                <div className="bg-white rounded-xl shadow-md p-6">
                   <h3 className="text-xl font-semibold text-gray-800 mb-4">
                     Ranking General
                   </h3>
@@ -2451,18 +2407,18 @@ export default function CRM() {
                     {getRanking().map((vendedor, index) => (
                       <div
                         key={vendedor.id}
-                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
+                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-sm transition-all"
                       >
                         <div className="flex items-center space-x-3">
                           <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white ${
+                            className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-md ${
                               index === 0
-                                ? "bg-yellow-500"
+                                ? "bg-gradient-to-br from-yellow-400 to-yellow-500"
                                 : index === 1
-                                ? "bg-gray-400"
+                                ? "bg-gradient-to-br from-gray-300 to-gray-400"
                                 : index === 2
-                                ? "bg-orange-600"
-                                : "bg-gray-300"
+                                ? "bg-gradient-to-br from-orange-500 to-orange-600"
+                                : "bg-gradient-to-br from-gray-400 to-gray-500"
                             }`}
                           >
                             {index + 1}
@@ -2475,11 +2431,11 @@ export default function CRM() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-green-600">
+                          <p className="font-bold text-emerald-600">
                             {vendedor.ventas} ventas
                           </p>
                           <p className="text-xs text-gray-500">
-                            {vendedor.leadsAsignados} leads asignados
+                            {vendedor.leadsAsignados} leads
                           </p>
                         </div>
                       </div>
@@ -2493,7 +2449,7 @@ export default function CRM() {
                 </div>
               )}
 
-              <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="bg-white rounded-xl shadow-md p-6">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">
                   {currentUser?.role === "vendedor" 
                     ? "Ranking Vendedores" 
@@ -2508,20 +2464,22 @@ export default function CRM() {
                   ).map((vendedor, index) => (
                     <div
                       key={vendedor.id}
-                      className={`flex items-center justify-between p-4 border border-gray-200 rounded-lg ${
-                        vendedor.id === currentUser?.id ? "bg-red-50 border-red-300" : ""
+                      className={`flex items-center justify-between p-4 border rounded-lg transition-all ${
+                        vendedor.id === currentUser?.id 
+                          ? "bg-red-50 border-red-300 shadow-sm" 
+                          : "border-gray-200 hover:shadow-sm"
                       }`}
                     >
                       <div className="flex items-center space-x-3">
                         <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white ${
+                          className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-md ${
                             index === 0
-                              ? "bg-yellow-500"
+                              ? "bg-gradient-to-br from-yellow-400 to-yellow-500"
                               : index === 1
-                              ? "bg-gray-400"
+                              ? "bg-gradient-to-br from-gray-300 to-gray-400"
                               : index === 2
-                              ? "bg-orange-600"
-                              : "bg-gray-300"
+                              ? "bg-gradient-to-br from-orange-500 to-orange-600"
+                              : "bg-gradient-to-br from-gray-400 to-gray-500"
                           }`}
                         >
                           {index + 1}
@@ -2539,7 +2497,7 @@ export default function CRM() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-green-600">
+                        <p className="font-bold text-emerald-600">
                           {vendedor.ventas} ventas
                         </p>
                         <p className="text-xs text-gray-500">
@@ -2558,9 +2516,7 @@ export default function CRM() {
                   : getRankingInScope()
                 ).length === 0 && (
                   <p className="text-gray-500 text-center py-8">
-                    {currentUser?.role === "vendedor" 
-                      ? "No hay otros vendedores en tu gerencia"
-                      : "No hay vendedores en tu scope"}
+                    No hay vendedores para mostrar
                   </p>
                 )}
               </div>
@@ -2573,12 +2529,12 @@ export default function CRM() {
           ["supervisor", "gerente", "gerente_general", "owner"].includes(currentUser?.role) && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold text-gray-800">Mi Equipo</h2>
+                <h2 className="text-3xl font-bold text-gray-900">Mi Equipo</h2>
                 {["owner", "gerente_general"].includes(currentUser?.role) && (
                   <select
                     value={selectedTeam}
                     onChange={(e) => setSelectedTeam(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-lg bg-white"
+                    className="px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm hover:border-gray-400 focus:ring-2 focus:ring-red-600 transition-all"
                   >
                     <option value="todos">Todos los equipos</option>
                     {users
@@ -2592,65 +2548,16 @@ export default function CRM() {
                 )}
               </div>
 
-              {/* Panel de Debug solo para Owner/Gerente General */}
-              {["owner", "gerente_general"].includes(currentUser?.role) && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <details>
-                    <summary className="cursor-pointer font-semibold text-yellow-800 mb-2">
-                      🔧 Panel de Depuración - Jerarquía
-                    </summary>
-                    <div className="text-xs space-y-2 mt-3">
-                      <div>
-                        <strong>Tu información:</strong>
-                        <div className="ml-4">Nombre: {currentUser?.name}</div>
-                        <div className="ml-4">Rol: {currentUser?.role}</div>
-                        <div className="ml-4">IDs visibles: {visibleUserIds.join(', ')}</div>
-                      </div>
-                      <div className="border-t pt-2 mt-2">
-                        <strong>Jerarquía completa:</strong>
-                        {users.filter((u) => u.role === "gerente").map((gerente) => {
-                          const gerenteChildren = childrenIndex.get(gerente.id) || [];
-                          return (
-                            <div key={gerente.id} className="ml-4 mt-2">
-                              <div className="font-semibold">👔 {gerente.name} (Gerente)</div>
-                              {gerenteChildren.map((supId) => {
-                                const supervisor = userById.get(supId);
-                                const supChildren = childrenIndex.get(supId) || [];
-                                const supLeads = leads.filter(l => l.vendedor === supId || supChildren.includes(l.vendedor || 0));
-                                return (
-                                  <div key={supId} className="ml-4">
-                                    <div>👨‍💼 {supervisor?.name} ({supervisor?.role}) - {supLeads.length} leads</div>
-                                    {supChildren.map((vendId) => {
-                                      const vendedor = userById.get(vendId);
-                                      const vendLeads = leads.filter(l => l.vendedor === vendId);
-                                      return (
-                                        <div key={vendId} className="ml-4">
-                                          👤 {vendedor?.name} ({vendedor?.role}) - {vendLeads.length} leads
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </details>
-                </div>
-              )}
-
               {/* Estadísticas por estado */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center justify-between mb-4">
+              <div className="bg-white rounded-xl shadow-md p-6">
+                <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-semibold text-gray-800">
                     Estados de Leads - Mi Equipo
                   </h3>
                   {selectedEstado && (
                     <button
                       onClick={() => setSelectedEstado(null)}
-                      className="text-sm text-red-600 hover:text-red-800 flex items-center space-x-1"
+                      className="text-sm text-red-600 hover:text-red-800 flex items-center space-x-1 font-medium"
                     >
                       <X size={16} />
                       <span>Cerrar filtro</span>
@@ -2668,243 +2575,22 @@ export default function CRM() {
                       <button
                         key={key}
                         onClick={() => setSelectedEstado(selectedEstado === key ? null : key)}
-                        className={`text-center transition-all duration-200 transform hover:scale-105 ${
-                          selectedEstado === key ? "ring-4 ring-red-300 ring-opacity-50" : ""
+                        className={`text-center transition-all duration-200 ${
+                          selectedEstado === key ? "ring-4 ring-red-400 ring-opacity-50 scale-105" : "hover:scale-105"
                         }`}
-                        title={`Ver todos los leads en estado: ${estado.label}`}
                       >
-                        <div className={`${estado.color} text-white rounded-lg p-4 mb-2 hover:opacity-90`}>
+                        <div className={`${estado.color} text-white rounded-xl p-4 mb-2 shadow-md hover:shadow-lg transition-all cursor-pointer`}>
                           <div className="text-2xl font-bold">{count}</div>
                         </div>
-                        <div className="text-sm text-gray-600">{estado.label}</div>
+                        <div className="text-sm text-gray-700 font-medium">{estado.label}</div>
                       </button>
                     );
                   })}
                 </div>
-
-                {selectedEstado && (
-                  <div className="mt-6 border-t pt-6">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-4">
-                      Leads de mi equipo en estado:{" "}
-                      <span
-                        className={`px-3 py-1 rounded-full text-white text-sm ${
-                          estados[selectedEstado].color
-                        }`}
-                      >
-                        {estados[selectedEstado].label}
-                      </span>
-                    </h4>
-
-                    {(() => {
-                      const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
-                        ? selectedTeam
-                        : undefined;
-                      const filteredLeads = getFilteredLeadsByTeam(teamFilter);
-                      const leadsFiltrados = filteredLeads.filter(
-                        (l) => l.estado === selectedEstado
-                      );
-
-                      if (leadsFiltrados.length === 0) {
-                        return (
-                          <p className="text-gray-500 text-center py-8">
-                            No hay leads de tu equipo en estado "
-                            {estados[selectedEstado].label}"
-                          </p>
-                        );
-                      }
-
-                      return (
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-sm">
-                            <thead className="bg-gray-50">
-                              <tr>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                                  Cliente
-                                </th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                                  Contacto
-                                </th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                                  Vehículo
-                                </th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                                  Estado
-                                </th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                                  Fuente
-                                </th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                                  Vendedor
-                                </th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                                  Fecha
-                                </th>
-                                <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
-                                  Acciones
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200">
-                              {leadsFiltrados.map((lead) => {
-                                const vendedor = lead.vendedor
-                                  ? userById.get(lead.vendedor)
-                                  : null;
-                                return (
-                                  <tr key={lead.id} className="hover:bg-gray-50">
-                                    <td className="px-4 py-2">
-                                      <div className="font-medium text-gray-900">
-                                        {lead.nombre}
-                                      </div>
-                                    </td>
-                                    <td className="px-4 py-2">
-                                      <div className="flex items-center space-x-1">
-                                        <Phone size={12} className="text-gray-400" />
-                                        <span className="text-gray-700">{lead.telefono}</span>
-                                      </div>
-                                    </td>
-                                    <td className="px-4 py-2">
-                                      <div>
-                                        <div className="font-medium text-gray-900">
-                                          {lead.modelo}
-                                        </div>
-                                        <div className="text-xs text-gray-500">
-                                          {lead.formaPago}
-                                        </div>
-                                        {lead.infoUsado && (
-                                          <div className="text-xs text-orange-600">
-                                            Usado: {lead.infoUsado}
-                                          </div>
-                                        )}
-                                      </div>
-                                    </td>
-                                    <td className="px-4 py-2">
-                                      <select
-                                        value={lead.estado}
-                                        onChange={(e) =>
-                                          handleUpdateLeadStatus(lead.id, e.target.value)
-                                        }
-                                        className={`text-xs font-medium rounded-full px-2 py-1 border-0 text-white ${estados[lead.estado].color}`}
-                                      >
-                                        {Object.entries(estados).map(([key, estado]) => (
-                                          <option key={key} value={key} className="text-black">
-                                            {estado.label}
-                                          </option>
-                                        ))}
-                                      </select>
-                                    </td>
-                                    <td className="px-4 py-2">
-                                      <div className="flex items-center space-x-1">
-                                        <span className="text-sm">
-                                          {fuentes[lead.fuente]?.icon || "❓"}
-                                        </span>
-                                        <span className="text-xs text-gray-600">
-                                          {fuentes[lead.fuente]?.label ||
-                                            String(lead.fuente)}
-                                        </span>
-                                      </div>
-                                    </td>
-                                    <td className="px-4 py-2 text-gray-700">
-                                      {vendedor?.name || "Sin asignar"}
-                                    </td>
-                                    <td className="px-4 py-2 text-gray-500 text-xs">
-                                      {lead.fecha ? String(lead.fecha).slice(0, 10) : "—"}
-                                    </td>
-                                    <td className="px-4 py-2 text-center">
-                                      <div className="flex items-center justify-center space-x-1">
-                                        <button
-                                          onClick={() => {
-                                            const phoneNumber = lead.telefono.replace(/\D/g, '');
-                                            const message = encodeURIComponent(
-                                              `Hola ${lead.nombre}, me contacto desde FIAT Auto del sol por su consulta sobre el ${lead.modelo}. ¿Cómo está?`
-                                            );
-                                            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
-                                            window.open(whatsappUrl, '_blank');
-                                          }}
-                                          className="px-2 py-1 text-xs rounded bg-green-100 text-green-700 hover:bg-green-200 flex items-center space-x-1"
-                                          title="Chatear por WhatsApp"
-                                        >
-                                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.89 3.587"/>
-                                          </svg>
-                                        </button>
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedLeadForPresupuesto(lead);
-                                            setShowPresupuestoSelectModal(true);
-                                          }}
-                                          className="px-2 py-1 text-xs rounded bg-red-100 text-red-700 hover:bg-red-200 flex items-center space-x-1"
-                                          title="Enviar presupuesto por WhatsApp"
-                                        >
-                                          <FileText size={12} />
-                                          <span>Pres</span>
-                                        </button>
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setEditingLeadObservaciones(lead);
-                                            setShowObservacionesModal(true);
-                                          }}
-                                          className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
-                                          title="Ver/Editar observaciones"
-                                        >
-                                          {lead.notas && lead.notas.length > 0 ? "Ver" : "Obs"}
-                                        </button>
-                                        {(canManageUsers() ||
-                                          (currentUser?.role === "supervisor" &&
-                                            lead.vendedor &&
-                                            getVisibleUsers().some(
-                                              (u) => u.id === lead.vendedor
-                                            ))) && (
-                                          <button
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              openReassignModal(lead);
-                                            }}
-                                            className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700 hover:bg-purple-200"
-                                            title="Reasignar lead"
-                                          >
-                                            Reasignar
-                                          </button>
-                                        )}
-                                        {canDeleteLeads() && (
-                                          <button
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              openDeleteLeadConfirm(lead);
-                                            }}
-                                            className="px-2 py-1 text-xs rounded bg-red-100 text-red-700 hover:bg-red-200"
-                                            title="Eliminar lead permanentemente"
-                                          >
-                                            <Trash2 size={12} />
-                                          </button>
-                                        )}
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setActiveSection("leads");
-                                          }}
-                                          className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                          title="Ver en tabla completa"
-                                        >
-                                          Ver
-                                        </button>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
               </div>
 
-              {/* Top vendedores */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
+              {/* Top vendedores en el equipo */}
+              <div className="bg-white rounded-xl shadow-md p-6">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">
                   Top Vendedores en Mi Organización
                 </h3>
@@ -2936,18 +2622,18 @@ export default function CRM() {
                     return ranking.map((vendedor, index) => (
                       <div
                         key={vendedor.id}
-                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-sm transition-all"
                       >
                         <div className="flex items-center space-x-3">
                           <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white ${
+                            className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-md ${
                               index === 0
-                                ? "bg-yellow-500"
+                                ? "bg-gradient-to-br from-yellow-400 to-yellow-500"
                                 : index === 1
-                                ? "bg-gray-400"
+                                ? "bg-gradient-to-br from-gray-300 to-gray-400"
                                 : index === 2
-                                ? "bg-orange-600"
-                                : "bg-gray-300"
+                                ? "bg-gradient-to-br from-orange-500 to-orange-600"
+                                : "bg-gradient-to-br from-gray-400 to-gray-500"
                             }`}
                           >
                             {index + 1}
@@ -2960,7 +2646,7 @@ export default function CRM() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-green-600">
+                          <p className="font-bold text-emerald-600">
                             {vendedor.ventas} ventas
                           </p>
                           <p className="text-xs text-gray-500">
@@ -2975,16 +2661,6 @@ export default function CRM() {
                     ));
                   })()}
                 </div>
-                {(() => {
-                  const vendedoresEnScope = users.filter(
-                    (u) => u.role === "vendedor" && visibleUserIds.includes(u.id)
-                  );
-                  return vendedoresEnScope.length === 0 && (
-                    <p className="text-gray-500 text-center py-8">
-                      No hay vendedores en tu equipo
-                    </p>
-                  );
-                })()}
               </div>
             </div>
           )}
@@ -2992,9 +2668,9 @@ export default function CRM() {
         {/* Sección Alertas */}
         {activeSection === "alerts" && (
           <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-gray-800">Notificaciones y Alertas</h2>
+            <h2 className="text-3xl font-bold text-gray-900">Notificaciones y Alertas</h2>
 
-            <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="bg-white rounded-xl shadow-md p-6">
               {alerts.filter(a => a.userId === currentUser?.id).length === 0 ? (
                 <div className="text-center py-12">
                   <Bell size={48} className="mx-auto text-gray-300 mb-4" />
@@ -3008,8 +2684,8 @@ export default function CRM() {
                     .map((alert) => (
                       <div
                         key={alert.id}
-                        className={`p-4 border rounded-lg ${
-                          alert.read ? 'bg-white border-gray-200' : 'bg-red-50 border-red-300'
+                        className={`p-4 border rounded-lg transition-all ${
+                          alert.read ? 'bg-white border-gray-200' : 'bg-red-50 border-red-300 shadow-sm'
                         }`}
                       >
                         <div className="flex items-start justify-between">
@@ -3017,7 +2693,7 @@ export default function CRM() {
                             {alert.type === 'lead_assigned' ? (
                               <Users className="h-5 w-5 text-red-600 mt-0.5" />
                             ) : (
-                              <Trophy className="h-5 w-5 text-yellow-600 mt-0.5" />
+                              <Trophy className="h-5 w-5 text-yellow-500 mt-0.5" />
                             )}
                             <div>
                               <p className="font-medium text-gray-900">{alert.message}</p>
@@ -3033,7 +2709,7 @@ export default function CRM() {
                                   prev.map(a => a.id === alert.id ? {...a, read: true} : a)
                                 );
                               }}
-                              className="text-xs text-red-600 hover:text-red-800"
+                              className="text-xs text-red-600 hover:text-red-800 font-medium"
                             >
                               Marcar como leída
                             </button>
@@ -3047,24 +2723,24 @@ export default function CRM() {
           </div>
         )}
 
-        {/* Sección Usuarios con filtros */}
+        {/* Sección Usuarios */}
         {activeSection === "users" && canManageUsers() && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-gray-800">Gestión de Usuarios</h2>
+              <h2 className="text-3xl font-bold text-gray-900">Gestión de Usuarios</h2>
               {canCreateUsers() && (
                 <button
                   onClick={openCreateUser}
-                  className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all"
                 >
                   <Plus size={20} />
-                  <span>Nuevo Usuario</span>
+                  <span className="font-medium">Nuevo Usuario</span>
                 </button>
               )}
             </div>
 
             {/* Barra de búsqueda y filtros usuarios */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="bg-white rounded-xl shadow-md p-6">
               <div className="flex flex-col lg:flex-row gap-4">
                 <div className="flex-1">
                   <div className="relative">
@@ -3074,18 +2750,18 @@ export default function CRM() {
                       placeholder="Buscar por nombre, email, rol o equipo..."
                       value={userSearchText}
                       onChange={(e) => setUserSearchText(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                     />
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-3">
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-600">Ordenar por:</span>
+                    <span className="text-sm text-gray-600 font-medium">Ordenar:</span>
                     <select
                       value={userSortBy}
                       onChange={(e) => setUserSortBy(e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500"
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-600 transition-all"
                     >
                       <option value="team">Equipo</option>
                       <option value="name">Nombre</option>
@@ -3096,16 +2772,16 @@ export default function CRM() {
 
                   <button
                     onClick={() => setShowUserFilters(!showUserFilters)}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
+                    className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg border transition-all ${
                       showUserFilters || getActiveUserFiltersCount() > 0
                         ? "bg-red-100 border-red-300 text-red-700"
-                        : "bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100"
+                        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                     }`}
                   >
                     <Filter size={20} />
-                    <span>Filtros</span>
+                    <span className="font-medium">Filtros</span>
                     {getActiveUserFiltersCount() > 0 && (
-                      <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
+                      <span className="bg-red-600 text-white text-xs rounded-full px-2 py-0.5 font-bold">
                         {getActiveUserFiltersCount()}
                       </span>
                     )}
@@ -3115,15 +2791,15 @@ export default function CRM() {
                   {getActiveUserFiltersCount() > 0 && (
                     <button
                       onClick={clearUserFilters}
-                      className="flex items-center space-x-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
+                      className="flex items-center space-x-2 px-4 py-2.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
                     >
                       <X size={16} />
-                      <span>Limpiar</span>
+                      <span className="font-medium">Limpiar</span>
                     </button>
                   )}
 
                   <div className="text-sm text-gray-600">
-                    <span className="font-medium">{getFilteredAndSortedUsers().length}</span> usuarios
+                    <span className="font-semibold text-gray-900">{getFilteredAndSortedUsers().length}</span> usuarios
                   </div>
                 </div>
               </div>
@@ -3139,7 +2815,7 @@ export default function CRM() {
                       <select
                         value={selectedTeamFilter}
                         onChange={(e) => setSelectedTeamFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
                       >
                         <option value="todos">Todos los equipos</option>
                         <option value="sin_equipo">Sin equipo asignado</option>
@@ -3167,7 +2843,7 @@ export default function CRM() {
                       <select
                         value={selectedRoleFilter}
                         onChange={(e) => setSelectedRoleFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
                       >
                         <option value="todos">Todos los roles</option>
                         {Object.entries(roles).map(([key, label]) => {
@@ -3187,37 +2863,25 @@ export default function CRM() {
             </div>
 
             {/* Tabla de usuarios */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="bg-white rounded-xl shadow-md overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Usuario
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Rol
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Equipo
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Estado
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Performance
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                        Acciones
-                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Usuario</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Rol</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Equipo</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Estado</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Performance</th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {getFilteredAndSortedUsers().length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                        <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
                           {userSearchText.trim() || selectedTeamFilter !== "todos" || selectedRoleFilter !== "todos"
-                            ? "No se encontraron usuarios que coincidan con los filtros aplicados"
+                            ? "No se encontraron usuarios con los filtros aplicados"
                             : "No hay usuarios para mostrar"}
                         </td>
                       </tr>
@@ -3228,7 +2892,7 @@ export default function CRM() {
                         const manager = user.reportsTo ? userById.get(user.reportsTo) : null;
 
                         return (
-                          <tr key={user.id} className="hover:bg-gray-50">
+                          <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                             <td className="px-4 py-4">
                               <div>
                                 <div className="font-medium text-gray-900">{user.name}</div>
@@ -3236,7 +2900,7 @@ export default function CRM() {
                               </div>
                             </td>
                             <td className="px-4 py-4">
-                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                              <span className="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
                                 {roles[user.role] || user.role}
                               </span>
                             </td>
@@ -3248,7 +2912,7 @@ export default function CRM() {
                                       Equipo {manager.name}
                                     </span>
                                     <div className="text-xs text-gray-500">
-                                      Reporta a: {manager.name} ({roles[manager.role] || manager.role})
+                                      Reporta a: {manager.name}
                                     </div>
                                   </div>
                                 ) : (
@@ -3259,9 +2923,9 @@ export default function CRM() {
                             <td className="px-4 py-4">
                               <div className="flex items-center space-x-2">
                                 <span
-                                  className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                  className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
                                     user.active
-                                      ? "bg-green-100 text-green-800"
+                                      ? "bg-emerald-100 text-emerald-800"
                                       : "bg-red-100 text-red-800"
                                   }`}
                                 >
@@ -3279,33 +2943,27 @@ export default function CRM() {
                                           prev.map((u) => (u.id === user.id ? updated : u))
                                         );
                                       } catch (e) {
-                                        console.error("No pude cambiar estado del usuario", e);
+                                        console.error("Error al cambiar estado", e);
                                       }
                                     }}
-                                    className={`px-2 py-1 text-xs rounded ${
+                                    className={`px-2 py-1 text-xs rounded-lg font-medium transition-colors ${
                                       user.active
                                         ? "bg-red-100 text-red-700 hover:bg-red-200"
-                                        : "bg-green-100 text-green-700 hover:bg-green-200"
+                                        : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
                                     }`}
-                                    title={user.active ? "Desactivar vendedor" : "Activar vendedor"}
                                   >
                                     {user.active ? "Desactivar" : "Activar"}
                                   </button>
                                 )}
                               </div>
-                              {user.role === "vendedor" && !user.active && (
-                                <div className="text-xs text-orange-600 mt-1">
-                                  No recibe leads nuevos
-                                </div>
-                              )}
                             </td>
                             <td className="px-4 py-4">
                               {user.role === "vendedor" ? (
                                 <div className="text-sm">
                                   <div className="flex items-center space-x-2">
-                                    <span>{userLeads.length} leads</span>
+                                    <span className="text-gray-900">{userLeads.length} leads</span>
                                     <span className="text-gray-400">•</span>
-                                    <span className="text-green-600 font-medium">
+                                    <span className="text-emerald-600 font-medium">
                                       {userSales} ventas
                                     </span>
                                   </div>
@@ -3323,16 +2981,16 @@ export default function CRM() {
                               <div className="flex items-center justify-center space-x-2">
                                 <button
                                   onClick={() => openEditUser(user)}
-                                  className="p-1 text-blue-600 hover:text-blue-800"
-                                  title="Editar usuario"
+                                  className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                                  title="Editar"
                                 >
                                   <Edit3 size={16} />
                                 </button>
                                 {isOwner() && user.id !== currentUser?.id && (
                                   <button
                                     onClick={() => openDeleteConfirm(user)}
-                                    className="p-1 text-red-600 hover:text-red-800"
-                                    title="Eliminar usuario"
+                                    className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                                    title="Eliminar"
                                   >
                                     <Trash2 size={16} />
                                   </button>
@@ -3349,13 +3007,12 @@ export default function CRM() {
             </div>
           </div>
         )}
-
-        {/* ===== MODALES ===== */}
+      {/* ===== MODALES ===== */}
 
         {/* Modal: Confirmación Eliminar Lead */}
         {showDeleteLeadConfirmModal && leadToDelete && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-md">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl">
               <div className="flex items-center mb-6">
                 <div className="bg-red-100 p-3 rounded-full mr-4">
                   <Trash2 className="h-6 w-6 text-red-600" />
@@ -3378,9 +3035,6 @@ export default function CRM() {
                   <div><strong>Modelo:</strong> {leadToDelete.modelo}</div>
                   <div><strong>Estado:</strong> {estados[leadToDelete.estado]?.label || leadToDelete.estado}</div>
                   <div><strong>Vendedor:</strong> {leadToDelete.vendedor ? userById.get(leadToDelete.vendedor)?.name : 'Sin asignar'}</div>
-                  {leadToDelete.created_by && (
-                    <div><strong>Creado por:</strong> {userById.get(leadToDelete.created_by)?.name || 'Usuario eliminado'}</div>
-                  )}
                 </div>
               </div>
 
@@ -3398,7 +3052,6 @@ export default function CRM() {
                         <li>El lead se eliminará permanentemente del sistema</li>
                         <li>Se perderán todos los datos y el historial</li>
                         <li>Esta acción no se puede revertir</li>
-                        <li>El vendedor asignado perderá el acceso al lead</li>
                       </ul>
                     </div>
                   </div>
@@ -3408,7 +3061,7 @@ export default function CRM() {
               <div className="flex space-x-3">
                 <button
                   onClick={confirmDeleteLead}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 font-medium shadow-md transition-all"
                 >
                   Sí, Eliminar Lead
                 </button>
@@ -3417,7 +3070,7 @@ export default function CRM() {
                     setShowDeleteLeadConfirmModal(false);
                     setLeadToDelete(null);
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3428,8 +3081,8 @@ export default function CRM() {
 
         {/* Modal: Confirmación Eliminar Usuario */}
         {showDeleteConfirmModal && userToDelete && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-md">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl">
               <div className="flex items-center mb-6">
                 <div className="bg-red-100 p-3 rounded-full mr-4">
                   <Trash2 className="h-6 w-6 text-red-600" />
@@ -3467,7 +3120,6 @@ export default function CRM() {
                         <li>Se eliminará permanentemente del sistema</li>
                         <li>Se perderá acceso a todas las funcionalidades</li>
                         <li>No podrá recuperar su cuenta</li>
-                        <li>Los datos históricos se mantendrán para auditoría</li>
                       </ul>
                     </div>
                   </div>
@@ -3477,7 +3129,7 @@ export default function CRM() {
               <div className="flex space-x-3">
                 <button
                   onClick={confirmDeleteUser}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 font-medium shadow-md transition-all"
                 >
                   Sí, Eliminar Usuario
                 </button>
@@ -3486,7 +3138,7 @@ export default function CRM() {
                     setShowDeleteConfirmModal(false);
                     setUserToDelete(null);
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3497,8 +3149,8 @@ export default function CRM() {
 
         {/* Modal: Reasignar Lead */}
         {showReassignModal && leadToReassign && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-2xl">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-6 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-semibold text-gray-800">
                   Reasignar Lead - {leadToReassign.nombre}
@@ -3509,14 +3161,15 @@ export default function CRM() {
                     setLeadToReassign(null);
                     setSelectedVendorForReassign(null);
                   }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <X size={24} className="text-gray-600" />
+                  <X size={24} />
                 </button>
               </div>
 
               <div className="mb-6">
-                <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                  <h4 className="font-medium text-gray-800 mb-2">Información del Lead</h4>
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-4 mb-4">
+                  <h4 className="font-medium text-gray-800 mb-3">Información del Lead</h4>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="font-medium text-gray-600">Cliente:</span>{" "}
@@ -3538,20 +3191,6 @@ export default function CRM() {
                         {estados[leadToReassign.estado].label}
                       </span>
                     </div>
-                    <div>
-                      <span className="font-medium text-gray-600">Fuente:</span>
-                      <span className="ml-2">
-                        {fuentes[leadToReassign.fuente]?.icon || "❓"}{" "}
-                        {fuentes[leadToReassign.fuente]?.label ||
-                          String(leadToReassign.fuente)}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-600">Vendedor actual:</span>{" "}
-                      {leadToReassign.vendedor
-                        ? userById.get(leadToReassign.vendedor)?.name
-                        : "Sin asignar"}
-                    </div>
                   </div>
                 </div>
 
@@ -3562,10 +3201,10 @@ export default function CRM() {
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     <div
                       onClick={() => setSelectedVendorForReassign(null)}
-                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                      className={`p-3 border rounded-lg cursor-pointer transition-all ${
                         selectedVendorForReassign === null
-                          ? "border-red-500 bg-red-50"
-                          : "border-gray-200 hover:bg-gray-50"
+                          ? "border-red-500 bg-red-50 shadow-sm"
+                          : "border-gray-200 hover:bg-gray-50 hover:border-gray-300"
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -3581,7 +3220,7 @@ export default function CRM() {
                           </div>
                         </div>
                         {selectedVendorForReassign === null && (
-                          <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                          <div className="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center">
                             <div className="w-2 h-2 bg-white rounded-full"></div>
                           </div>
                         )}
@@ -3602,15 +3241,15 @@ export default function CRM() {
                         <div
                           key={vendedor.id}
                           onClick={() => setSelectedVendorForReassign(vendedor.id)}
-                          className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                          className={`p-3 border rounded-lg cursor-pointer transition-all ${
                             selectedVendorForReassign === vendedor.id
-                              ? "border-red-500 bg-red-50"
-                              : "border-gray-200 hover:bg-gray-50"
+                              ? "border-red-500 bg-red-50 shadow-sm"
+                              : "border-gray-200 hover:bg-gray-50 hover:border-gray-300"
                           }`}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center">
+                              <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-700 rounded-full flex items-center justify-center shadow-md">
                                 <span className="text-white font-medium text-sm">
                                   {vendedor.name
                                     .split(" ")
@@ -3629,13 +3268,13 @@ export default function CRM() {
                                 <p className="text-xs text-gray-400">
                                   Equipo de {userById.get(vendedor.reportsTo)?.name || "—"}
                                 </p>
-                                <p className="text-xs text-green-600 font-medium">
+                                <p className="text-xs text-emerald-600 font-medium">
                                   ✓ Activo - Recibe leads nuevos
                                 </p>
                               </div>
                             </div>
                             {selectedVendorForReassign === vendedor.id && (
-                              <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                              <div className="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center">
                                 <div className="w-2 h-2 bg-white rounded-full"></div>
                               </div>
                             )}
@@ -3648,7 +3287,7 @@ export default function CRM() {
                   {getAvailableVendorsForReassign().length === 0 && (
                     <div className="text-center py-8 bg-gray-50 rounded-lg border">
                       <p className="text-gray-500">
-                        No hay vendedores activos disponibles en tu scope para reasignar
+                        No hay vendedores activos disponibles
                       </p>
                     </div>
                   )}
@@ -3659,15 +3298,13 @@ export default function CRM() {
                 <button
                   onClick={handleReassignLead}
                   disabled={selectedVendorForReassign === leadToReassign.vendedor}
-                  className={`flex-1 px-4 py-2 rounded-lg font-medium ${
+                  className={`flex-1 px-4 py-2.5 rounded-lg font-medium shadow-md transition-all ${
                     selectedVendorForReassign === leadToReassign.vendedor
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-red-600 text-white hover:bg-red-700"
+                      : "bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800"
                   }`}
                 >
-                  {selectedVendorForReassign === leadToReassign.vendedor
-                    ? "Ya está asignado a este vendedor"
-                    : "Reasignar Lead"}
+                  Reasignar Lead
                 </button>
                 <button
                   onClick={() => {
@@ -3675,7 +3312,7 @@ export default function CRM() {
                     setLeadToReassign(null);
                     setSelectedVendorForReassign(null);
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3686,8 +3323,8 @@ export default function CRM() {
 
         {/* Modal: Observaciones */}
         {showObservacionesModal && editingLeadObservaciones && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-2xl">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-6 w-full max-w-2xl shadow-2xl">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-semibold text-gray-800">
                   Observaciones - {editingLeadObservaciones.nombre}
@@ -3697,27 +3334,20 @@ export default function CRM() {
                     setShowObservacionesModal(false);
                     setEditingLeadObservaciones(null);
                   }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <X size={24} className="text-gray-600" />
+                  <X size={24} />
                 </button>
               </div>
 
-              <div className="mb-4">
-                <p className="text-sm text-gray-600 mb-2">
+              <div className="mb-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-3">
+                <p className="text-sm text-gray-600">
                   <span className="font-medium">Cliente:</span>{" "}
                   {editingLeadObservaciones.nombre} |{" "}
                   <span className="font-medium ml-2">Teléfono:</span>{" "}
                   {editingLeadObservaciones.telefono} |{" "}
                   <span className="font-medium ml-2">Vehículo:</span>{" "}
                   {editingLeadObservaciones.modelo}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium">Estado actual:</span>
-                  <span
-                    className={`ml-2 px-2 py-1 rounded-full text-xs font-medium text-white ${estados[editingLeadObservaciones.estado].color}`}
-                  >
-                    {estados[editingLeadObservaciones.estado].label}
-                  </span>
                 </p>
               </div>
 
@@ -3728,8 +3358,8 @@ export default function CRM() {
                 <textarea
                   id="observaciones-textarea"
                   defaultValue={editingLeadObservaciones.notas || ""}
-                  placeholder="Agregar observaciones sobre el cliente, llamadas realizadas, intereses, objeciones, etc..."
-                  className="w-full h-32 px-3 py-2 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  placeholder="Agregar observaciones sobre el cliente, llamadas realizadas, intereses, objeciones..."
+                  className="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                 />
               </div>
 
@@ -3746,7 +3376,7 @@ export default function CRM() {
                       );
                     }
                   }}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 font-medium shadow-md transition-all"
                 >
                   Guardar Observaciones
                 </button>
@@ -3755,7 +3385,7 @@ export default function CRM() {
                     setShowObservacionesModal(false);
                     setEditingLeadObservaciones(null);
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3766,8 +3396,8 @@ export default function CRM() {
 
         {/* Modal: Historial */}
         {showHistorialModal && viewingLeadHistorial && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-2xl">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-6 w-full max-w-2xl shadow-2xl">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-semibold text-gray-800">
                   Historial - {viewingLeadHistorial.nombre}
@@ -3777,13 +3407,14 @@ export default function CRM() {
                     setShowHistorialModal(false);
                     setViewingLeadHistorial(null);
                   }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <X size={24} className="text-gray-600" />
+                  <X size={24} />
                 </button>
               </div>
 
-              <div className="mb-4">
-                <p className="text-sm text-gray-600 mb-2">
+              <div className="mb-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-3">
+                <p className="text-sm text-gray-600">
                   <span className="font-medium">Cliente:</span>{" "}
                   {viewingLeadHistorial.nombre} |{" "}
                   <span className="font-medium ml-2">Teléfono:</span>{" "}
@@ -3801,10 +3432,10 @@ export default function CRM() {
                 ) : (
                   <div className="space-y-3">
                     {viewingLeadHistorial.historial?.map((entry, index) => (
-                      <div key={index} className="border-l-4 border-red-500 pl-4 py-2">
+                      <div key={index} className="border-l-4 border-red-600 pl-4 py-2 bg-gray-50 rounded-r-lg">
                         <div className="flex items-center justify-between">
                           <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium text-white ${
+                            className={`px-3 py-1 rounded-full text-xs font-medium text-white ${
                               estados[entry.estado]?.color || "bg-gray-500"
                             }`}
                           >
@@ -3830,7 +3461,7 @@ export default function CRM() {
                     setShowHistorialModal(false);
                     setViewingLeadHistorial(null);
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  className="px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
                 >
                   Cerrar
                 </button>
@@ -3841,12 +3472,15 @@ export default function CRM() {
 
         {/* Modal: Nuevo Lead */}
         {showNewLeadModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-3xl">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-6 w-full max-w-3xl shadow-2xl max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-semibold text-gray-800">Nuevo Lead</h3>
-                <button onClick={() => setShowNewLeadModal(false)}>
-                  <X size={24} className="text-gray-600" />
+                <button 
+                  onClick={() => setShowNewLeadModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X size={24} />
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -3857,7 +3491,7 @@ export default function CRM() {
                   <input
                     type="text"
                     id="new-nombre"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3867,7 +3501,7 @@ export default function CRM() {
                   <input
                     type="text"
                     id="new-telefono"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3877,7 +3511,7 @@ export default function CRM() {
                   <input
                     type="text"
                     id="new-modelo"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3886,7 +3520,7 @@ export default function CRM() {
                   </label>
                   <select
                     id="new-formaPago"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                   >
                     <option value="Contado">Contado</option>
                     <option value="Financiado">Financiado</option>
@@ -3900,7 +3534,7 @@ export default function CRM() {
                     type="text"
                     id="new-infoUsado"
                     placeholder="Marca Modelo Año"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3910,14 +3544,14 @@ export default function CRM() {
                   <input
                     type="date"
                     id="new-fecha"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                   />
                 </div>
                 <div className="col-span-2 flex items-center space-x-3">
                   <input
                     type="checkbox"
                     id="new-entrega"
-                    className="rounded border-gray-300 text-red-600 focus:ring-2 focus:ring-red-500"
+                    className="rounded border-gray-300 text-red-600 focus:ring-2 focus:ring-red-600"
                   />
                   <span className="text-sm text-gray-700">
                     Entrega de vehículo usado
@@ -3928,10 +3562,10 @@ export default function CRM() {
                     type="checkbox"
                     id="new-autoassign"
                     defaultChecked
-                    className="rounded border-gray-300 text-red-600 focus:ring-2 focus:ring-red-500"
+                    className="rounded border-gray-300 text-red-600 focus:ring-2 focus:ring-red-600"
                   />
                   <span className="text-sm text-gray-700">
-                    Asignación automática y equitativa a vendedores activos de mi equipo
+                    Asignación automática y equitativa
                   </span>
                 </div>
                 <div className="col-span-2">
@@ -3940,7 +3574,7 @@ export default function CRM() {
                   </label>
                   <select
                     id="new-vendedor"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                   >
                     <option value="">Sin asignar</option>
                     {getAvailableVendorsForAssignment().map((u) => (
@@ -3949,46 +3583,27 @@ export default function CRM() {
                       </option>
                     ))}
                   </select>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Si está activada la "Asignación automática", se ignorará esta selección.
-                    Solo puedes asignar a vendedores activos de tu equipo.
-                  </p>
                 </div>
 
                 {getAvailableVendorsForAssignment().length === 0 && (
-                  <div className="col-span-2 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                    <p className="text-sm text-yellow-700">
-                      <strong>Atención:</strong> No hay vendedores activos disponibles en tu equipo. 
-                      El lead se creará sin asignar.
+                  <div className="col-span-2 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                    <p className="text-sm text-amber-700">
+                      <strong>Atención:</strong> No hay vendedores activos disponibles
                     </p>
                   </div>
                 )}
-
-                <div className="col-span-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <h4 className="text-sm font-medium text-blue-800 mb-2">
-                    Información sobre la creación de leads:
-                  </h4>
-                  <ul className="text-xs text-blue-700 space-y-1">
-                    <li>• Este lead aparecerá marcado como "Creado por {currentUser?.name}"</li>
-                    <li>• La fuente se establecerá automáticamente como "Creado por"</li>
-                    <li>• Solo puedes asignar a vendedores activos de tu scope/equipo</li>
-                    {currentUser?.role === "vendedor" && (
-                      <li>• Como vendedor, puedes crear leads pero solo asignártelos a ti mismo</li>
-                    )}
-                  </ul>
-                </div>
               </div>
 
               <div className="flex space-x-3 pt-6">
                 <button
                   onClick={handleCreateLead}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 font-medium shadow-md transition-all"
                 >
                   Crear Lead
                 </button>
                 <button
                   onClick={() => setShowNewLeadModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3999,12 +3614,15 @@ export default function CRM() {
 
         {/* Modal: Nuevo Evento */}
         {showNewEventModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-lg">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-2xl">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-semibold text-gray-800">Nuevo Evento</h3>
-                <button onClick={() => setShowNewEventModal(false)}>
-                  <X size={24} className="text-gray-600" />
+                <button 
+                  onClick={() => setShowNewEventModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X size={24} />
                 </button>
               </div>
 
@@ -4016,7 +3634,7 @@ export default function CRM() {
                   <input
                     type="text"
                     id="ev-title"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                   />
                 </div>
                 <div>
@@ -4026,7 +3644,7 @@ export default function CRM() {
                   <input
                     type="date"
                     id="ev-date"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                   />
                 </div>
                 <div>
@@ -4037,7 +3655,7 @@ export default function CRM() {
                     type="time"
                     id="ev-time"
                     defaultValue="09:00"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                   />
                 </div>
                 <div>
@@ -4046,7 +3664,7 @@ export default function CRM() {
                   </label>
                   <select
                     id="ev-user"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                     defaultValue={currentUser?.id}
                   >
                     <option value={currentUser?.id}>{currentUser?.name} (Yo)</option>
@@ -4064,13 +3682,13 @@ export default function CRM() {
               <div className="flex space-x-3 pt-6">
                 <button
                   onClick={createEvent}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 font-medium shadow-md transition-all"
                 >
                   Crear Evento
                 </button>
                 <button
                   onClick={() => setShowNewEventModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -4081,14 +3699,17 @@ export default function CRM() {
 
         {/* Modal: Usuario */}
         {showUserModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-lg">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-2xl">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-semibold text-gray-800">
                   {editingUser ? "Editar Usuario" : "Nuevo Usuario"}
                 </h3>
-                <button onClick={() => setShowUserModal(false)}>
-                  <X size={24} className="text-gray-600" />
+                <button 
+                  onClick={() => setShowUserModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X size={24} />
                 </button>
               </div>
 
@@ -4101,7 +3722,7 @@ export default function CRM() {
                     type="text"
                     id="u-name"
                     defaultValue={editingUser?.name || ""}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                   />
                 </div>
                 <div>
@@ -4112,26 +3733,21 @@ export default function CRM() {
                     type="email"
                     id="u-email"
                     defaultValue={editingUser?.email || ""}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Contraseña {editingUser ? "(dejar vacío para mantener actual)" : "*"}
+                    Contraseña {editingUser ? "(dejar vacío para mantener)" : "*"}
                   </label>
                   <input
                     type="password"
                     id="u-pass"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                     placeholder={
                       editingUser ? "Nueva contraseña (opcional)" : "Contraseña obligatoria"
                     }
                   />
-                  {!editingUser && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      La contraseña es obligatoria para usuarios nuevos
-                    </p>
-                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -4145,7 +3761,7 @@ export default function CRM() {
                       const validManagers = validManagersByRole(newRole);
                       setModalReportsTo(validManagers[0]?.id ?? null);
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                   >
                     {validRolesByUser(currentUser).map((role) => (
                       <option key={role} value={role}>
@@ -4166,7 +3782,7 @@ export default function CRM() {
                           e.target.value ? parseInt(e.target.value, 10) : null
                         )
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
                     >
                       {validManagersByRole(modalRole).map((manager) => (
                         <option key={manager.id} value={manager.id}>
@@ -4181,77 +3797,24 @@ export default function CRM() {
                     type="checkbox"
                     id="u-active"
                     defaultChecked={editingUser?.active !== false}
-                    className="rounded border-gray-300 text-red-600 focus:ring-2 focus:ring-red-500"
+                    className="rounded border-gray-300 text-red-600 focus:ring-2 focus:ring-red-600"
                   />
                   <label htmlFor="u-active" className="text-sm text-gray-700">
                     Usuario activo
                   </label>
-                </div>
-                {modalRole === "vendedor" && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <p className="text-sm text-blue-700">
-                      <strong>Nota:</strong> Los vendedores desactivados pueden seguir usando el CRM 
-                      para gestionar sus leads existentes, pero no recibirán leads nuevos automáticamente.
-                    </p>
-                  </div>
-                )}
-
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                  <h4 className="text-sm font-medium text-gray-800 mb-2">
-                    Permisos del rol {roles[modalRole] || modalRole}:
-                  </h4>
-                  <ul className="text-xs text-gray-600 space-y-1">
-                    {modalRole === "owner" && (
-                      <>
-                        <li>• Acceso completo al sistema</li>
-                        <li>• Gestión total de usuarios y equipos</li>
-                        <li>• Visualización de todos los datos</li>
-                        <li>• Puede eliminar leads</li>
-                      </>
-                    )}
-                    {modalRole === "gerente_general" && (
-                      <>
-                        <li>• Gestión de gerentes, supervisores y vendedores</li>
-                        <li>• Visualización de todos los equipos</li>
-                        <li>• Creación y asignación de leads</li>
-                        <li>• Puede eliminar leads</li>
-                      </>
-                    )}
-                    {modalRole === "gerente" && (
-                      <>
-                        <li>• Gestión de supervisores y vendedores de su equipo</li>
-                        <li>• Visualización de su equipo completo</li>
-                        <li>• Creación y asignación de leads a su equipo</li>
-                      </>
-                    )}
-                    {modalRole === "supervisor" && (
-                      <>
-                        <li>• Gestión de vendedores directos</li>
-                        <li>• Visualización de su equipo directo</li>
-                        <li>• Creación y asignación de leads a su equipo</li>
-                      </>
-                    )}
-                    {modalRole === "vendedor" && (
-                      <>
-                        <li>• Gestión de sus propios leads</li>
-                        <li>• Creación de leads (autoasignados)</li>
-                        <li>• Visualización de su propio ranking</li>
-                      </>
-                    )}
-                  </ul>
                 </div>
               </div>
 
               <div className="flex space-x-3 pt-6">
                 <button
                   onClick={saveUser}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 font-medium shadow-md transition-all"
                 >
                   {editingUser ? "Actualizar" : "Crear"} Usuario
                 </button>
                 <button
                   onClick={() => setShowUserModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -4262,8 +3825,8 @@ export default function CRM() {
 
         {/* Modal: Seleccionar Presupuesto */}
         {showPresupuestoSelectModal && selectedLeadForPresupuesto && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
               <div className="flex justify-between items-center mb-6">
                 <div>
                   <h3 className="text-xl font-semibold text-gray-800">
@@ -4278,18 +3841,16 @@ export default function CRM() {
                     setShowPresupuestoSelectModal(false);
                     setSelectedLeadForPresupuesto(null);
                   }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <X size={24} className="text-gray-600" />
+                  <X size={24} />
                 </button>
               </div>
 
               {presupuestos.length === 0 ? (
                 <div className="text-center py-12">
                   <FileText size={48} className="mx-auto text-gray-300 mb-4" />
-                  <p className="text-gray-500">No hay plantillas de presupuesto disponibles</p>
-                  <p className="text-sm text-gray-400 mt-2">
-                    Contacta al administrador para crear plantillas
-                  </p>
+                  <p className="text-gray-500">No hay plantillas disponibles</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -4325,16 +3886,7 @@ export default function CRM() {
                           mensaje += `\n🎁 *BONIFICACIONES:*\n${presupuesto.bonificaciones}\n`;
                         }
                         
-                        if (presupuesto.especificaciones_tecnicas) {
-                          mensaje += `\n📋 *CARACTERÍSTICAS:*\n${presupuesto.especificaciones_tecnicas}\n`;
-                        }
-                        
-                        if (lead.infoUsado) {
-                          mensaje += `\n🚗 *TU VEHÍCULO USADO:* ${lead.infoUsado}\n`;
-                          mensaje += `(Se considera como parte de pago)\n`;
-                        }
-                        
-                        mensaje += `\n¿Te gustaría coordinar una visita al showroom para verlo personalmente?\n\n`;
+                        mensaje += `\n¿Te gustaría coordinar una visita al showroom?\n\n`;
                         mensaje += `Saludos desde FIAT Auto del sol! 🚙`;
                         
                         const phoneNumber = lead.telefono.replace(/\D/g, '');
@@ -4364,25 +3916,19 @@ export default function CRM() {
                         </h4>
                         
                         {presupuesto.precio_contado && (
-                          <div className="mt-2 p-2 bg-green-50 rounded">
+                          <div className="mt-2 p-2 bg-emerald-50 rounded">
                             <p className="text-xs text-gray-600">Precio Contado</p>
-                            <p className="text-lg font-bold text-green-600">
+                            <p className="text-lg font-bold text-emerald-600">
                               {presupuesto.precio_contado}
                             </p>
                           </div>
                         )}
                         
-                        {presupuesto.anticipo && (
-                          <p className="mt-2 text-sm text-gray-600">
-                            <strong>Anticipo:</strong> {presupuesto.anticipo}
-                          </p>
-                        )}
-                        
                         <div className="mt-3 flex items-center justify-between">
                           <span className="text-xs text-gray-500">
-                            Click para enviar por WhatsApp
+                            Click para enviar
                           </span>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-green-600">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-emerald-600">
                             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.89 3.587"/>
                           </svg>
                         </div>
@@ -4398,7 +3944,7 @@ export default function CRM() {
                     setShowPresupuestoSelectModal(false);
                     setSelectedLeadForPresupuesto(null);
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  className="px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -4409,8 +3955,8 @@ export default function CRM() {
 
         {/* Modal: Presupuesto */}
         {showPresupuestoModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-semibold text-gray-800">
                   {editingPresupuesto ? "Editar Plantilla" : "Nueva Plantilla de Presupuesto"}
@@ -4418,8 +3964,10 @@ export default function CRM() {
                 <button onClick={() => {
                   setShowPresupuestoModal(false);
                   setEditingPresupuesto(null);
-                }}>
-                  <X size={24} className="text-gray-600" />
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X size={24} />
                 </button>
               </div>
 
@@ -4433,7 +3981,7 @@ export default function CRM() {
                       type="text"
                       id="pres-marca"
                       defaultValue={editingPresupuesto?.marca || ""}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
                       placeholder="ej: FIAT"
                     />
                   </div>
@@ -4445,7 +3993,7 @@ export default function CRM() {
                       type="text"
                       id="pres-modelo"
                       defaultValue={editingPresupuesto?.modelo || ""}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
                       placeholder="ej: Cronos 1.3"
                     />
                   </div>
@@ -4459,7 +4007,7 @@ export default function CRM() {
                     type="url"
                     id="pres-imagen"
                     defaultValue={editingPresupuesto?.imagen_url || ""}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
                     placeholder="https://ejemplo.com/imagen.jpg"
                   />
                 </div>
@@ -4472,7 +4020,7 @@ export default function CRM() {
                     type="text"
                     id="pres-precio"
                     defaultValue={editingPresupuesto?.precio_contado || ""}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
                     placeholder="ej: $25.000.000"
                   />
                 </div>
@@ -4485,7 +4033,7 @@ export default function CRM() {
                     type="text"
                     id="pres-anticipo"
                     defaultValue={editingPresupuesto?.anticipo || ""}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
                     placeholder="ej: 30% - $7.500.000"
                   />
                 </div>
@@ -4497,8 +4045,8 @@ export default function CRM() {
                   <textarea
                     id="pres-bonificaciones"
                     defaultValue={editingPresupuesto?.bonificaciones || ""}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 h-20 resize-none"
-                    placeholder="ej: Bonificación por pago contado: $500.000"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 h-20 resize-none transition-all"
+                    placeholder="Bonificaciones disponibles"
                   />
                 </div>
 
@@ -4509,8 +4057,8 @@ export default function CRM() {
                   <textarea
                     id="pres-specs"
                     defaultValue={editingPresupuesto?.especificaciones_tecnicas || ""}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 h-24 resize-none"
-                    placeholder="Motor, transmisión, equipamiento, etc."
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 h-24 resize-none transition-all"
+                    placeholder="Motor, transmisión, equipamiento..."
                   />
                 </div>
 
@@ -4521,11 +4069,11 @@ export default function CRM() {
                   <textarea
                     id="pres-cuotas"
                     defaultValue={editingPresupuesto?.planes_cuotas ? JSON.stringify(editingPresupuesto.planes_cuotas, null, 2) : ""}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 h-24 resize-none font-mono text-xs"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 h-24 resize-none font-mono text-xs transition-all"
                     placeholder='{"12": "cuota de $2.000.000", "24": "cuota de $1.100.000"}'
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Formato JSON opcional. Ejemplo: {`{"12": "cuota $X", "24": "cuota $Y"}`}
+                    Formato JSON. Ejemplo: {`{"12": "cuota $X", "24": "cuota $Y"}`}
                   </p>
                 </div>
               </div>
@@ -4584,7 +4132,7 @@ export default function CRM() {
                       alert(`Error: ${e?.response?.data?.error || e.message}`);
                     }
                   }}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 font-medium shadow-md transition-all"
                 >
                   {editingPresupuesto ? "Actualizar" : "Crear"} Plantilla
                 </button>
@@ -4593,7 +4141,7 @@ export default function CRM() {
                     setShowPresupuestoModal(false);
                     setEditingPresupuesto(null);
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
