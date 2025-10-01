@@ -1258,220 +1258,263 @@ export default function CRM() {
 
   // ===== UI: Login =====
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-purple-800 flex items-center justify-center p-4 relative overflow-hidden">
-        {/* Decorative circles */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-white opacity-5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white opacity-5 rounded-full translate-x-1/2 translate-y-1/2 blur-3xl"></div>
-        
-        <div className="w-full max-w-md">
-          {/* Login Card */}
-          <div className="bg-white rounded-2xl shadow-2xl p-8 backdrop-blur-sm bg-opacity-95 transform transition-all duration-500 hover:scale-[1.02]">
-            {/* Logo and Title */}
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center mb-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-6 transition-transform duration-300">
-                  <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
-                    <path d="M8 12L20 4L32 12V28L20 36L8 28V12Z" fill="white" fillOpacity="0.9" />
-                    <circle cx="20" cy="20" r="6" fill="url(#gradient)" />
-                    <defs>
-                      <linearGradient id="gradient" x1="14" y1="14" x2="26" y2="26">
-                        <stop offset="0%" stopColor="#60A5FA" />
-                        <stop offset="100%" stopColor="#A78BFA" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </div>
-              </div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                Alluma CRM
-              </h1>
-              <p className="text-gray-500 text-sm">Sistema de gestión CRM</p>
-            </div>
-
-            {/* Inputs */}
-            <div className="space-y-5">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleLogin(
-                        document.getElementById("email").value,
-                        document.getElementById("password").value
-                      );
-                    }
-                  }}
-                  placeholder="tu@alluma.com"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none bg-gray-50 hover:bg-white"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Contraseña
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleLogin(
-                        document.getElementById("email").value,
-                        document.getElementById("password").value
-                      );
-                    }
-                  }}
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none bg-gray-50 hover:bg-white"
-                />
-              </div>
-
-              {loginError && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-3">
-                  <p className="text-red-700 text-sm text-center">{loginError}</p>
-                </div>
-              )}
-
-              <button
-                onClick={() =>
-                  handleLogin(
-                    document.getElementById("email").value,
-                    document.getElementById("password").value
-                  )
-                }
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0"
-              >
-                Iniciar Sesión
-              </button>
-            </div>
-
-            {/* Footer */}
-            <div className="mt-6 text-center">
-              <button className="text-sm text-purple-600 hover:text-purple-700 transition-colors">
-                ¿Olvidaste tu contraseña?
-              </button>
-            </div>
-          </div>
-
-          {/* Additional Info */}
-          <div className="text-center mt-6 text-white text-sm opacity-90">
-            <p>© 2024 Alluma CRM. Todos los derechos reservados.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ===== UI autenticada =====
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex">
-      {/* Sidebar */}
-      <div className="bg-gradient-to-b from-slate-900 to-slate-800 text-white w-64 min-h-screen p-4 shadow-2xl">
-        <div className="mb-8">
-          <div className="flex items-center mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
-                <path d="M8 12L20 4L32 12V28L20 36L8 28V12Z" fill="white" fillOpacity="0.9" />
-                <circle cx="20" cy="20" r="6" fill="url(#gradientSide)" />
-                <defs>
-                  <linearGradient id="gradientSide" x1="14" y1="14" x2="26" y2="26">
-                    <stop offset="0%" stopColor="#60A5FA" />
-                    <stop offset="100%" stopColor="#A78BFA" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            </div>
-            <div className="ml-3">
-              <h1 className="text-xl font-bold text-white">Alluma</h1>
-              <p className="text-xs text-gray-300">CRM System</p>
-            </div>
-          </div>
-
-          <div className="text-sm bg-slate-800/50 rounded-lg p-3">
-            <p className="font-medium text-white">{currentUser?.name || currentUser?.email}</p>
-            <p className="text-gray-300 text-xs">
-              {roles[currentUser?.role] || currentUser?.role}
-            </p>
-            {!currentUser?.active && (
-              <p className="text-amber-400 text-xs mt-1">
-                Usuario desactivado
-              </p>
-            )}
-          </div>
+    <div style={{
+      minHeight: '100vh',
+      width: '100%',
+      background: 'linear-gradient(to bottom right, #2563eb, #9333ea, #7c3aed)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '1rem'
+    }}>
+      <div style={{
+        background: 'white',
+        borderRadius: '1rem',
+        boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
+        padding: '2rem',
+        width: '100%',
+        maxWidth: '28rem'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '0.25rem' }}>Alluma</h1>
+          <p style={{ fontSize: '0.875rem', color: '#9ca3af' }}>Publicidad</p>
+          <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.5rem' }}>Sistema de gestión CRM</p>
         </div>
 
-        <nav className="space-y-2">
-          {[
-            { key: "dashboard", label: "Dashboard", Icon: Home },
-            { key: "leads", label: "Leads", Icon: Users },
-            { key: "calendar", label: "Calendario", Icon: Calendar },
-            { key: "presupuestos", label: "Presupuestos", Icon: FileText },
-            { key: "ranking", label: "Ranking", Icon: Trophy },
-            ...(["supervisor", "gerente", "gerente_general", "owner"].includes(currentUser?.role)
-              ? [{ key: "team", label: "Mi Equipo", Icon: UserCheck }]
-              : []),
-            { key: "alerts", label: "Alertas", Icon: Bell, badge: unreadAlerts },
-            ...(canManageUsers()
-              ? [{ key: "users", label: "Usuarios", Icon: Settings }]
-              : []),
-          ].map(({ key, label, Icon, badge }) => (
-            <button
-              key={key}
-              onClick={() => setActiveSection(key)}
-              className={`w-full flex items-center justify-between space-x-3 px-3 py-2.5 rounded-lg transition-all ${
-                activeSection === key
-                  ? "bg-purple-600 text-white shadow-md"
-                  : "text-gray-300 hover:bg-slate-700/50 hover:text-white"
-              }`}
-            >
-              <div className="flex items-center space-x-3">
-                <Icon size={20} />
-                <span className="font-medium">{label}</span>
-              </div>
-              {badge !== undefined && badge > 0 && (
-                <span className="bg-amber-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center font-bold">
-                  {badge}
-                </span>
-              )}
-            </button>
-          ))}
-        </nav>
-
-        <div className="mt-auto pt-4 border-t border-slate-700">
-          <button
-            onClick={async () => {
-              try {
-                await api.post('/auth/logout');
-              } catch (error) {
-                console.error('Error al cerrar sesión:', error);
-              } finally {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                localStorage.clear();
-                sessionStorage.clear();
-                delete api.defaults.headers.common['Authorization'];
-                setIsAuthenticated(false);
-                setCurrentUser(null);
-                setUsers([]);
-                setLeads([]);
-                window.location.reload();
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>Email</label>
+          <input
+            type="email"
+            id="email"
+            placeholder="tu@alluma.com"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleLogin(
+                  document.getElementById("email").value,
+                  document.getElementById("password").value
+                );
               }
             }}
-            className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-slate-700/50 hover:text-white transition-all"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-            <span>Cerrar Sesión</span>
+            style={{ width: '100%', padding: '0.625rem 1rem', border: '1px solid #d1d5db', borderRadius: '0.5rem' }}
+          />
+        </div>
+
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>Contraseña</label>
+          <input
+            type="password"
+            id="password"
+            placeholder="••••••••"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleLogin(
+                  document.getElementById("email").value,
+                  document.getElementById("password").value
+                );
+              }
+            }}
+            style={{ width: '100%', padding: '0.625rem 1rem', border: '1px solid #d1d5db', borderRadius: '0.5rem' }}
+          />
+        </div>
+
+        {loginError && (
+          <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.5rem', padding: '0.75rem', marginBottom: '1rem' }}>
+            <p style={{ color: '#b91c1c', fontSize: '0.875rem', textAlign: 'center' }}>{loginError}</p>
+          </div>
+        )}
+
+        <button
+          onClick={() => handleLogin(document.getElementById("email").value, document.getElementById("password").value)}
+          style={{
+            width: '100%',
+            background: 'linear-gradient(to right, #2563eb, #9333ea)',
+            color: 'white',
+            padding: '0.625rem 1rem',
+            borderRadius: '0.5rem',
+            fontWeight: '500',
+            border: 'none',
+            cursor: 'pointer',
+            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+          }}
+        >
+          Iniciar Sesión
+        </button>
+
+        <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+          <button style={{ fontSize: '0.875rem', color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer' }}>
+            ¿Olvidaste tu contraseña?
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+  // ===== UI autenticada =====
+  <div style={{ 
+  background: '#1a1a2e', 
+  color: 'white', 
+  width: '240px', 
+  minHeight: '100vh', 
+  padding: '1rem',
+  boxShadow: '2px 0 10px rgba(0,0,0,0.1)'
+}}>
+  <div style={{ marginBottom: '2rem' }}>
+    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
+      <div style={{ 
+        width: '40px', 
+        height: '40px', 
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        borderRadius: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <span style={{ color: 'white', fontWeight: 'bold', fontSize: '18px' }}>A</span>
+      </div>
+      <div style={{ marginLeft: '0.75rem' }}>
+        <h1 style={{ fontSize: '18px', fontWeight: 'bold', color: 'white', margin: 0 }}>Alluma</h1>
+        <p style={{ fontSize: '11px', color: '#a0a0a0', margin: 0 }}>Publicidad</p>
+      </div>
+    </div>
+    <div style={{ 
+      background: 'rgba(255,255,255,0.05)', 
+      borderRadius: '8px', 
+      padding: '0.75rem',
+      fontSize: '13px'
+    }}>
+      <p style={{ fontWeight: '500', color: 'white', margin: '0 0 2px 0' }}>{currentUser?.name || currentUser?.email}</p>
+      <p style={{ color: '#a0a0a0', fontSize: '11px', margin: 0 }}>
+        {roles[currentUser?.role] || currentUser?.role}
+      </p>
+      {!currentUser?.active && (
+        <p style={{ color: '#fbbf24', fontSize: '11px', marginTop: '4px' }}>
+          Usuario desactivado
+        </p>
+      )}
+    </div>
+  </div>
+
+  <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+    {[
+      { key: "dashboard", label: "Dashboard", Icon: Home },
+      { key: "leads", label: "Leads", Icon: Users },
+      { key: "calendar", label: "Calendario", Icon: Calendar },
+      { key: "presupuestos", label: "Presupuestos", Icon: FileText },
+      { key: "ranking", label: "Ranking", Icon: Trophy },
+      ...(["supervisor", "gerente", "gerente_general", "owner"].includes(currentUser?.role)
+        ? [{ key: "team", label: "Mi Equipo", Icon: UserCheck }]
+        : []),
+      { key: "alerts", label: "Alertas", Icon: Bell, badge: unreadAlerts },
+      ...(canManageUsers()
+        ? [{ key: "users", label: "Usuarios", Icon: Settings }]
+        : []),
+    ].map(({ key, label, Icon, badge }) => (
+      <button
+        key={key}
+        onClick={() => setActiveSection(key)}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '10px 12px',
+          borderRadius: '8px',
+          background: activeSection === key ? '#667eea' : 'transparent',
+          color: activeSection === key ? 'white' : '#a0a0a0',
+          border: 'none',
+          cursor: 'pointer',
+          transition: 'all 0.2s',
+          fontSize: '14px',
+          fontWeight: activeSection === key ? '500' : '400'
+        }}
+        onMouseEnter={(e) => {
+          if (activeSection !== key) {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+            e.currentTarget.style.color = 'white';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (activeSection !== key) {
+            e.currentTarget.style.background = 'transparent';
+            e.currentTarget.style.color = '#a0a0a0';
+          }
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Icon size={18} />
+          <span>{label}</span>
+        </div>
+        {badge !== undefined && badge > 0 && (
+          <span style={{ 
+            background: '#fbbf24', 
+            color: '#1a1a2e', 
+            fontSize: '11px', 
+            borderRadius: '10px', 
+            padding: '2px 7px',
+            fontWeight: 'bold',
+            minWidth: '20px',
+            textAlign: 'center'
+          }}>
+            {badge}
+          </span>
+        )}
+      </button>
+    ))}
+  </nav>
+
+  <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+    <button
+      onClick={async () => {
+        try {
+          await api.post('/auth/logout');
+        } catch (error) {
+          console.error('Error al cerrar sesión:', error);
+        } finally {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          localStorage.clear();
+          sessionStorage.clear();
+          delete api.defaults.headers.common['Authorization'];
+          setIsAuthenticated(false);
+          setCurrentUser(null);
+          setUsers([]);
+          setLeads([]);
+          window.location.reload();
+        }
+      }}
+      style={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        padding: '10px 12px',
+        borderRadius: '8px',
+        background: 'transparent',
+        color: '#a0a0a0',
+        border: 'none',
+        cursor: 'pointer',
+        fontSize: '14px'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+        e.currentTarget.style.color = 'white';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = 'transparent';
+        e.currentTarget.style.color = '#a0a0a0';
+      }}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+        <polyline points="16 17 21 12 16 7"></polyline>
+        <line x1="21" y1="12" x2="9" y2="12"></line>
+      </svg>
+      <span>Cerrar Sesión</span>
+    </button>
+  </div>
+</div>
 
       {/* Main Content Area */}
       <div className="flex-1 p-6 overflow-y-auto">
@@ -4046,7 +4089,7 @@ export default function CRM() {
                       id="pres-marca"
                       defaultValue={editingPresupuesto?.marca || ""}
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
-                      placeholder="ej: FIAT"
+                      placeholder="ej: ALLUMA"
                     />
                   </div>
                   <div>
