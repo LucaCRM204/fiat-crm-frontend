@@ -1259,54 +1259,108 @@ export default function CRM() {
   // ===== UI: Login =====
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-2xl">FIAT</span>
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-purple-800 flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Decorative circles */}
+        <div className="absolute top-0 left-0 w-96 h-96 bg-white opacity-5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white opacity-5 rounded-full translate-x-1/2 translate-y-1/2 blur-3xl"></div>
+        
+        <div className="w-full max-w-md">
+          {/* Login Card */}
+          <div className="bg-white rounded-2xl shadow-2xl p-8 backdrop-blur-sm bg-opacity-95 transform transition-all duration-500 hover:scale-[1.02]">
+            {/* Logo and Title */}
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center mb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-6 transition-transform duration-300">
+                  <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
+                    <path d="M8 12L20 4L32 12V28L20 36L8 28V12Z" fill="white" fillOpacity="0.9" />
+                    <circle cx="20" cy="20" r="6" fill="url(#gradient)" />
+                    <defs>
+                      <linearGradient id="gradient" x1="14" y1="14" x2="26" y2="26">
+                        <stop offset="0%" stopColor="#60A5FA" />
+                        <stop offset="100%" stopColor="#A78BFA" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
               </div>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                Alluma CRM
+              </h1>
+              <p className="text-gray-500 text-sm">Sistema de gestión CRM</p>
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">FIAT Auto del Sol</h1>
-            <p className="text-gray-600">Sistema de gestión CRM</p>
+
+            {/* Inputs */}
+            <div className="space-y-5">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleLogin(
+                        document.getElementById("email").value,
+                        document.getElementById("password").value
+                      );
+                    }
+                  }}
+                  placeholder="tu@alluma.com"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none bg-gray-50 hover:bg-white"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                  Contraseña
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleLogin(
+                        document.getElementById("email").value,
+                        document.getElementById("password").value
+                      );
+                    }
+                  }}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none bg-gray-50 hover:bg-white"
+                />
+              </div>
+
+              {loginError && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-3">
+                  <p className="text-red-700 text-sm text-center">{loginError}</p>
+                </div>
+              )}
+
+              <button
+                onClick={() =>
+                  handleLogin(
+                    document.getElementById("email").value,
+                    document.getElementById("password").value
+                  )
+                }
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0"
+              >
+                Iniciar Sesión
+              </button>
+            </div>
+
+            {/* Footer */}
+            <div className="mt-6 text-center">
+              <button className="text-sm text-purple-600 hover:text-purple-700 transition-colors">
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
           </div>
 
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-              <input
-                type="email"
-                id="email"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-colors"
-                placeholder="email@ejemplo.com"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
-              <input
-                type="password"
-                id="password"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-colors"
-                placeholder="••••••••"
-              />
-            </div>
-            {loginError && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <p className="text-red-700 text-sm">{loginError}</p>
-              </div>
-            )}
-
-            <button
-              onClick={() =>
-                handleLogin(
-                  document.getElementById("email").value,
-                  document.getElementById("password").value
-                )
-              }
-              className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-4 rounded-lg font-semibold hover:from-red-700 hover:to-red-800 transition-all shadow-md hover:shadow-lg"
-            >
-              Iniciar Sesión
-            </button>
+          {/* Additional Info */}
+          <div className="text-center mt-6 text-white text-sm opacity-90">
+            <p>© 2024 Alluma CRM. Todos los derechos reservados.</p>
           </div>
         </div>
       </div>
@@ -1320,12 +1374,21 @@ export default function CRM() {
       <div className="bg-gradient-to-b from-slate-900 to-slate-800 text-white w-64 min-h-screen p-4 shadow-2xl">
         <div className="mb-8">
           <div className="flex items-center mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-red-700 rounded-lg flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-lg">F</span>
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+                <path d="M8 12L20 4L32 12V28L20 36L8 28V12Z" fill="white" fillOpacity="0.9" />
+                <circle cx="20" cy="20" r="6" fill="url(#gradientSide)" />
+                <defs>
+                  <linearGradient id="gradientSide" x1="14" y1="14" x2="26" y2="26">
+                    <stop offset="0%" stopColor="#60A5FA" />
+                    <stop offset="100%" stopColor="#A78BFA" />
+                  </linearGradient>
+                </defs>
+              </svg>
             </div>
             <div className="ml-3">
-              <h1 className="text-xl font-bold text-white">FIAT</h1>
-              <p className="text-xs text-gray-300">Auto del Sol</p>
+              <h1 className="text-xl font-bold text-white">Alluma</h1>
+              <p className="text-xs text-gray-300">CRM System</p>
             </div>
           </div>
 
@@ -1362,7 +1425,7 @@ export default function CRM() {
               onClick={() => setActiveSection(key)}
               className={`w-full flex items-center justify-between space-x-3 px-3 py-2.5 rounded-lg transition-all ${
                 activeSection === key
-                  ? "bg-red-600 text-white shadow-md"
+                  ? "bg-purple-600 text-white shadow-md"
                   : "text-gray-300 hover:bg-slate-700/50 hover:text-white"
               }`}
             >
@@ -1403,8 +1466,7 @@ export default function CRM() {
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
+              <polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line>
             </svg>
             <span>Cerrar Sesión</span>
           </button>
@@ -1422,7 +1484,7 @@ export default function CRM() {
                   <select
                     value={selectedTeam}
                     onChange={(e) => setSelectedTeam(e.target.value)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm hover:border-gray-400 focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                    className="px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm hover:border-gray-400 focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   >
                     <option value="todos">Todos los equipos</option>
                     {users
@@ -1437,7 +1499,7 @@ export default function CRM() {
                 {canCreateLeads() && (
                   <button
                     onClick={() => setShowNewLeadModal(true)}
-                    className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all"
+                    className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all"
                   >
                     <Plus size={20} />
                     <span className="font-medium">Nuevo Lead</span>
@@ -1471,7 +1533,7 @@ export default function CRM() {
                 const stats = getDashboardStats(teamFilter);
                 return (
                   <>
-                    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-xl shadow-md hover:shadow-lg transition-all p-6">
+                    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-6">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium text-gray-600">Total Leads</p>
@@ -1503,11 +1565,11 @@ export default function CRM() {
                           <p className="text-sm font-medium text-gray-600">
                             Conversión
                           </p>
-                          <p className="text-3xl font-bold text-red-600 mt-1">
+                          <p className="text-3xl font-bold text-purple-600 mt-1">
                             {stats.conversion}%
                           </p>
                         </div>
-                        <div className="bg-gradient-to-br from-red-600 to-red-700 p-4 rounded-xl shadow-md">
+                        <div className="bg-gradient-to-br from-purple-600 to-purple-700 p-4 rounded-xl shadow-md">
                           <BarChart3 className="h-6 w-6 text-white" />
                         </div>
                       </div>
@@ -1546,7 +1608,7 @@ export default function CRM() {
                   {selectedEstado && (
                     <button
                       onClick={() => setSelectedEstado(null)}
-                      className="text-sm text-red-600 hover:text-red-800 flex items-center space-x-1 font-medium"
+                      className="text-sm text-purple-600 hover:text-purple-800 flex items-center space-x-1 font-medium"
                     >
                       <X size={16} />
                       <span>Cerrar filtro</span>
@@ -1572,7 +1634,7 @@ export default function CRM() {
                       <button
                         onClick={() => setSelectedEstado(selectedEstado === key ? null : key)}
                         className={`w-full text-center transition-all duration-200 ${
-                          selectedEstado === key ? "ring-4 ring-red-400 ring-opacity-50 scale-105" : "hover:scale-105"
+                          selectedEstado === key ? "ring-4 ring-purple-400 ring-opacity-50 scale-105" : "hover:scale-105"
                         }`}
                         title={`Ver todos los leads en estado: ${estado.label}`}
                       >
@@ -1756,7 +1818,7 @@ export default function CRM() {
                                         onClick={() => {
                                           const phoneNumber = lead.telefono.replace(/\D/g, '');
                                           const message = encodeURIComponent(
-                                            `Hola ${lead.nombre}, me contacto desde FIAT Auto del sol por su consulta sobre el ${lead.modelo}. ¿Cómo está?`
+                                            `Hola ${lead.nombre}, me contacto desde Alluma CRM por su consulta sobre el ${lead.modelo}. ¿Cómo está?`
                                           );
                                           const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
                                           window.open(whatsappUrl, '_blank');
@@ -1774,7 +1836,7 @@ export default function CRM() {
                                           setSelectedLeadForPresupuesto(lead);
                                           setShowPresupuestoSelectModal(true);
                                         }}
-                                        className="px-2 py-1 text-xs rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors flex items-center space-x-1"
+                                        className="px-2 py-1 text-xs rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors flex items-center space-x-1"
                                         title="Enviar presupuesto por WhatsApp"
                                       >
                                         <FileText size={12} />
@@ -1866,7 +1928,7 @@ export default function CRM() {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Conversión:</span>
-                          <span className="font-semibold text-red-600">
+                          <span className="font-semibold text-purple-600">
                             {item.conversion}%
                           </span>
                         </div>
@@ -1887,7 +1949,7 @@ export default function CRM() {
               {canCreateLeads() && (
                 <button
                   onClick={() => setShowNewLeadModal(true)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all"
+                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all"
                 >
                   <Plus size={20} />
                   <span className="font-medium">Nuevo Lead</span>
@@ -1906,7 +1968,7 @@ export default function CRM() {
                       placeholder="Buscar por cliente, teléfono, modelo, vendedor..."
                       value={searchText}
                       onChange={(e) => setSearchText(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                     />
                   </div>
                 </div>
@@ -1916,14 +1978,14 @@ export default function CRM() {
                     onClick={() => setShowFilters(!showFilters)}
                     className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg border transition-all ${
                       showFilters || getActiveFiltersCount() > 0
-                        ? "bg-red-100 border-red-300 text-red-700"
+                        ? "bg-purple-100 border-purple-300 text-purple-700"
                         : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                     }`}
                   >
                     <Filter size={20} />
                     <span className="font-medium">Filtros</span>
                     {getActiveFiltersCount() > 0 && (
-                      <span className="bg-red-600 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center font-bold">
+                      <span className="bg-purple-600 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center font-bold">
                         {getActiveFiltersCount()}
                       </span>
                     )}
@@ -1932,7 +1994,7 @@ export default function CRM() {
                   {getActiveFiltersCount() > 0 && (
                     <button
                       onClick={clearFilters}
-                      className="flex items-center space-x-2 px-4 py-2.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+                      className="flex items-center space-x-2 px-4 py-2.5 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
                     >
                       <X size={16} />
                       <span className="font-medium">Limpiar</span>
@@ -1956,7 +2018,7 @@ export default function CRM() {
                       <select
                         value={selectedVendedorFilter || ""}
                         onChange={(e) => setSelectedVendedorFilter(e.target.value ? parseInt(e.target.value, 10) : null)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                       >
                         <option value="">Todos los vendedores</option>
                         <option value="0">Sin asignar</option>
@@ -1980,7 +2042,7 @@ export default function CRM() {
                       <select
                         value={selectedEstadoFilter}
                         onChange={(e) => setSelectedEstadoFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                       >
                         <option value="">Todos los estados</option>
                         {Object.entries(estados).map(([key, estado]) => (
@@ -1998,7 +2060,7 @@ export default function CRM() {
                       <select
                         value={selectedFuenteFilter}
                         onChange={(e) => setSelectedFuenteFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                       >
                         <option value="">Todas las fuentes</option>
                         {Object.entries(fuentes).map(([key, fuente]) => (
@@ -2110,7 +2172,7 @@ export default function CRM() {
                                   onClick={() => {
                                     const phoneNumber = lead.telefono.replace(/\D/g, '');
                                     const message = encodeURIComponent(
-                                      `Hola ${lead.nombre}, me contacto desde FIAT Auto del sol por su consulta sobre el ${lead.modelo}. ¿Cómo está?`
+                                      `Hola ${lead.nombre}, me contacto desde Alluma CRM por su consulta sobre el ${lead.modelo}. ¿Cómo está?`
                                     );
                                     window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
                                   }}
@@ -2127,7 +2189,7 @@ export default function CRM() {
                                     setSelectedLeadForPresupuesto(lead);
                                     setShowPresupuestoSelectModal(true);
                                   }}
-                                  className="px-2 py-1 text-xs rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+                                  className="px-2 py-1 text-xs rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors"
                                   title="Presupuesto"
                                 >
                                   <FileText size={12} />
@@ -2201,7 +2263,7 @@ export default function CRM() {
                       e.target.value ? parseInt(e.target.value, 10) : null
                     )
                   }
-                  className="px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm hover:border-gray-400 focus:ring-2 focus:ring-red-600 transition-all"
+                  className="px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm hover:border-gray-400 focus:ring-2 focus:ring-purple-600 transition-all"
                 >
                   <option value="">Mi calendario</option>
                   {visibleUsers
@@ -2214,7 +2276,7 @@ export default function CRM() {
                 </select>
                 <button
                   onClick={() => setShowNewEventModal(true)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all"
+                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all"
                 >
                   <Plus size={20} />
                   <span className="font-medium">Nuevo Evento</span>
@@ -2277,7 +2339,7 @@ export default function CRM() {
                     setEditingPresupuesto(null);
                     setShowPresupuestoModal(true);
                   }}
-                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all"
+                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all"
                 >
                   <Plus size={20} />
                   <span className="font-medium">Nueva Plantilla</span>
@@ -2305,7 +2367,7 @@ export default function CRM() {
                         setEditingPresupuesto(null);
                         setShowPresupuestoModal(true);
                       }}
-                      className="mt-4 text-red-600 hover:text-red-800 font-medium"
+                      className="mt-4 text-purple-600 hover:text-purple-800 font-medium"
                     >
                       Crear la primera plantilla
                     </button>
@@ -2466,7 +2528,7 @@ export default function CRM() {
                       key={vendedor.id}
                       className={`flex items-center justify-between p-4 border rounded-lg transition-all ${
                         vendedor.id === currentUser?.id 
-                          ? "bg-red-50 border-red-300 shadow-sm" 
+                          ? "bg-purple-50 border-purple-300 shadow-sm" 
                           : "border-gray-200 hover:shadow-sm"
                       }`}
                     >
@@ -2486,11 +2548,11 @@ export default function CRM() {
                         </div>
                         <div>
                           <p className={`font-medium ${
-                            vendedor.id === currentUser?.id ? "text-red-900" : "text-gray-900"
+                            vendedor.id === currentUser?.id ? "text-purple-900" : "text-gray-900"
                           }`}>
                             {vendedor.nombre}
                             {vendedor.id === currentUser?.id && (
-                              <span className="ml-2 text-xs text-red-600 font-normal">(Tú)</span>
+                              <span className="ml-2 text-xs text-purple-600 font-normal">(Tú)</span>
                             )}
                           </p>
                           <p className="text-xs text-gray-500">{vendedor.team}</p>
@@ -2534,7 +2596,7 @@ export default function CRM() {
                   <select
                     value={selectedTeam}
                     onChange={(e) => setSelectedTeam(e.target.value)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm hover:border-gray-400 focus:ring-2 focus:ring-red-600 transition-all"
+                    className="px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm hover:border-gray-400 focus:ring-2 focus:ring-purple-600 transition-all"
                   >
                     <option value="todos">Todos los equipos</option>
                     {users
@@ -2557,7 +2619,7 @@ export default function CRM() {
                   {selectedEstado && (
                     <button
                       onClick={() => setSelectedEstado(null)}
-                      className="text-sm text-red-600 hover:text-red-800 flex items-center space-x-1 font-medium"
+                      className="text-sm text-purple-600 hover:text-purple-800 flex items-center space-x-1 font-medium"
                     >
                       <X size={16} />
                       <span>Cerrar filtro</span>
@@ -2576,7 +2638,7 @@ export default function CRM() {
                         key={key}
                         onClick={() => setSelectedEstado(selectedEstado === key ? null : key)}
                         className={`text-center transition-all duration-200 ${
-                          selectedEstado === key ? "ring-4 ring-red-400 ring-opacity-50 scale-105" : "hover:scale-105"
+                          selectedEstado === key ? "ring-4 ring-purple-400 ring-opacity-50 scale-105" : "hover:scale-105"
                         }`}
                       >
                         <div className={`${estado.color} text-white rounded-xl p-4 mb-2 shadow-md hover:shadow-lg transition-all cursor-pointer`}>
@@ -2685,13 +2747,13 @@ export default function CRM() {
                       <div
                         key={alert.id}
                         className={`p-4 border rounded-lg transition-all ${
-                          alert.read ? 'bg-white border-gray-200' : 'bg-red-50 border-red-300 shadow-sm'
+                          alert.read ? 'bg-white border-gray-200' : 'bg-purple-50 border-purple-300 shadow-sm'
                         }`}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex items-start space-x-3">
                             {alert.type === 'lead_assigned' ? (
-                              <Users className="h-5 w-5 text-red-600 mt-0.5" />
+                              <Users className="h-5 w-5 text-purple-600 mt-0.5" />
                             ) : (
                               <Trophy className="h-5 w-5 text-yellow-500 mt-0.5" />
                             )}
@@ -2709,7 +2771,7 @@ export default function CRM() {
                                   prev.map(a => a.id === alert.id ? {...a, read: true} : a)
                                 );
                               }}
-                              className="text-xs text-red-600 hover:text-red-800 font-medium"
+                              className="text-xs text-purple-600 hover:text-purple-800 font-medium"
                             >
                               Marcar como leída
                             </button>
@@ -2731,7 +2793,7 @@ export default function CRM() {
               {canCreateUsers() && (
                 <button
                   onClick={openCreateUser}
-                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all"
+                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all"
                 >
                   <Plus size={20} />
                   <span className="font-medium">Nuevo Usuario</span>
@@ -2750,7 +2812,7 @@ export default function CRM() {
                       placeholder="Buscar por nombre, email, rol o equipo..."
                       value={userSearchText}
                       onChange={(e) => setUserSearchText(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                     />
                   </div>
                 </div>
@@ -2761,7 +2823,7 @@ export default function CRM() {
                     <select
                       value={userSortBy}
                       onChange={(e) => setUserSortBy(e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-600 transition-all"
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-600 transition-all"
                     >
                       <option value="team">Equipo</option>
                       <option value="name">Nombre</option>
@@ -2774,14 +2836,14 @@ export default function CRM() {
                     onClick={() => setShowUserFilters(!showUserFilters)}
                     className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg border transition-all ${
                       showUserFilters || getActiveUserFiltersCount() > 0
-                        ? "bg-red-100 border-red-300 text-red-700"
+                        ? "bg-purple-100 border-purple-300 text-purple-700"
                         : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                     }`}
                   >
                     <Filter size={20} />
                     <span className="font-medium">Filtros</span>
                     {getActiveUserFiltersCount() > 0 && (
-                      <span className="bg-red-600 text-white text-xs rounded-full px-2 py-0.5 font-bold">
+                      <span className="bg-purple-600 text-white text-xs rounded-full px-2 py-0.5 font-bold">
                         {getActiveUserFiltersCount()}
                       </span>
                     )}
@@ -2791,7 +2853,7 @@ export default function CRM() {
                   {getActiveUserFiltersCount() > 0 && (
                     <button
                       onClick={clearUserFilters}
-                      className="flex items-center space-x-2 px-4 py-2.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+                      className="flex items-center space-x-2 px-4 py-2.5 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
                     >
                       <X size={16} />
                       <span className="font-medium">Limpiar</span>
@@ -2815,7 +2877,7 @@ export default function CRM() {
                       <select
                         value={selectedTeamFilter}
                         onChange={(e) => setSelectedTeamFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                       >
                         <option value="todos">Todos los equipos</option>
                         <option value="sin_equipo">Sin equipo asignado</option>
@@ -2843,7 +2905,7 @@ export default function CRM() {
                       <select
                         value={selectedRoleFilter}
                         onChange={(e) => setSelectedRoleFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                       >
                         <option value="todos">Todos los roles</option>
                         {Object.entries(roles).map(([key, label]) => {
@@ -2900,7 +2962,7 @@ export default function CRM() {
                               </div>
                             </td>
                             <td className="px-4 py-4">
-                              <span className="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                              <span className="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
                                 {roles[user.role] || user.role}
                               </span>
                             </td>
@@ -3007,6 +3069,8 @@ export default function CRM() {
             </div>
           </div>
         )}
+      </div>
+
       {/* ===== MODALES ===== */}
 
         {/* Modal: Confirmación Eliminar Lead */}
@@ -3203,7 +3267,7 @@ export default function CRM() {
                       onClick={() => setSelectedVendorForReassign(null)}
                       className={`p-3 border rounded-lg cursor-pointer transition-all ${
                         selectedVendorForReassign === null
-                          ? "border-red-500 bg-red-50 shadow-sm"
+                          ? "border-purple-500 bg-purple-50 shadow-sm"
                           : "border-gray-200 hover:bg-gray-50 hover:border-gray-300"
                       }`}
                     >
@@ -3220,7 +3284,7 @@ export default function CRM() {
                           </div>
                         </div>
                         {selectedVendorForReassign === null && (
-                          <div className="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center">
+                          <div className="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center">
                             <div className="w-2 h-2 bg-white rounded-full"></div>
                           </div>
                         )}
@@ -3243,13 +3307,13 @@ export default function CRM() {
                           onClick={() => setSelectedVendorForReassign(vendedor.id)}
                           className={`p-3 border rounded-lg cursor-pointer transition-all ${
                             selectedVendorForReassign === vendedor.id
-                              ? "border-red-500 bg-red-50 shadow-sm"
+                              ? "border-purple-500 bg-purple-50 shadow-sm"
                               : "border-gray-200 hover:bg-gray-50 hover:border-gray-300"
                           }`}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-700 rounded-full flex items-center justify-center shadow-md">
+                              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-700 rounded-full flex items-center justify-center shadow-md">
                                 <span className="text-white font-medium text-sm">
                                   {vendedor.name
                                     .split(" ")
@@ -3274,7 +3338,7 @@ export default function CRM() {
                               </div>
                             </div>
                             {selectedVendorForReassign === vendedor.id && (
-                              <div className="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center">
+                              <div className="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center">
                                 <div className="w-2 h-2 bg-white rounded-full"></div>
                               </div>
                             )}
@@ -3301,7 +3365,7 @@ export default function CRM() {
                   className={`flex-1 px-4 py-2.5 rounded-lg font-medium shadow-md transition-all ${
                     selectedVendorForReassign === leadToReassign.vendedor
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800"
+                      : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
                   }`}
                 >
                   Reasignar Lead
@@ -3359,7 +3423,7 @@ export default function CRM() {
                   id="observaciones-textarea"
                   defaultValue={editingLeadObservaciones.notas || ""}
                   placeholder="Agregar observaciones sobre el cliente, llamadas realizadas, intereses, objeciones..."
-                  className="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                  className="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                 />
               </div>
 
@@ -3376,7 +3440,7 @@ export default function CRM() {
                       );
                     }
                   }}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 font-medium shadow-md transition-all"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md transition-all"
                 >
                   Guardar Observaciones
                 </button>
@@ -3432,7 +3496,7 @@ export default function CRM() {
                 ) : (
                   <div className="space-y-3">
                     {viewingLeadHistorial.historial?.map((entry, index) => (
-                      <div key={index} className="border-l-4 border-red-600 pl-4 py-2 bg-gray-50 rounded-r-lg">
+                      <div key={index} className="border-l-4 border-purple-600 pl-4 py-2 bg-gray-50 rounded-r-lg">
                         <div className="flex items-center justify-between">
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-medium text-white ${
@@ -3491,7 +3555,7 @@ export default function CRM() {
                   <input
                     type="text"
                     id="new-nombre"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3501,7 +3565,7 @@ export default function CRM() {
                   <input
                     type="text"
                     id="new-telefono"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3511,7 +3575,7 @@ export default function CRM() {
                   <input
                     type="text"
                     id="new-modelo"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3520,7 +3584,7 @@ export default function CRM() {
                   </label>
                   <select
                     id="new-formaPago"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   >
                     <option value="Contado">Contado</option>
                     <option value="Financiado">Financiado</option>
@@ -3534,7 +3598,7 @@ export default function CRM() {
                     type="text"
                     id="new-infoUsado"
                     placeholder="Marca Modelo Año"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3544,14 +3608,14 @@ export default function CRM() {
                   <input
                     type="date"
                     id="new-fecha"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div className="col-span-2 flex items-center space-x-3">
                   <input
                     type="checkbox"
                     id="new-entrega"
-                    className="rounded border-gray-300 text-red-600 focus:ring-2 focus:ring-red-600"
+                    className="rounded border-gray-300 text-purple-600 focus:ring-2 focus:ring-purple-600"
                   />
                   <span className="text-sm text-gray-700">
                     Entrega de vehículo usado
@@ -3562,7 +3626,7 @@ export default function CRM() {
                     type="checkbox"
                     id="new-autoassign"
                     defaultChecked
-                    className="rounded border-gray-300 text-red-600 focus:ring-2 focus:ring-red-600"
+                    className="rounded border-gray-300 text-purple-600 focus:ring-2 focus:ring-purple-600"
                   />
                   <span className="text-sm text-gray-700">
                     Asignación automática y equitativa
@@ -3574,7 +3638,7 @@ export default function CRM() {
                   </label>
                   <select
                     id="new-vendedor"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   >
                     <option value="">Sin asignar</option>
                     {getAvailableVendorsForAssignment().map((u) => (
@@ -3597,7 +3661,7 @@ export default function CRM() {
               <div className="flex space-x-3 pt-6">
                 <button
                   onClick={handleCreateLead}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 font-medium shadow-md transition-all"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md transition-all"
                 >
                   Crear Lead
                 </button>
@@ -3634,7 +3698,7 @@ export default function CRM() {
                   <input
                     type="text"
                     id="ev-title"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3644,7 +3708,7 @@ export default function CRM() {
                   <input
                     type="date"
                     id="ev-date"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3655,7 +3719,7 @@ export default function CRM() {
                     type="time"
                     id="ev-time"
                     defaultValue="09:00"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3664,7 +3728,7 @@ export default function CRM() {
                   </label>
                   <select
                     id="ev-user"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                     defaultValue={currentUser?.id}
                   >
                     <option value={currentUser?.id}>{currentUser?.name} (Yo)</option>
@@ -3682,7 +3746,7 @@ export default function CRM() {
               <div className="flex space-x-3 pt-6">
                 <button
                   onClick={createEvent}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 font-medium shadow-md transition-all"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md transition-all"
                 >
                   Crear Evento
                 </button>
@@ -3722,7 +3786,7 @@ export default function CRM() {
                     type="text"
                     id="u-name"
                     defaultValue={editingUser?.name || ""}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3733,7 +3797,7 @@ export default function CRM() {
                     type="email"
                     id="u-email"
                     defaultValue={editingUser?.email || ""}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3743,7 +3807,7 @@ export default function CRM() {
                   <input
                     type="password"
                     id="u-pass"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                     placeholder={
                       editingUser ? "Nueva contraseña (opcional)" : "Contraseña obligatoria"
                     }
@@ -3761,7 +3825,7 @@ export default function CRM() {
                       const validManagers = validManagersByRole(newRole);
                       setModalReportsTo(validManagers[0]?.id ?? null);
                     }}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   >
                     {validRolesByUser(currentUser).map((role) => (
                       <option key={role} value={role}>
@@ -3782,7 +3846,7 @@ export default function CRM() {
                           e.target.value ? parseInt(e.target.value, 10) : null
                         )
                       }
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                     >
                       {validManagersByRole(modalRole).map((manager) => (
                         <option key={manager.id} value={manager.id}>
@@ -3797,7 +3861,7 @@ export default function CRM() {
                     type="checkbox"
                     id="u-active"
                     defaultChecked={editingUser?.active !== false}
-                    className="rounded border-gray-300 text-red-600 focus:ring-2 focus:ring-red-600"
+                    className="rounded border-gray-300 text-purple-600 focus:ring-2 focus:ring-purple-600"
                   />
                   <label htmlFor="u-active" className="text-sm text-gray-700">
                     Usuario activo
@@ -3808,7 +3872,7 @@ export default function CRM() {
               <div className="flex space-x-3 pt-6">
                 <button
                   onClick={saveUser}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 font-medium shadow-md transition-all"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md transition-all"
                 >
                   {editingUser ? "Actualizar" : "Crear"} Usuario
                 </button>
@@ -3887,7 +3951,7 @@ export default function CRM() {
                         }
                         
                         mensaje += `\n¿Te gustaría coordinar una visita al showroom?\n\n`;
-                        mensaje += `Saludos desde FIAT Auto del sol! 🚙`;
+                        mensaje += `Saludos desde Alluma CRM! 🚙`;
                         
                         const phoneNumber = lead.telefono.replace(/\D/g, '');
                         const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(mensaje)}`;
@@ -3896,7 +3960,7 @@ export default function CRM() {
                         setShowPresupuestoSelectModal(false);
                         setSelectedLeadForPresupuesto(null);
                       }}
-                      className="cursor-pointer border-2 border-gray-200 rounded-xl overflow-hidden hover:border-red-500 hover:shadow-lg transition-all"
+                      className="cursor-pointer border-2 border-gray-200 rounded-xl overflow-hidden hover:border-purple-500 hover:shadow-lg transition-all"
                     >
                       {presupuesto.imagen_url && (
                         <div className="h-40 bg-gray-200 overflow-hidden">
@@ -3981,7 +4045,7 @@ export default function CRM() {
                       type="text"
                       id="pres-marca"
                       defaultValue={editingPresupuesto?.marca || ""}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                       placeholder="ej: FIAT"
                     />
                   </div>
@@ -3993,7 +4057,7 @@ export default function CRM() {
                       type="text"
                       id="pres-modelo"
                       defaultValue={editingPresupuesto?.modelo || ""}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                       placeholder="ej: Cronos 1.3"
                     />
                   </div>
@@ -4007,7 +4071,7 @@ export default function CRM() {
                     type="url"
                     id="pres-imagen"
                     defaultValue={editingPresupuesto?.imagen_url || ""}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                     placeholder="https://ejemplo.com/imagen.jpg"
                   />
                 </div>
@@ -4020,7 +4084,7 @@ export default function CRM() {
                     type="text"
                     id="pres-precio"
                     defaultValue={editingPresupuesto?.precio_contado || ""}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                     placeholder="ej: $25.000.000"
                   />
                 </div>
@@ -4033,7 +4097,7 @@ export default function CRM() {
                     type="text"
                     id="pres-anticipo"
                     defaultValue={editingPresupuesto?.anticipo || ""}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                     placeholder="ej: 30% - $7.500.000"
                   />
                 </div>
@@ -4045,7 +4109,7 @@ export default function CRM() {
                   <textarea
                     id="pres-bonificaciones"
                     defaultValue={editingPresupuesto?.bonificaciones || ""}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 h-20 resize-none transition-all"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 h-20 resize-none transition-all"
                     placeholder="Bonificaciones disponibles"
                   />
                 </div>
@@ -4057,7 +4121,7 @@ export default function CRM() {
                   <textarea
                     id="pres-specs"
                     defaultValue={editingPresupuesto?.especificaciones_tecnicas || ""}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 h-24 resize-none transition-all"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 h-24 resize-none transition-all"
                     placeholder="Motor, transmisión, equipamiento..."
                   />
                 </div>
@@ -4069,7 +4133,7 @@ export default function CRM() {
                   <textarea
                     id="pres-cuotas"
                     defaultValue={editingPresupuesto?.planes_cuotas ? JSON.stringify(editingPresupuesto.planes_cuotas, null, 2) : ""}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 h-24 resize-none font-mono text-xs transition-all"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 h-24 resize-none font-mono text-xs transition-all"
                     placeholder='{"12": "cuota de $2.000.000", "24": "cuota de $1.100.000"}'
                   />
                   <p className="text-xs text-gray-500 mt-1">
@@ -4132,7 +4196,7 @@ export default function CRM() {
                       alert(`Error: ${e?.response?.data?.error || e.message}`);
                     }
                   }}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 font-medium shadow-md transition-all"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md transition-all"
                 >
                   {editingPresupuesto ? "Actualizar" : "Crear"} Plantilla
                 </button>
@@ -4149,7 +4213,6 @@ export default function CRM() {
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 }
