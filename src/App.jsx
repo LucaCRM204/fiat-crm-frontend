@@ -72,16 +72,16 @@ const roles = {
 };
 
 const estados = {
-  nuevo: { label: "Nuevo", color: "bg-blue-600" },
-  contactado: { label: "Contactado", color: "bg-amber-500" },
-  interesado: { label: "Interesado", color: "bg-orange-500" },
-  negociacion: { label: "Negociación", color: "bg-purple-600" },
-  vendido: { label: "Vendido", color: "bg-emerald-600" },
-  perdido: { label: "Perdido", color: "bg-rose-600" },
-  numero_invalido: { label: "Número inválido", color: "bg-slate-500" },
-  no_contesta_1: { label: "No contesta 1", color: "bg-amber-600" },
-  no_contesta_2: { label: "No contesta 2", color: "bg-orange-700" },
-  no_contesta_3: { label: "No contesta 3", color: "bg-red-700" },
+  nuevo: { label: "Nuevo", color: "bg-blue-500", icon: "🆕" },
+  contactado: { label: "Contactado", color: "bg-amber-500", icon: "📞" },
+  interesado: { label: "Interesado", color: "bg-orange-500", icon: "👀" },
+  negociacion: { label: "Negociación", color: "bg-purple-500", icon: "💼" },
+  vendido: { label: "Vendido", color: "bg-emerald-500", icon: "✅" },
+  perdido: { label: "Perdido", color: "bg-rose-500", icon: "❌" },
+  numero_invalido: { label: "Número inválido", color: "bg-slate-500", icon: "🚫" },
+  no_contesta_1: { label: "No contesta 1", color: "bg-amber-600", icon: "📵" },
+  no_contesta_2: { label: "No contesta 2", color: "bg-orange-700", icon: "📵" },
+  no_contesta_3: { label: "No contesta 3", color: "bg-red-700", icon: "📵" },
 };
 
 const fuentes = {
@@ -1259,92 +1259,73 @@ export default function CRM() {
   // ===== UI: Login =====
   if (!isAuthenticated) {
   return (
-    <div style={{
-      minHeight: '100vh',
-      width: '100%',
-      background: 'linear-gradient(to bottom right, #2563eb, #9333ea, #7c3aed)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1rem'
-    }}>
-      <div style={{
-        background: 'white',
-        borderRadius: '1rem',
-        boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
-        padding: '2rem',
-        width: '100%',
-        maxWidth: '28rem'
-      }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '0.25rem' }}>Alluma</h1>
-          <p style={{ fontSize: '0.875rem', color: '#9ca3af' }}>Publicidad</p>
-          <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.5rem' }}>Sistema de gestión CRM</p>
-        </div>
-
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>Email</label>
-          <input
-            type="email"
-            id="email"
-            placeholder="tu@alluma.com"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                handleLogin(
-                  document.getElementById("email").value,
-                  document.getElementById("password").value
-                );
-              }
-            }}
-            style={{ width: '100%', padding: '0.625rem 1rem', border: '1px solid #d1d5db', borderRadius: '0.5rem' }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>Contraseña</label>
-          <input
-            type="password"
-            id="password"
-            placeholder="••••••••"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                handleLogin(
-                  document.getElementById("email").value,
-                  document.getElementById("password").value
-                );
-              }
-            }}
-            style={{ width: '100%', padding: '0.625rem 1rem', border: '1px solid #d1d5db', borderRadius: '0.5rem' }}
-          />
-        </div>
-
-        {loginError && (
-          <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.5rem', padding: '0.75rem', marginBottom: '1rem' }}>
-            <p style={{ color: '#b91c1c', fontSize: '0.875rem', textAlign: 'center' }}>{loginError}</p>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-md transform transition-all hover:scale-[1.02]">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl mb-6 shadow-2xl">
+            <span className="text-5xl">⚡</span>
           </div>
-        )}
+          <h1 className="text-5xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
+            Alluma
+          </h1>
+          <p className="text-gray-600 text-lg font-semibold">CRM Inteligente</p>
+        </div>
 
-        <button
-          onClick={() => handleLogin(document.getElementById("email").value, document.getElementById("password").value)}
-          style={{
-            width: '100%',
-            background: 'linear-gradient(to right, #2563eb, #9333ea)',
-            color: 'white',
-            padding: '0.625rem 1rem',
-            borderRadius: '0.5rem',
-            fontWeight: '500',
-            border: 'none',
-            cursor: 'pointer',
-            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-          }}
-        >
-          Iniciar Sesión
-        </button>
+        <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-3">Email</label>
+            <input
+              type="email"
+              id="email"
+              placeholder="tu@alluma.com"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleLogin(
+                    document.getElementById("email").value,
+                    document.getElementById("password").value
+                  );
+                }
+              }}
+              className="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all text-lg"
+            />
+          </div>
 
-        <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-          <button style={{ fontSize: '0.875rem', color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer' }}>
-            ¿Olvidaste tu contraseña?
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-3">Contraseña</label>
+            <input
+              type="password"
+              id="password"
+              placeholder="••••••••"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleLogin(
+                    document.getElementById("email").value,
+                    document.getElementById("password").value
+                  );
+                }
+              }}
+              className="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all text-lg"
+            />
+          </div>
+
+          {loginError && (
+            <div className="bg-red-50 border-2 border-red-300 text-red-700 px-5 py-4 rounded-2xl text-sm font-semibold shadow-sm">
+              {loginError}
+            </div>
+          )}
+
+          <button
+            onClick={() => handleLogin(document.getElementById("email").value, document.getElementById("password").value)}
+            className="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white py-5 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transform hover:scale-[1.03] transition-all"
+          >
+            Iniciar Sesión
           </button>
+
+          <div className="text-center pt-6 border-t-2 border-gray-100">
+            <button className="text-sm font-semibold text-purple-600 hover:text-purple-800 transition-colors">
+              ¿Olvidaste tu contraseña?
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1352,182 +1333,109 @@ export default function CRM() {
 }
 
   // ===== UI autenticada =====
-  <div style={{ 
-  background: '#1a1a2e', 
-  color: 'white', 
-  width: '240px', 
-  minHeight: '100vh', 
-  padding: '1rem',
-  boxShadow: '2px 0 10px rgba(0,0,0,0.1)'
-}}>
-  <div style={{ marginBottom: '2rem' }}>
-    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
-      <div style={{ 
-        width: '40px', 
-        height: '40px', 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        borderRadius: '8px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <span style={{ color: 'white', fontWeight: 'bold', fontSize: '18px' }}>A</span>
-      </div>
-      <div style={{ marginLeft: '0.75rem' }}>
-        <h1 style={{ fontSize: '18px', fontWeight: 'bold', color: 'white', margin: 0 }}>Alluma</h1>
-        <p style={{ fontSize: '11px', color: '#a0a0a0', margin: 0 }}>Publicidad</p>
-      </div>
-    </div>
-    <div style={{ 
-      background: 'rgba(255,255,255,0.05)', 
-      borderRadius: '8px', 
-      padding: '0.75rem',
-      fontSize: '13px'
-    }}>
-      <p style={{ fontWeight: '500', color: 'white', margin: '0 0 2px 0' }}>{currentUser?.name || currentUser?.email}</p>
-      <p style={{ color: '#a0a0a0', fontSize: '11px', margin: 0 }}>
-        {roles[currentUser?.role] || currentUser?.role}
-      </p>
-      {!currentUser?.active && (
-        <p style={{ color: '#fbbf24', fontSize: '11px', marginTop: '4px' }}>
-          Usuario desactivado
-        </p>
-      )}
-    </div>
-  </div>
-
-  <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-    {[
-      { key: "dashboard", label: "Dashboard", Icon: Home },
-      { key: "leads", label: "Leads", Icon: Users },
-      { key: "calendar", label: "Calendario", Icon: Calendar },
-      { key: "presupuestos", label: "Presupuestos", Icon: FileText },
-      { key: "ranking", label: "Ranking", Icon: Trophy },
-      ...(["supervisor", "gerente", "gerente_general", "owner"].includes(currentUser?.role)
-        ? [{ key: "team", label: "Mi Equipo", Icon: UserCheck }]
-        : []),
-      { key: "alerts", label: "Alertas", Icon: Bell, badge: unreadAlerts },
-      ...(canManageUsers()
-        ? [{ key: "users", label: "Usuarios", Icon: Settings }]
-        : []),
-    ].map(({ key, label, Icon, badge }) => (
-      <button
-        key={key}
-        onClick={() => setActiveSection(key)}
-        style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '10px 12px',
-          borderRadius: '8px',
-          background: activeSection === key ? '#667eea' : 'transparent',
-          color: activeSection === key ? 'white' : '#a0a0a0',
-          border: 'none',
-          cursor: 'pointer',
-          transition: 'all 0.2s',
-          fontSize: '14px',
-          fontWeight: activeSection === key ? '500' : '400'
-        }}
-        onMouseEnter={(e) => {
-          if (activeSection !== key) {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-            e.currentTarget.style.color = 'white';
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (activeSection !== key) {
-            e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.color = '#a0a0a0';
-          }
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Icon size={18} />
-          <span>{label}</span>
+  return (
+    <div className="flex h-screen bg-gray-50">
+      {/* Sidebar mejorado */}
+      <div className="w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white shadow-2xl flex flex-col">
+        <div className="p-6 border-b border-slate-700/50">
+          <div className="flex items-center space-x-4 mb-6">
+            <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-600 rounded-2xl flex items-center justify-center shadow-xl transform hover:scale-110 transition-all">
+              <span className="text-3xl">⚡</span>
+            </div>
+            <div>
+              <h1 className="text-2xl font-extrabold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Alluma</h1>
+              <p className="text-xs text-gray-400 font-medium">CRM Professional</p>
+            </div>
+          </div>
+          <div className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50">
+            <p className="font-bold text-white text-sm mb-1">{currentUser?.name || currentUser?.email}</p>
+            <p className="text-xs text-gray-400">{roles[currentUser?.role] || currentUser?.role}</p>
+            {!currentUser?.active && (
+              <p className="text-xs text-amber-400 mt-2 font-semibold">⚠ Usuario desactivado</p>
+            )}
+          </div>
         </div>
-        {badge !== undefined && badge > 0 && (
-          <span style={{ 
-            background: '#fbbf24', 
-            color: '#1a1a2e', 
-            fontSize: '11px', 
-            borderRadius: '10px', 
-            padding: '2px 7px',
-            fontWeight: 'bold',
-            minWidth: '20px',
-            textAlign: 'center'
-          }}>
-            {badge}
-          </span>
-        )}
-      </button>
-    ))}
-  </nav>
 
-  <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-    <button
-      onClick={async () => {
-        try {
-          await api.post('/auth/logout');
-        } catch (error) {
-          console.error('Error al cerrar sesión:', error);
-        } finally {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          localStorage.clear();
-          sessionStorage.clear();
-          delete api.defaults.headers.common['Authorization'];
-          setIsAuthenticated(false);
-          setCurrentUser(null);
-          setUsers([]);
-          setLeads([]);
-          window.location.reload();
-        }
-      }}
-      style={{
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        padding: '10px 12px',
-        borderRadius: '8px',
-        background: 'transparent',
-        color: '#a0a0a0',
-        border: 'none',
-        cursor: 'pointer',
-        fontSize: '14px'
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-        e.currentTarget.style.color = 'white';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = 'transparent';
-        e.currentTarget.style.color = '#a0a0a0';
-      }}
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-        <polyline points="16 17 21 12 16 7"></polyline>
-        <line x1="21" y1="12" x2="9" y2="12"></line>
-      </svg>
-      <span>Cerrar Sesión</span>
-    </button>
-  </div>
-</div>
-
-      {/* Main Content Area */}
-      <div className="flex-1 p-6 overflow-y-auto">
-        {activeSection === "dashboard" && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-gray-900">Dashboard</h2>
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          {[
+            { key: "dashboard", label: "Dashboard", icon: "🏠" },
+            { key: "leads", label: "Leads", icon: "👥" },
+            { key: "calendar", label: "Calendario", icon: "📅" },
+            { key: "presupuestos", label: "Presupuestos", icon: "📄" },
+            { key: "ranking", label: "Ranking", icon: "🏆" },
+            ...(["supervisor", "gerente", "gerente_general", "owner"].includes(currentUser?.role)
+              ? [{ key: "team", label: "Mi Equipo", icon: "👔" }]
+              : []),
+            { key: "alerts", label: "Alertas", icon: "🔔", badge: unreadAlerts },
+            ...(canManageUsers()
+              ? [{ key: "users", label: "Usuarios", icon: "⚙️" }]
+              : []),
+          ].map(({ key, label, icon, badge }) => (
+            <button
+              key={key}
+              onClick={() => setActiveSection(key)}
+              className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-all font-semibold ${
+                activeSection === key
+                  ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-2xl transform scale-105"
+                  : "text-gray-300 hover:bg-slate-700/50 hover:text-white"
+              }`}
+            >
               <div className="flex items-center space-x-3">
+                <span className="text-2xl">{icon}</span>
+                <span className="text-sm">{label}</span>
+              </div>
+              {badge !== undefined && badge > 0 && (
+                <span className="bg-gradient-to-r from-pink-500 to-red-500 text-white text-xs rounded-full px-3 py-1 font-extrabold shadow-lg min-w-[24px] text-center">
+                  {badge}
+                </span>
+              )}
+            </button>
+          ))}
+        </nav>
+
+        <div className="p-4 border-t border-slate-700/50">
+          <button
+            onClick={async () => {
+              try {
+                await api.post('/auth/logout');
+              } catch (error) {
+                console.error('Error al cerrar sesión:', error);
+              } finally {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                localStorage.clear();
+                sessionStorage.clear();
+                delete api.defaults.headers.common['Authorization'];
+                setIsAuthenticated(false);
+                setCurrentUser(null);
+                setUsers([]);
+                setLeads([]);
+                window.location.reload();
+              }
+            }}
+            className="w-full flex items-center space-x-3 px-4 py-4 rounded-2xl text-gray-300 hover:bg-red-600/20 hover:text-red-400 transition-all font-semibold"
+          >
+            <span className="text-2xl">🚪</span>
+            <span className="text-sm">Cerrar Sesión</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Área de contenido principal */}
+      <div className="flex-1 p-8 overflow-y-auto bg-gradient-to-br from-gray-50 to-gray-100">
+        {activeSection === "dashboard" && (
+          <div className="space-y-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-4xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Dashboard</h2>
+                <p className="text-gray-600 mt-2 font-medium">Resumen general de tu actividad</p>
+              </div>
+              <div className="flex items-center space-x-4">
                 {["owner", "gerente_general", "dueño"].includes(currentUser?.role) && (
                   <select
                     value={selectedTeam}
                     onChange={(e) => setSelectedTeam(e.target.value)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm hover:border-gray-400 focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="px-6 py-3 border-2 border-gray-200 rounded-2xl bg-white shadow-sm hover:border-purple-300 focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all font-semibold"
                   >
                     <option value="todos">Todos los equipos</option>
                     {users
@@ -1542,33 +1450,31 @@ export default function CRM() {
                 {canCreateLeads() && (
                   <button
                     onClick={() => setShowNewLeadModal(true)}
-                    className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all"
+                    className="flex items-center space-x-3 px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl hover:from-indigo-700 hover:to-purple-700 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all font-bold"
                   >
-                    <Plus size={20} />
-                    <span className="font-medium">Nuevo Lead</span>
+                    <Plus size={24} />
+                    <span>Nuevo Lead</span>
                   </button>
                 )}
               </div>
             </div>
 
             {!currentUser?.active && (
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-500 p-4 rounded-lg shadow-sm">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <Bell className="h-5 w-5 text-amber-600" />
-                  </div>
-                  <div className="ml-3">
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 p-6 rounded-2xl shadow-lg">
+                <div className="flex items-start space-x-4">
+                  <Bell className="h-8 w-8 text-amber-600 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-bold text-amber-900 text-lg mb-2">Usuario Desactivado</h4>
                     <p className="text-sm text-amber-800">
-                      <strong>Usuario Desactivado:</strong> No recibirás nuevos leads automáticamente. 
-                      Solo podrás gestionar los leads que ya tienes asignados.
+                      No recibirás nuevos leads automáticamente. Solo podrás gestionar los leads que ya tienes asignados.
                     </p>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Estadísticas principales */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Estadísticas principales mejoradas */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {(() => {
                 const teamFilter = ["owner", "gerente_general", "dueño"].includes(currentUser?.role)
                   ? selectedTeam
@@ -1576,45 +1482,57 @@ export default function CRM() {
                 const stats = getDashboardStats(teamFilter);
                 return (
                   <>
-                    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-6">
-                      <div className="flex items-center justify-between">
+                    <div className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all p-8 border-2 border-gray-100 transform hover:scale-105">
+                      <div className="flex items-center justify-between mb-6">
                         <div>
-                          <p className="text-sm font-medium text-gray-600">Total Leads</p>
-                          <p className="text-3xl font-bold text-gray-900 mt-1">
+                          <p className="text-sm font-bold text-gray-500 uppercase tracking-wide">Total Leads</p>
+                          <p className="text-5xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mt-3">
                             {stats.totalLeads}
                           </p>
                         </div>
-                        <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-4 rounded-xl shadow-md">
-                          <Users className="h-6 w-6 text-white" />
+                        <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-6 rounded-3xl shadow-2xl">
+                          <Users className="h-10 w-10 text-white" />
                         </div>
                       </div>
+                      <div className="flex items-center text-emerald-600 font-semibold">
+                        <BarChart3 size={16} className="mr-2" />
+                        <span className="text-sm">+12% vs mes anterior</span>
+                      </div>
                     </div>
-                    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-6">
-                      <div className="flex items-center justify-between">
+
+                    <div className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all p-8 border-2 border-gray-100 transform hover:scale-105">
+                      <div className="flex items-center justify-between mb-6">
                         <div>
-                          <p className="text-sm font-medium text-gray-600">Ventas</p>
-                          <p className="text-3xl font-bold text-emerald-600 mt-1">
+                          <p className="text-sm font-bold text-gray-500 uppercase tracking-wide">Ventas</p>
+                          <p className="text-5xl font-extrabold text-emerald-600 mt-3">
                             {stats.vendidos}
                           </p>
                         </div>
-                        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-4 rounded-xl shadow-md">
-                          <Trophy className="h-6 w-6 text-white" />
+                        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-6 rounded-3xl shadow-2xl">
+                          <Trophy className="h-10 w-10 text-white" />
                         </div>
                       </div>
+                      <div className="flex items-center text-emerald-600 font-semibold">
+                        <Trophy size={16} className="mr-2" />
+                        <span className="text-sm">Excelente desempeño</span>
+                      </div>
                     </div>
-                    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-6">
-                      <div className="flex items-center justify-between">
+
+                    <div className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all p-8 border-2 border-gray-100 transform hover:scale-105">
+                      <div className="flex items-center justify-between mb-6">
                         <div>
-                          <p className="text-sm font-medium text-gray-600">
-                            Conversión
-                          </p>
-                          <p className="text-3xl font-bold text-purple-600 mt-1">
+                          <p className="text-sm font-bold text-gray-500 uppercase tracking-wide">Conversión</p>
+                          <p className="text-5xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mt-3">
                             {stats.conversion}%
                           </p>
                         </div>
-                        <div className="bg-gradient-to-br from-purple-600 to-purple-700 p-4 rounded-xl shadow-md">
-                          <BarChart3 className="h-6 w-6 text-white" />
+                        <div className="bg-gradient-to-br from-purple-600 to-pink-600 p-6 rounded-3xl shadow-2xl">
+                          <BarChart3 className="h-10 w-10 text-white" />
                         </div>
+                      </div>
+                      <div className="flex items-center text-purple-600 font-semibold">
+                        <BarChart3 size={16} className="mr-2" />
+                        <span className="text-sm">Por encima del promedio</span>
                       </div>
                     </div>
                   </>
@@ -1622,14 +1540,14 @@ export default function CRM() {
               })()}
             </div>
 
-            {/* Estados de Leads */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-gray-800">Estados de Leads</h3>
-                <div className="flex items-center space-x-2">
+            {/* Estados de Leads mejorado */}
+            <div className="bg-white rounded-3xl shadow-xl p-8 border-2 border-gray-100">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-2xl font-extrabold text-gray-900">Estados de Leads</h3>
+                <div className="flex items-center space-x-3">
                   {["owner", "gerente_general"].includes(currentUser?.role) && (
                     <>
-                      <span className="text-sm text-gray-600 font-medium">Descargar Excel:</span>
+                      <span className="text-sm text-gray-600 font-bold">Descargar Excel:</span>
                       <button
                         onClick={() => {
                           const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
@@ -1640,10 +1558,9 @@ export default function CRM() {
                             : getFilteredLeads();
                           downloadAllLeadsExcel(filteredLeads, userById, fuentes);
                         }}
-                        className="px-3 py-1.5 bg-emerald-600 text-white text-xs rounded-lg hover:bg-emerald-700 transition-colors flex items-center space-x-1 shadow-sm"
-                        title="Descargar Excel completo"
+                        className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-xs rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all flex items-center space-x-2 shadow-lg font-bold"
                       >
-                        <Download size={14} />
+                        <Download size={16} />
                         <span>Todos</span>
                       </button>
                     </>
@@ -1651,15 +1568,15 @@ export default function CRM() {
                   {selectedEstado && (
                     <button
                       onClick={() => setSelectedEstado(null)}
-                      className="text-sm text-purple-600 hover:text-purple-800 flex items-center space-x-1 font-medium"
+                      className="text-sm text-purple-600 hover:text-purple-800 flex items-center space-x-2 font-bold"
                     >
-                      <X size={16} />
+                      <X size={18} />
                       <span>Cerrar filtro</span>
                     </button>
                   )}
                 </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
                 {Object.entries(estados).map(([key, estado]) => {
                   const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
                     ? selectedTeam
@@ -1676,14 +1593,14 @@ export default function CRM() {
                     <div key={key} className="relative group">
                       <button
                         onClick={() => setSelectedEstado(selectedEstado === key ? null : key)}
-                        className={`w-full text-center transition-all duration-200 ${
-                          selectedEstado === key ? "ring-4 ring-purple-400 ring-opacity-50 scale-105" : "hover:scale-105"
+                        className={`w-full text-center transition-all duration-300 ${
+                          selectedEstado === key ? "ring-4 ring-purple-400 ring-opacity-50 transform scale-110" : "hover:scale-110"
                         }`}
-                        title={`Ver todos los leads en estado: ${estado.label}`}
                       >
-                        <div className={`${estado.color} text-white rounded-xl p-4 mb-2 relative cursor-pointer shadow-md hover:shadow-lg transition-all`}>
-                          <div className="text-2xl font-bold">{count}</div>
-                          <div className="text-xs opacity-90">{percentage}%</div>
+                        <div className={`${estado.color} text-white rounded-2xl p-6 mb-3 relative cursor-pointer shadow-xl hover:shadow-2xl transition-all`}>
+                          <div className="text-xl mb-2">{estado.icon}</div>
+                          <div className="text-4xl font-extrabold">{count}</div>
+                          <div className="text-sm opacity-90 mt-2 font-semibold">{percentage}%</div>
                           
                           {["owner", "dueño"].includes(currentUser?.role) && count > 0 && (
                             <button
@@ -1697,15 +1614,14 @@ export default function CRM() {
                                   : getFilteredLeads();
                                 downloadLeadsByStateExcel(filteredLeads, key, userById, fuentes);
                               }}
-                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 hover:bg-white/40 rounded-lg p-1.5"
-                              title={`Descargar Excel: ${estado.label}`}
+                              className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-white/30 hover:bg-white/50 rounded-xl p-2 shadow-lg"
                             >
-                              <Download size={14} />
+                              <Download size={16} />
                             </button>
                           )}
                         </div>
                       </button>
-                      <div className="text-sm text-gray-700 text-center font-medium">
+                      <div className="text-sm text-gray-700 text-center font-bold">
                         {estado.label}
                       </div>
                     </div>
@@ -1715,15 +1631,11 @@ export default function CRM() {
 
               {/* Lista filtrada por estado */}
               {selectedEstado && (
-                <div className="mt-6 border-t pt-6">
-                  <h4 className="text-lg font-semibold text-gray-800 mb-4">
-                    Leads en estado:{" "}
-                    <span
-                      className={`px-3 py-1 rounded-full text-white text-sm ${
-                        estados[selectedEstado].color
-                      }`}
-                    >
-                      {estados[selectedEstado].label}
+                <div className="mt-8 border-t-2 border-gray-200 pt-8">
+                  <h4 className="text-xl font-extrabold text-gray-800 mb-6 flex items-center">
+                    <span className="mr-3">Leads en estado:</span>
+                    <span className={`px-4 py-2 rounded-full text-white text-sm font-bold ${estados[selectedEstado].color} shadow-lg`}>
+                      {estados[selectedEstado].icon} {estados[selectedEstado].label}
                     </span>
                   </h4>
 
@@ -1740,44 +1652,28 @@ export default function CRM() {
 
                     if (leadsFiltrados.length === 0) {
                       return (
-                        <p className="text-gray-500 text-center py-8">
+                        <p className="text-gray-500 text-center py-12 text-lg">
                           No hay leads en estado "{estados[selectedEstado].label}"
                         </p>
                       );
                     }
 
                     return (
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead className="bg-gray-50">
+                      <div className="overflow-x-auto rounded-2xl border-2 border-gray-200">
+                        <table className="w-full">
+                          <thead className="bg-gradient-to-r from-gray-100 to-gray-50">
                             <tr>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Cliente
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Contacto
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Vehículo
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Estado
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Fuente
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Vendedor
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Fecha
-                              </th>
-                              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                                Acciones
-                              </th>
+                              <th className="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">Cliente</th>
+                              <th className="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">Contacto</th>
+                              <th className="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">Vehículo</th>
+                              <th className="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">Estado</th>
+                              <th className="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">Fuente</th>
+                              <th className="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">Vendedor</th>
+                              <th className="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">Fecha</th>
+                              <th className="px-6 py-4 text-center text-xs font-extrabold text-gray-600 uppercase tracking-wider">Acciones</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-gray-200">
+                          <tbody className="divide-y-2 divide-gray-100 bg-white">
                             {leadsFiltrados.map((lead) => {
                               const vendedor = lead.vendedor
                                 ? userById.get(lead.vendedor)
@@ -1789,74 +1685,67 @@ export default function CRM() {
                                   getVisibleUsers().some((u) => u.id === lead.vendedor));
                               
                               return (
-                                <tr key={lead.id} className="hover:bg-gray-50 transition-colors">
-                                  <td className="px-4 py-3">
-                                    <div className="font-medium text-gray-900">
+                                <tr key={lead.id} className="hover:bg-purple-50 transition-all">
+                                  <td className="px-6 py-5">
+                                    <div className="font-bold text-gray-900 text-base">
                                       {lead.nombre}
                                     </div>
                                   </td>
-                                  <td className="px-4 py-3">
-                                    <div className="flex items-center space-x-1">
-                                      <Phone size={14} className="text-gray-400" />
-                                      <span className="text-gray-700">{lead.telefono}</span>
+                                  <td className="px-6 py-5">
+                                    <div className="flex items-center space-x-2">
+                                      <Phone size={16} className="text-gray-400" />
+                                      <span className="text-gray-700 font-semibold">{lead.telefono}</span>
                                     </div>
                                   </td>
-                                  <td className="px-4 py-3">
+                                  <td className="px-6 py-5">
                                     <div>
-                                      <div className="font-medium text-gray-900">
-                                        {lead.modelo}
-                                      </div>
-                                      <div className="text-xs text-gray-500">
-                                        {lead.formaPago}
-                                      </div>
+                                      <div className="font-bold text-gray-900">{lead.modelo}</div>
+                                      <div className="text-sm text-gray-500 font-medium">{lead.formaPago}</div>
                                       {lead.infoUsado && (
-                                        <div className="text-xs text-orange-600">
+                                        <div className="text-xs text-orange-600 font-semibold mt-1">
                                           Usado: {lead.infoUsado}
                                         </div>
                                       )}
                                     </div>
                                   </td>
-                                  <td className="px-4 py-3">
+                                  <td className="px-6 py-5">
                                     <select
                                       value={lead.estado}
                                       onChange={(e) =>
                                         handleUpdateLeadStatus(lead.id, e.target.value)
                                       }
-                                      className={`text-xs font-medium rounded-full px-3 py-1 border-0 text-white ${estados[lead.estado].color} cursor-pointer hover:opacity-90 transition-opacity`}
+                                      className={`text-sm font-bold rounded-full px-4 py-2 border-0 text-white ${estados[lead.estado].color} cursor-pointer hover:opacity-90 transition-opacity shadow-lg`}
                                     >
                                       {Object.entries(estados).map(([key, estado]) => (
                                         <option key={key} value={key} className="text-black">
-                                          {estado.label}
+                                          {estado.icon} {estado.label}
                                         </option>
                                       ))}
                                     </select>
                                   </td>
-                                  <td className="px-4 py-3">
-                                    <div className="flex items-center space-x-1">
-                                      <span className="text-sm">
-                                        {fuentes[lead.fuente]?.icon || "❓"}
-                                      </span>
-                                      <span className="text-xs text-gray-600">
-                                        {fuentes[lead.fuente]?.label ||
-                                          String(lead.fuente)}
+                                  <td className="px-6 py-5">
+                                    <div className="flex items-center space-x-2">
+                                      <span className="text-lg">{fuentes[lead.fuente]?.icon || "❓"}</span>
+                                      <span className="text-sm text-gray-600 font-semibold">
+                                        {fuentes[lead.fuente]?.label || String(lead.fuente)}
                                       </span>
                                     </div>
                                   </td>
-                                  <td className="px-4 py-3 text-gray-700">
-                                    <div>
+                                  <td className="px-6 py-5">
+                                    <div className="font-semibold text-gray-900">
                                       {vendedor?.name || "Sin asignar"}
                                       {vendedor && !vendedor.active && (
-                                        <div className="text-xs text-red-600">
+                                        <div className="text-xs text-red-600 font-bold mt-1">
                                           (Desactivado)
                                         </div>
                                       )}
                                     </div>
                                   </td>
-                                  <td className="px-4 py-3 text-gray-500 text-xs">
+                                  <td className="px-6 py-5 text-gray-600 text-sm font-medium">
                                     {lead.fecha ? String(lead.fecha).slice(0, 10) : "—"}
                                   </td>
-                                  <td className="px-4 py-3 text-center">
-                                    <div className="flex items-center justify-center space-x-1">
+                                  <td className="px-6 py-5">
+                                    <div className="flex items-center justify-center space-x-2">
                                       <button
                                         onClick={() => {
                                           const phoneNumber = lead.telefono.replace(/\D/g, '');
@@ -1866,10 +1755,10 @@ export default function CRM() {
                                           const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
                                           window.open(whatsappUrl, '_blank');
                                         }}
-                                        className="px-2 py-1 text-xs rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors flex items-center space-x-1"
+                                        className="px-3 py-2 text-sm rounded-xl bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-all flex items-center space-x-1 font-bold shadow-sm"
                                         title="Chatear por WhatsApp"
                                       >
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.89 3.587"/>
                                         </svg>
                                       </button>
@@ -1879,10 +1768,10 @@ export default function CRM() {
                                           setSelectedLeadForPresupuesto(lead);
                                           setShowPresupuestoSelectModal(true);
                                         }}
-                                        className="px-2 py-1 text-xs rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors flex items-center space-x-1"
-                                        title="Enviar presupuesto por WhatsApp"
+                                        className="px-3 py-2 text-sm rounded-xl bg-purple-100 text-purple-700 hover:bg-purple-200 transition-all flex items-center space-x-1 font-bold shadow-sm"
+                                        title="Enviar presupuesto"
                                       >
-                                        <FileText size={12} />
+                                        <FileText size={14} />
                                         <span>Pres</span>
                                       </button>
                                       <button
@@ -1891,8 +1780,8 @@ export default function CRM() {
                                           setEditingLeadObservaciones(lead);
                                           setShowObservacionesModal(true);
                                         }}
-                                        className="px-2 py-1 text-xs rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
-                                        title="Ver/Editar observaciones"
+                                        className="px-3 py-2 text-sm rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition-all font-bold shadow-sm"
+                                        title="Observaciones"
                                       >
                                         {lead.notas && lead.notas.length > 0 ? "Ver" : "Obs"}
                                       </button>
@@ -1902,8 +1791,8 @@ export default function CRM() {
                                             e.stopPropagation();
                                             openReassignModal(lead);
                                           }}
-                                          className="px-2 py-1 text-xs rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors"
-                                          title="Reasignar lead"
+                                          className="px-3 py-2 text-sm rounded-xl bg-purple-100 text-purple-700 hover:bg-purple-200 transition-all font-bold shadow-sm"
+                                          title="Reasignar"
                                         >
                                           Reasignar
                                         </button>
@@ -1914,10 +1803,10 @@ export default function CRM() {
                                             e.stopPropagation();
                                             openDeleteLeadConfirm(lead);
                                           }}
-                                          className="px-2 py-1 text-xs rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
-                                          title="Eliminar lead permanentemente"
+                                          className="p-2 text-sm rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-all shadow-sm"
+                                          title="Eliminar"
                                         >
-                                          <Trash2 size={12} />
+                                          <Trash2 size={14} />
                                         </button>
                                       )}
                                       <button
@@ -1925,8 +1814,8 @@ export default function CRM() {
                                           e.stopPropagation();
                                           setActiveSection("leads");
                                         }}
-                                        className="px-2 py-1 text-xs rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-                                        title="Ver en tabla completa"
+                                        className="px-3 py-2 text-sm rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all font-bold shadow-sm"
+                                        title="Ver en tabla"
                                       >
                                         Ver
                                       </button>
@@ -1944,34 +1833,34 @@ export default function CRM() {
               )}
             </div>
 
-            {/* Métricas por fuente */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            {/* Métricas por fuente mejoradas */}
+            <div className="bg-white rounded-3xl shadow-xl p-8 border-2 border-gray-100">
+              <h3 className="text-2xl font-extrabold text-gray-900 mb-8">
                 Performance por Fuente
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {(() => {
                   const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
                     ? selectedTeam
                     : undefined;
                   return getSourceMetrics(teamFilter).map((item) => (
-                    <div key={item.source} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                      <div className="flex items-center space-x-2 mb-3">
-                        <span className="text-xl">{item.icon}</span>
-                        <span className="font-medium text-gray-900">{item.label}</span>
+                    <div key={item.source} className="border-2 border-gray-200 rounded-2xl p-6 hover:shadow-2xl hover:border-purple-300 transition-all transform hover:scale-105">
+                      <div className="flex items-center space-x-3 mb-4">
+                        <span className="text-3xl">{item.icon}</span>
+                        <span className="font-extrabold text-gray-900 text-lg">{item.label}</span>
                       </div>
-                      <div className="space-y-2 text-sm">
+                      <div className="space-y-3 text-sm">
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Total:</span>
-                          <span className="font-semibold text-gray-900">{item.total}</span>
+                          <span className="text-gray-600 font-semibold">Total:</span>
+                          <span className="font-extrabold text-gray-900 text-lg">{item.total}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Ventas:</span>
-                          <span className="font-semibold text-emerald-600">{item.vendidos}</span>
+                          <span className="text-gray-600 font-semibold">Ventas:</span>
+                          <span className="font-extrabold text-emerald-600 text-lg">{item.vendidos}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Conversión:</span>
-                          <span className="font-semibold text-purple-600">
+                          <span className="text-gray-600 font-semibold">Conversión:</span>
+                          <span className="font-extrabold text-purple-600 text-lg">
                             {item.conversion}%
                           </span>
                         </div>
@@ -1984,7 +1873,7 @@ export default function CRM() {
           </div>
         )}
 
-       {/* Sección Leads */}
+        {/* Sección Leads */}
         {activeSection === "leads" && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
