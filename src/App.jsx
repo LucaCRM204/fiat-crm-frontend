@@ -1440,14 +1440,14 @@ if (!isAuthenticated) {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-4xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Dashboard</h2>
-                <p className="text-gray-600 mt-2 font-medium">Resumen general de tu actividad</p>
+                <p className="text-slate-400 mt-2 font-medium">Resumen general de tu actividad</p>
               </div>
               <div className="flex items-center space-x-4">
                 {["owner", "gerente_general", "dueño"].includes(currentUser?.role) && (
                   <select
                     value={selectedTeam}
                     onChange={(e) => setSelectedTeam(e.target.value)}
-                    className="px-6 py-3 border-2 border-gray-200 rounded-2xl bg-white shadow-sm hover:border-purple-300 focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all font-semibold"
+                    className="px-6 py-3 border-2 border-slate-600 rounded-2xl bg-slate-800 border border-slate-700 shadow-sm hover:border-purple-300 focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all font-semibold"
                   >
                     <option value="todos">Todos los equipos</option>
                     {users
@@ -1494,7 +1494,7 @@ if (!isAuthenticated) {
                 const stats = getDashboardStats(teamFilter);
                 return (
                   <>
-                    <div className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all p-8 border-2 border-gray-100 transform hover:scale-105">
+                    <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-xl hover:shadow-2xl transition-all p-8 border-2 border-gray-100 transform hover:scale-105">
                       <div className="flex items-center justify-between mb-6">
                         <div>
                           <p className="text-sm font-bold text-gray-500 uppercase tracking-wide">Total Leads</p>
@@ -1512,7 +1512,7 @@ if (!isAuthenticated) {
                       </div>
                     </div>
 
-                    <div className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all p-8 border-2 border-gray-100 transform hover:scale-105">
+                    <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-xl hover:shadow-2xl transition-all p-8 border-2 border-gray-100 transform hover:scale-105">
                       <div className="flex items-center justify-between mb-6">
                         <div>
                           <p className="text-sm font-bold text-gray-500 uppercase tracking-wide">Ventas</p>
@@ -1530,7 +1530,7 @@ if (!isAuthenticated) {
                       </div>
                     </div>
 
-                    <div className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all p-8 border-2 border-gray-100 transform hover:scale-105">
+                    <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-xl hover:shadow-2xl transition-all p-8 border-2 border-gray-100 transform hover:scale-105">
                       <div className="flex items-center justify-between mb-6">
                         <div>
                           <p className="text-sm font-bold text-gray-500 uppercase tracking-wide">Conversión</p>
@@ -1553,13 +1553,16 @@ if (!isAuthenticated) {
             </div>
 
             {/* Estados de Leads mejorado */}
-            <div className="bg-white rounded-3xl shadow-xl p-8 border-2 border-gray-100">
+            <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-xl p-8 border-2 border-gray-100">
               <div className="flex items-center justify-between mb-8">
-                <h3 className="text-2xl font-extrabold text-gray-900">Estados de Leads</h3>
+                <h3 className="text-2xl font-extrabold text-white
+
+
+">Estados de Leads</h3>
                 <div className="flex items-center space-x-3">
                   {["owner", "gerente_general"].includes(currentUser?.role) && (
                     <>
-                      <span className="text-sm text-gray-600 font-bold">Descargar Excel:</span>
+                      <span className="text-sm text-slate-400 font-bold">Descargar Excel:</span>
                       <button
                         onClick={() => {
                           const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
@@ -1626,14 +1629,14 @@ if (!isAuthenticated) {
                                   : getFilteredLeads();
                                 downloadLeadsByStateExcel(filteredLeads, key, userById, fuentes);
                               }}
-                              className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-white/30 hover:bg-white/50 rounded-xl p-2 shadow-lg"
+                              className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-800 border border-slate-700/30 hover:bg-slate-800 border border-slate-700/50 rounded-xl p-2 shadow-lg"
                             >
                               <Download size={16} />
                             </button>
                           )}
                         </div>
                       </button>
-                      <div className="text-sm text-gray-700 text-center font-bold">
+                      <div className="text-sm text-slate-300 text-center font-bold">
                         {estado.label}
                       </div>
                     </div>
@@ -1643,8 +1646,8 @@ if (!isAuthenticated) {
 
               {/* Lista filtrada por estado */}
               {selectedEstado && (
-                <div className="mt-8 border-t-2 border-gray-200 pt-8">
-                  <h4 className="text-xl font-extrabold text-gray-800 mb-6 flex items-center">
+                <div className="mt-8 border-t-2 border-slate-600 pt-8">
+                  <h4 className="text-xl font-extrabold text-slate-200 mb-6 flex items-center">
                     <span className="mr-3">Leads en estado:</span>
                     <span className={`px-4 py-2 rounded-full text-white text-sm font-bold ${estados[selectedEstado].color} shadow-lg`}>
                       {estados[selectedEstado].icon} {estados[selectedEstado].label}
@@ -1671,21 +1674,21 @@ if (!isAuthenticated) {
                     }
 
                     return (
-                      <div className="overflow-x-auto rounded-2xl border-2 border-gray-200">
+                      <div className="overflow-x-auto rounded-2xl border-2 border-slate-600">
                         <table className="w-full">
                           <thead className="bg-gradient-to-r from-gray-100 to-gray-50">
                             <tr>
-                              <th className="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">Cliente</th>
-                              <th className="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">Contacto</th>
-                              <th className="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">Vehículo</th>
-                              <th className="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">Estado</th>
-                              <th className="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">Fuente</th>
-                              <th className="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">Vendedor</th>
-                              <th className="px-6 py-4 text-left text-xs font-extrabold text-gray-600 uppercase tracking-wider">Fecha</th>
-                              <th className="px-6 py-4 text-center text-xs font-extrabold text-gray-600 uppercase tracking-wider">Acciones</th>
+                              <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-400 uppercase tracking-wider">Cliente</th>
+                              <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-400 uppercase tracking-wider">Contacto</th>
+                              <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-400 uppercase tracking-wider">Vehículo</th>
+                              <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-400 uppercase tracking-wider">Estado</th>
+                              <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-400 uppercase tracking-wider">Fuente</th>
+                              <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-400 uppercase tracking-wider">Vendedor</th>
+                              <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-400 uppercase tracking-wider">Fecha</th>
+                              <th className="px-6 py-4 text-center text-xs font-extrabold text-slate-400 uppercase tracking-wider">Acciones</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y-2 divide-gray-100 bg-white">
+                          <tbody className="divide-y-2 divide-slate-700 bg-slate-800 border border-slate-700">
                             {leadsFiltrados.map((lead) => {
                               const vendedor = lead.vendedor
                                 ? userById.get(lead.vendedor)
@@ -1699,19 +1702,25 @@ if (!isAuthenticated) {
                               return (
                                 <tr key={lead.id} className="hover:bg-purple-50 transition-all">
                                   <td className="px-6 py-5">
-                                    <div className="font-bold text-gray-900 text-base">
+                                    <div className="font-bold text-white
+
+
+ text-base">
                                       {lead.nombre}
                                     </div>
                                   </td>
                                   <td className="px-6 py-5">
                                     <div className="flex items-center space-x-2">
                                       <Phone size={16} className="text-gray-400" />
-                                      <span className="text-gray-700 font-semibold">{lead.telefono}</span>
+                                      <span className="text-slate-300 font-semibold">{lead.telefono}</span>
                                     </div>
                                   </td>
                                   <td className="px-6 py-5">
                                     <div>
-                                      <div className="font-bold text-gray-900">{lead.modelo}</div>
+                                      <div className="font-bold text-white
+
+
+">{lead.modelo}</div>
                                       <div className="text-sm text-gray-500 font-medium">{lead.formaPago}</div>
                                       {lead.infoUsado && (
                                         <div className="text-xs text-orange-600 font-semibold mt-1">
@@ -1738,13 +1747,16 @@ if (!isAuthenticated) {
                                   <td className="px-6 py-5">
                                     <div className="flex items-center space-x-2">
                                       <span className="text-lg">{fuentes[lead.fuente]?.icon || "❓"}</span>
-                                      <span className="text-sm text-gray-600 font-semibold">
+                                      <span className="text-sm text-slate-400 font-semibold">
                                         {fuentes[lead.fuente]?.label || String(lead.fuente)}
                                       </span>
                                     </div>
                                   </td>
                                   <td className="px-6 py-5">
-                                    <div className="font-semibold text-gray-900">
+                                    <div className="font-semibold text-white
+
+
+">
                                       {vendedor?.name || "Sin asignar"}
                                       {vendedor && !vendedor.active && (
                                         <div className="text-xs text-red-600 font-bold mt-1">
@@ -1753,7 +1765,7 @@ if (!isAuthenticated) {
                                       )}
                                     </div>
                                   </td>
-                                  <td className="px-6 py-5 text-gray-600 text-sm font-medium">
+                                  <td className="px-6 py-5 text-slate-400 text-sm font-medium">
                                     {lead.fecha ? String(lead.fecha).slice(0, 10) : "—"}
                                   </td>
                                   <td className="px-6 py-5">
@@ -1826,7 +1838,7 @@ if (!isAuthenticated) {
                                           e.stopPropagation();
                                           setActiveSection("leads");
                                         }}
-                                        className="px-3 py-2 text-sm rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all font-bold shadow-sm"
+                                        className="px-3 py-2 text-sm rounded-xl bg-slate-700 text-slate-300 hover:bg-gray-200 transition-all font-bold shadow-sm"
                                         title="Ver en tabla"
                                       >
                                         Ver
@@ -1846,8 +1858,11 @@ if (!isAuthenticated) {
             </div>
 
             {/* Métricas por fuente mejoradas */}
-            <div className="bg-white rounded-3xl shadow-xl p-8 border-2 border-gray-100">
-              <h3 className="text-2xl font-extrabold text-gray-900 mb-8">
+            <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-xl p-8 border-2 border-gray-100">
+              <h3 className="text-2xl font-extrabold text-white
+
+
+ mb-8">
                 Performance por Fuente
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1856,22 +1871,28 @@ if (!isAuthenticated) {
                     ? selectedTeam
                     : undefined;
                   return getSourceMetrics(teamFilter).map((item) => (
-                    <div key={item.source} className="border-2 border-gray-200 rounded-2xl p-6 hover:shadow-2xl hover:border-purple-300 transition-all transform hover:scale-105">
+                    <div key={item.source} className="border-2 border-slate-600 rounded-2xl p-6 hover:shadow-2xl hover:border-purple-300 transition-all transform hover:scale-105">
                       <div className="flex items-center space-x-3 mb-4">
                         <span className="text-3xl">{item.icon}</span>
-                        <span className="font-extrabold text-gray-900 text-lg">{item.label}</span>
+                        <span className="font-extrabold text-white
+
+
+ text-lg">{item.label}</span>
                       </div>
                       <div className="space-y-3 text-sm">
                         <div className="flex justify-between">
-                          <span className="text-gray-600 font-semibold">Total:</span>
-                          <span className="font-extrabold text-gray-900 text-lg">{item.total}</span>
+                          <span className="text-slate-400 font-semibold">Total:</span>
+                          <span className="font-extrabold text-white
+
+
+ text-lg">{item.total}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600 font-semibold">Ventas:</span>
+                          <span className="text-slate-400 font-semibold">Ventas:</span>
                           <span className="font-extrabold text-emerald-600 text-lg">{item.vendidos}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600 font-semibold">Conversión:</span>
+                          <span className="text-slate-400 font-semibold">Conversión:</span>
                           <span className="font-extrabold text-purple-600 text-lg">
                             {item.conversion}%
                           </span>
@@ -1889,7 +1910,10 @@ if (!isAuthenticated) {
         {activeSection === "leads" && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-gray-900">Gestión de Leads</h2>
+              <h2 className="text-3xl font-bold text-white
+
+
+">Gestión de Leads</h2>
               {canCreateLeads() && (
                 <button
                   onClick={() => setShowNewLeadModal(true)}
@@ -1902,7 +1926,7 @@ if (!isAuthenticated) {
             </div>
 
             {/* Barra de búsqueda y filtros */}
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6">
               <div className="flex flex-col lg:flex-row gap-4">
                 <div className="flex-1">
                   <div className="relative">
@@ -1923,7 +1947,7 @@ if (!isAuthenticated) {
                     className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg border transition-all ${
                       showFilters || getActiveFiltersCount() > 0
                         ? "bg-purple-100 border-purple-300 text-purple-700"
-                        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                        : "bg-slate-800 border border-slate-700 border-gray-300 text-slate-300 hover:bg-slate-800"
                     }`}
                   >
                     <Filter size={20} />
@@ -1945,17 +1969,20 @@ if (!isAuthenticated) {
                     </button>
                   )}
 
-                  <div className="text-sm text-gray-600">
-                    <span className="font-semibold text-gray-900">{getFilteredAndSearchedLeads().length}</span> leads
+                  <div className="text-sm text-slate-400">
+                    <span className="font-semibold text-white
+
+
+">{getFilteredAndSearchedLeads().length}</span> leads
                   </div>
                 </div>
               </div>
 
               {showFilters && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="mt-4 pt-4 border-t border-slate-600">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-slate-300 mb-2">
                         <User size={16} className="inline mr-1" />
                         Vendedor
                       </label>
@@ -1980,7 +2007,7 @@ if (!isAuthenticated) {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-slate-300 mb-2">
                         Estado
                       </label>
                       <select
@@ -1998,7 +2025,7 @@ if (!isAuthenticated) {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-slate-300 mb-2">
                         Fuente
                       </label>
                       <select
@@ -2020,22 +2047,22 @@ if (!isAuthenticated) {
             </div>
 
             {/* Tabla de leads */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                  <thead className="bg-slate-700">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Cliente</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Contacto</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Vehículo</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Estado</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Fuente</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Vendedor</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Fecha</th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase">Acciones</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Cliente</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Contacto</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Vehículo</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Estado</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Fuente</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Vendedor</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Fecha</th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-slate-300 uppercase">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-slate-800 border border-slate-700 divide-y divide-gray-200">
                     {getFilteredAndSearchedLeads().length === 0 ? (
                       <tr>
                         <td colSpan={8} className="px-4 py-12 text-center text-gray-500">
@@ -2054,9 +2081,12 @@ if (!isAuthenticated) {
                             getVisibleUsers().some((u) => u.id === lead.vendedor));
 
                         return (
-                          <tr key={lead.id} className="hover:bg-gray-50 transition-colors">
+                          <tr key={lead.id} className="hover:bg-slate-800 transition-colors">
                             <td className="px-4 py-4">
-                              <div className="font-medium text-gray-900">{lead.nombre}</div>
+                              <div className="font-medium text-white
+
+
+">{lead.nombre}</div>
                               {lead.created_by && (
                                 <div className="text-xs text-gray-500">
                                   Creado por: {userById.get(lead.created_by)?.name || 'Sistema'}
@@ -2066,12 +2096,15 @@ if (!isAuthenticated) {
                             <td className="px-4 py-4">
                               <div className="flex items-center space-x-2">
                                 <Phone size={14} className="text-gray-400" />
-                                <span className="text-gray-700">{lead.telefono}</span>
+                                <span className="text-slate-300">{lead.telefono}</span>
                               </div>
                             </td>
                             <td className="px-4 py-4">
                               <div>
-                                <div className="font-medium text-gray-900">{lead.modelo}</div>
+                                <div className="font-medium text-white
+
+
+">{lead.modelo}</div>
                                 <div className="text-xs text-gray-500">{lead.formaPago}</div>
                                 {lead.infoUsado && (
                                   <div className="text-xs text-orange-600">Usado: {lead.infoUsado}</div>
@@ -2094,14 +2127,17 @@ if (!isAuthenticated) {
                             <td className="px-4 py-4">
                               <div className="flex items-center space-x-1">
                                 <span>{fuentes[lead.fuente]?.icon || "❓"}</span>
-                                <span className="text-xs text-gray-600">
+                                <span className="text-xs text-slate-400">
                                   {fuentes[lead.fuente]?.label || String(lead.fuente)}
                                 </span>
                               </div>
                             </td>
                             <td className="px-4 py-4">
                               <div>
-                                <span className="text-gray-900">{vendedor?.name || "Sin asignar"}</span>
+                                <span className="text-white
+
+
+">{vendedor?.name || "Sin asignar"}</span>
                                 {vendedor && !vendedor.active && (
                                   <div className="text-xs text-red-600">(Desactivado)</div>
                                 )}
@@ -2177,7 +2213,7 @@ if (!isAuthenticated) {
                                     setViewingLeadHistorial(lead);
                                     setShowHistorialModal(true);
                                   }}
-                                  className="px-2 py-1 text-xs rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                                  className="px-2 py-1 text-xs rounded-lg bg-slate-700 text-slate-300 hover:bg-gray-200 transition-colors"
                                 >
                                   Historial
                                 </button>
@@ -2198,7 +2234,10 @@ if (!isAuthenticated) {
         {activeSection === "calendar" && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-gray-900">Calendario</h2>
+              <h2 className="text-3xl font-bold text-white
+
+
+">Calendario</h2>
               <div className="flex items-center space-x-3">
                 <select
                   value={selectedCalendarUserId ?? ""}
@@ -2207,7 +2246,7 @@ if (!isAuthenticated) {
                       e.target.value ? parseInt(e.target.value, 10) : null
                     )
                   }
-                  className="px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm hover:border-gray-400 focus:ring-2 focus:ring-purple-600 transition-all"
+                  className="px-4 py-2 border border-gray-300 rounded-lg bg-slate-800 border border-slate-700 shadow-sm hover:border-gray-400 focus:ring-2 focus:ring-purple-600 transition-all"
                 >
                   <option value="">Mi calendario</option>
                   {visibleUsers
@@ -2228,8 +2267,8 @@ if (!isAuthenticated) {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6">
+              <h3 className="text-xl font-semibold text-slate-200 mb-4">
                 Próximos eventos -{" "}
                 {selectedCalendarUserId
                   ? userById.get(selectedCalendarUserId)?.name
@@ -2246,11 +2285,14 @@ if (!isAuthenticated) {
                   {eventsForSelectedUser.map((event) => (
                     <div
                       key={event.id}
-                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:shadow-sm transition-all"
+                      className="flex items-center justify-between p-4 border border-slate-600 rounded-lg hover:bg-slate-800 hover:shadow-sm transition-all"
                     >
                       <div>
-                        <h4 className="font-medium text-gray-900">{event.title}</h4>
-                        <p className="text-sm text-gray-600">
+                        <h4 className="font-medium text-white
+
+
+">{event.title}</h4>
+                        <p className="text-sm text-slate-400">
                           {formatterEs.format(new Date(event.date))} a las {event.time}
                         </p>
                         <p className="text-xs text-gray-500">
@@ -2276,7 +2318,10 @@ if (!isAuthenticated) {
         {activeSection === "presupuestos" && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-gray-900">Plantillas de Presupuesto</h2>
+              <h2 className="text-3xl font-bold text-white
+
+
+">Plantillas de Presupuesto</h2>
               {isOwner() && (
                 <button
                   onClick={() => {
@@ -2321,7 +2366,7 @@ if (!isAuthenticated) {
                 presupuestos.map((presupuesto) => (
                   <div
                     key={presupuesto.id}
-                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all"
+                    className="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all"
                   >
                     {presupuesto.imagen_url && (
                       <div className="h-48 bg-gray-200 overflow-hidden">
@@ -2338,16 +2383,19 @@ if (!isAuthenticated) {
                     <div className="p-4">
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <h3 className="text-lg font-bold text-gray-900">
+                          <h3 className="text-lg font-bold text-white
+
+
+">
                             {presupuesto.modelo}
                           </h3>
-                          <p className="text-sm text-gray-600">{presupuesto.marca}</p>
+                          <p className="text-sm text-slate-400">{presupuesto.marca}</p>
                         </div>
                       </div>
                       
                       {presupuesto.precio_contado && (
                         <div className="mt-3 p-3 bg-emerald-50 rounded-lg">
-                          <p className="text-xs text-gray-600">Precio Contado</p>
+                          <p className="text-xs text-slate-400">Precio Contado</p>
                           <p className="text-xl font-bold text-emerald-600">
                             {presupuesto.precio_contado}
                           </p>
@@ -2355,7 +2403,7 @@ if (!isAuthenticated) {
                       )}
 
                       {presupuesto.anticipo && (
-                        <div className="mt-2 text-sm text-gray-600">
+                        <div className="mt-2 text-sm text-slate-400">
                           <strong>Anticipo:</strong> {presupuesto.anticipo}
                         </div>
                       )}
@@ -2401,19 +2449,22 @@ if (!isAuthenticated) {
         {/* Sección Ranking */}
         {activeSection === "ranking" && (
           <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-gray-900">Ranking de Vendedores</h2>
+            <h2 className="text-3xl font-bold text-white
+
+
+">Ranking de Vendedores</h2>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {isOwner() && (
-                <div className="bg-white rounded-xl shadow-md p-6">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6">
+                  <h3 className="text-xl font-semibold text-slate-200 mb-4">
                     Ranking General
                   </h3>
                   <div className="space-y-3">
                     {getRanking().map((vendedor, index) => (
                       <div
                         key={vendedor.id}
-                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-sm transition-all"
+                        className="flex items-center justify-between p-4 border border-slate-600 rounded-lg hover:shadow-sm transition-all"
                       >
                         <div className="flex items-center space-x-3">
                           <div
@@ -2430,7 +2481,10 @@ if (!isAuthenticated) {
                             {index + 1}
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">
+                            <p className="font-medium text-white
+
+
+">
                               {vendedor.nombre}
                             </p>
                             <p className="text-xs text-gray-500">{vendedor.team}</p>
@@ -2455,8 +2509,8 @@ if (!isAuthenticated) {
                 </div>
               )}
 
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6">
+                <h3 className="text-xl font-semibold text-slate-200 mb-4">
                   {currentUser?.role === "vendedor" 
                     ? "Ranking Vendedores" 
                     : isOwner() 
@@ -2473,7 +2527,7 @@ if (!isAuthenticated) {
                       className={`flex items-center justify-between p-4 border rounded-lg transition-all ${
                         vendedor.id === currentUser?.id 
                           ? "bg-purple-50 border-purple-300 shadow-sm" 
-                          : "border-gray-200 hover:shadow-sm"
+                          : "border-slate-600 hover:shadow-sm"
                       }`}
                     >
                       <div className="flex items-center space-x-3">
@@ -2492,7 +2546,10 @@ if (!isAuthenticated) {
                         </div>
                         <div>
                           <p className={`font-medium ${
-                            vendedor.id === currentUser?.id ? "text-purple-900" : "text-gray-900"
+                            vendedor.id === currentUser?.id ? "text-purple-900" : "text-white
+
+
+"
                           }`}>
                             {vendedor.nombre}
                             {vendedor.id === currentUser?.id && (
@@ -2535,12 +2592,15 @@ if (!isAuthenticated) {
           ["supervisor", "gerente", "gerente_general", "owner"].includes(currentUser?.role) && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold text-gray-900">Mi Equipo</h2>
+                <h2 className="text-3xl font-bold text-white
+
+
+">Mi Equipo</h2>
                 {["owner", "gerente_general"].includes(currentUser?.role) && (
                   <select
                     value={selectedTeam}
                     onChange={(e) => setSelectedTeam(e.target.value)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm hover:border-gray-400 focus:ring-2 focus:ring-purple-600 transition-all"
+                    className="px-4 py-2 border border-gray-300 rounded-lg bg-slate-800 border border-slate-700 shadow-sm hover:border-gray-400 focus:ring-2 focus:ring-purple-600 transition-all"
                   >
                     <option value="todos">Todos los equipos</option>
                     {users
@@ -2555,9 +2615,9 @@ if (!isAuthenticated) {
               </div>
 
               {/* Estadísticas por estado */}
-              <div className="bg-white rounded-xl shadow-md p-6">
+              <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold text-gray-800">
+                  <h3 className="text-xl font-semibold text-slate-200">
                     Estados de Leads - Mi Equipo
                   </h3>
                   {selectedEstado && (
@@ -2588,7 +2648,7 @@ if (!isAuthenticated) {
                         <div className={`${estado.color} text-white rounded-xl p-4 mb-2 shadow-md hover:shadow-lg transition-all cursor-pointer`}>
                           <div className="text-2xl font-bold">{count}</div>
                         </div>
-                        <div className="text-sm text-gray-700 font-medium">{estado.label}</div>
+                        <div className="text-sm text-slate-300 font-medium">{estado.label}</div>
                       </button>
                     );
                   })}
@@ -2596,8 +2656,8 @@ if (!isAuthenticated) {
               </div>
 
               {/* Top vendedores en el equipo */}
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6">
+                <h3 className="text-xl font-semibold text-slate-200 mb-4">
                   Top Vendedores en Mi Organización
                 </h3>
                 <div className="space-y-3">
@@ -2628,7 +2688,7 @@ if (!isAuthenticated) {
                     return ranking.map((vendedor, index) => (
                       <div
                         key={vendedor.id}
-                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-sm transition-all"
+                        className="flex items-center justify-between p-4 border border-slate-600 rounded-lg hover:shadow-sm transition-all"
                       >
                         <div className="flex items-center space-x-3">
                           <div
@@ -2645,7 +2705,10 @@ if (!isAuthenticated) {
                             {index + 1}
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">
+                            <p className="font-medium text-white
+
+
+">
                               {vendedor.nombre}
                             </p>
                             <p className="text-xs text-gray-500">{vendedor.team}</p>
@@ -2674,9 +2737,12 @@ if (!isAuthenticated) {
         {/* Sección Alertas */}
         {activeSection === "alerts" && (
           <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-gray-900">Notificaciones y Alertas</h2>
+            <h2 className="text-3xl font-bold text-white
 
-            <div className="bg-white rounded-xl shadow-md p-6">
+
+">Notificaciones y Alertas</h2>
+
+            <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6">
               {alerts.filter(a => a.userId === currentUser?.id).length === 0 ? (
                 <div className="text-center py-12">
                   <Bell size={48} className="mx-auto text-gray-300 mb-4" />
@@ -2691,7 +2757,7 @@ if (!isAuthenticated) {
                       <div
                         key={alert.id}
                         className={`p-4 border rounded-lg transition-all ${
-                          alert.read ? 'bg-white border-gray-200' : 'bg-purple-50 border-purple-300 shadow-sm'
+                          alert.read ? 'bg-slate-800 border border-slate-700 border-slate-600' : 'bg-purple-50 border-purple-300 shadow-sm'
                         }`}
                       >
                         <div className="flex items-start justify-between">
@@ -2702,7 +2768,10 @@ if (!isAuthenticated) {
                               <Trophy className="h-5 w-5 text-yellow-500 mt-0.5" />
                             )}
                             <div>
-                              <p className="font-medium text-gray-900">{alert.message}</p>
+                              <p className="font-medium text-white
+
+
+">{alert.message}</p>
                               <p className="text-xs text-gray-500 mt-1">
                                 {new Date(alert.ts).toLocaleString('es-AR')}
                               </p>
@@ -2733,7 +2802,10 @@ if (!isAuthenticated) {
         {activeSection === "users" && canManageUsers() && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-gray-900">Gestión de Usuarios</h2>
+              <h2 className="text-3xl font-bold text-white
+
+
+">Gestión de Usuarios</h2>
               {canCreateUsers() && (
                 <button
                   onClick={openCreateUser}
@@ -2746,7 +2818,7 @@ if (!isAuthenticated) {
             </div>
 
             {/* Barra de búsqueda y filtros usuarios */}
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6">
               <div className="flex flex-col lg:flex-row gap-4">
                 <div className="flex-1">
                   <div className="relative">
@@ -2763,7 +2835,7 @@ if (!isAuthenticated) {
 
                 <div className="flex items-center space-x-3">
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-600 font-medium">Ordenar:</span>
+                    <span className="text-sm text-slate-400 font-medium">Ordenar:</span>
                     <select
                       value={userSortBy}
                       onChange={(e) => setUserSortBy(e.target.value)}
@@ -2781,7 +2853,7 @@ if (!isAuthenticated) {
                     className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg border transition-all ${
                       showUserFilters || getActiveUserFiltersCount() > 0
                         ? "bg-purple-100 border-purple-300 text-purple-700"
-                        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                        : "bg-slate-800 border border-slate-700 border-gray-300 text-slate-300 hover:bg-slate-800"
                     }`}
                   >
                     <Filter size={20} />
@@ -2804,17 +2876,20 @@ if (!isAuthenticated) {
                     </button>
                   )}
 
-                  <div className="text-sm text-gray-600">
-                    <span className="font-semibold text-gray-900">{getFilteredAndSortedUsers().length}</span> usuarios
+                  <div className="text-sm text-slate-400">
+                    <span className="font-semibold text-white
+
+
+">{getFilteredAndSortedUsers().length}</span> usuarios
                   </div>
                 </div>
               </div>
 
               {showUserFilters && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="mt-4 pt-4 border-t border-slate-600">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-slate-300 mb-2">
                         <Users size={16} className="inline mr-1" />
                         Equipo
                       </label>
@@ -2842,7 +2917,7 @@ if (!isAuthenticated) {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-slate-300 mb-2">
                         <User size={16} className="inline mr-1" />
                         Rol
                       </label>
@@ -2869,20 +2944,20 @@ if (!isAuthenticated) {
             </div>
 
             {/* Tabla de usuarios */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                  <thead className="bg-slate-700">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Usuario</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Rol</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Equipo</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Estado</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Performance</th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase">Acciones</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Usuario</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Rol</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Equipo</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Estado</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Performance</th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-slate-300 uppercase">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-slate-800 border border-slate-700 divide-y divide-gray-200">
                     {getFilteredAndSortedUsers().length === 0 ? (
                       <tr>
                         <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
@@ -2898,10 +2973,13 @@ if (!isAuthenticated) {
                         const manager = user.reportsTo ? userById.get(user.reportsTo) : null;
 
                         return (
-                          <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                          <tr key={user.id} className="hover:bg-slate-800 transition-colors">
                             <td className="px-4 py-4">
                               <div>
-                                <div className="font-medium text-gray-900">{user.name}</div>
+                                <div className="font-medium text-white
+
+
+">{user.name}</div>
                                 <div className="text-sm text-gray-500">{user.email}</div>
                               </div>
                             </td>
@@ -2914,7 +2992,10 @@ if (!isAuthenticated) {
                               <div className="text-sm">
                                 {manager ? (
                                   <div>
-                                    <span className="font-medium text-gray-900">
+                                    <span className="font-medium text-white
+
+
+">
                                       Equipo {manager.name}
                                     </span>
                                     <div className="text-xs text-gray-500">
@@ -2967,7 +3048,10 @@ if (!isAuthenticated) {
                               {user.role === "vendedor" ? (
                                 <div className="text-sm">
                                   <div className="flex items-center space-x-2">
-                                    <span className="text-gray-900">{userLeads.length} leads</span>
+                                    <span className="text-white
+
+
+">{userLeads.length} leads</span>
                                     <span className="text-gray-400">•</span>
                                     <span className="text-emerald-600 font-medium">
                                       {userSales} ventas
@@ -3020,23 +3104,23 @@ if (!isAuthenticated) {
         {/* Modal: Confirmación Eliminar Lead */}
         {showDeleteLeadConfirmModal && leadToDelete && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-md shadow-2xl">
               <div className="flex items-center mb-6">
                 <div className="bg-red-100 p-3 rounded-full mr-4">
                   <Trash2 className="h-6 w-6 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800">
+                  <h3 className="text-lg font-semibold text-slate-200">
                     Eliminar Lead
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-slate-400">
                     Esta acción no se puede deshacer
                   </p>
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <h4 className="font-medium text-gray-800 mb-2">Lead a eliminar:</h4>
+              <div className="bg-slate-800 rounded-lg p-4 mb-6">
+                <h4 className="font-medium text-slate-200 mb-2">Lead a eliminar:</h4>
                 <div className="text-sm space-y-1">
                   <div><strong>Cliente:</strong> {leadToDelete.nombre}</div>
                   <div><strong>Teléfono:</strong> {leadToDelete.telefono}</div>
@@ -3078,7 +3162,7 @@ if (!isAuthenticated) {
                     setShowDeleteLeadConfirmModal(false);
                     setLeadToDelete(null);
                   }}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3090,23 +3174,23 @@ if (!isAuthenticated) {
         {/* Modal: Confirmación Eliminar Usuario */}
         {showDeleteConfirmModal && userToDelete && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-md shadow-2xl">
               <div className="flex items-center mb-6">
                 <div className="bg-red-100 p-3 rounded-full mr-4">
                   <Trash2 className="h-6 w-6 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800">
+                  <h3 className="text-lg font-semibold text-slate-200">
                     Confirmar Eliminación
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-slate-400">
                     Esta acción no se puede deshacer
                   </p>
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <h4 className="font-medium text-gray-800 mb-2">Usuario a eliminar:</h4>
+              <div className="bg-slate-800 rounded-lg p-4 mb-6">
+                <h4 className="font-medium text-slate-200 mb-2">Usuario a eliminar:</h4>
                 <div className="text-sm space-y-1">
                   <div><strong>Nombre:</strong> {userToDelete.name}</div>
                   <div><strong>Email:</strong> {userToDelete.email}</div>
@@ -3146,7 +3230,7 @@ if (!isAuthenticated) {
                     setShowDeleteConfirmModal(false);
                     setUserToDelete(null);
                   }}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3158,9 +3242,9 @@ if (!isAuthenticated) {
         {/* Modal: Reasignar Lead */}
         {showReassignModal && leadToReassign && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-gray-800">
+                <h3 className="text-xl font-semibold text-slate-200">
                   Reasignar Lead - {leadToReassign.nombre}
                 </h3>
                 <button
@@ -3169,30 +3253,30 @@ if (!isAuthenticated) {
                     setLeadToReassign(null);
                     setSelectedVendorForReassign(null);
                   }}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-slate-400 transition-colors"
                 >
                   <X size={24} />
                 </button>
               </div>
 
               <div className="mb-6">
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-4 mb-4">
-                  <h4 className="font-medium text-gray-800 mb-3">Información del Lead</h4>
+                <div className="bg-slate-700 rounded-lg p-4 mb-4">
+                  <h4 className="font-medium text-slate-200 mb-3">Información del Lead</h4>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="font-medium text-gray-600">Cliente:</span>{" "}
+                      <span className="font-medium text-slate-400">Cliente:</span>{" "}
                       {leadToReassign.nombre}
                     </div>
                     <div>
-                      <span className="font-medium text-gray-600">Teléfono:</span>{" "}
+                      <span className="font-medium text-slate-400">Teléfono:</span>{" "}
                       {leadToReassign.telefono}
                     </div>
                     <div>
-                      <span className="font-medium text-gray-600">Vehículo:</span>{" "}
+                      <span className="font-medium text-slate-400">Vehículo:</span>{" "}
                       {leadToReassign.modelo}
                     </div>
                     <div>
-                      <span className="font-medium text-gray-600">Estado:</span>
+                      <span className="font-medium text-slate-400">Estado:</span>
                       <span
                         className={`ml-2 px-2 py-1 rounded-full text-xs font-medium text-white ${estados[leadToReassign.estado].color}`}
                       >
@@ -3203,7 +3287,7 @@ if (!isAuthenticated) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                  <label className="block text-sm font-medium text-slate-300 mb-3">
                     Seleccionar nuevo vendedor (solo vendedores activos)
                   </label>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -3212,7 +3296,7 @@ if (!isAuthenticated) {
                       className={`p-3 border rounded-lg cursor-pointer transition-all ${
                         selectedVendorForReassign === null
                           ? "border-purple-500 bg-purple-50 shadow-sm"
-                          : "border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+                          : "border-slate-600 hover:bg-slate-800 hover:border-gray-300"
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -3221,7 +3305,10 @@ if (!isAuthenticated) {
                             <span className="text-white font-medium text-sm">--</span>
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">Sin asignar</p>
+                            <p className="font-medium text-white
+
+
+">Sin asignar</p>
                             <p className="text-sm text-gray-500">
                               Dejar el lead sin vendedor asignado
                             </p>
@@ -3229,7 +3316,7 @@ if (!isAuthenticated) {
                         </div>
                         {selectedVendorForReassign === null && (
                           <div className="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center">
-                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                            <div className="w-2 h-2 bg-slate-800 border border-slate-700 rounded-full"></div>
                           </div>
                         )}
                       </div>
@@ -3252,7 +3339,7 @@ if (!isAuthenticated) {
                           className={`p-3 border rounded-lg cursor-pointer transition-all ${
                             selectedVendorForReassign === vendedor.id
                               ? "border-purple-500 bg-purple-50 shadow-sm"
-                              : "border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+                              : "border-slate-600 hover:bg-slate-800 hover:border-gray-300"
                           }`}
                         >
                           <div className="flex items-center justify-between">
@@ -3268,7 +3355,10 @@ if (!isAuthenticated) {
                                 </span>
                               </div>
                               <div>
-                                <p className="font-medium text-gray-900">{vendedor.name}</p>
+                                <p className="font-medium text-white
+
+
+">{vendedor.name}</p>
                                 <p className="text-sm text-gray-500">
                                   {vendedorLeads.length} leads • {vendedorVentas} ventas •{" "}
                                   {conversion}% conversión
@@ -3283,7 +3373,7 @@ if (!isAuthenticated) {
                             </div>
                             {selectedVendorForReassign === vendedor.id && (
                               <div className="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center">
-                                <div className="w-2 h-2 bg-white rounded-full"></div>
+                                <div className="w-2 h-2 bg-slate-800 border border-slate-700 rounded-full"></div>
                               </div>
                             )}
                           </div>
@@ -3293,7 +3383,7 @@ if (!isAuthenticated) {
                   </div>
 
                   {getAvailableVendorsForReassign().length === 0 && (
-                    <div className="text-center py-8 bg-gray-50 rounded-lg border">
+                    <div className="text-center py-8 bg-slate-800 rounded-lg border">
                       <p className="text-gray-500">
                         No hay vendedores activos disponibles
                       </p>
@@ -3320,7 +3410,7 @@ if (!isAuthenticated) {
                     setLeadToReassign(null);
                     setSelectedVendorForReassign(null);
                   }}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3332,9 +3422,9 @@ if (!isAuthenticated) {
         {/* Modal: Observaciones */}
         {showObservacionesModal && editingLeadObservaciones && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 w-full max-w-2xl shadow-2xl">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-2xl shadow-2xl">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-gray-800">
+                <h3 className="text-xl font-semibold text-slate-200">
                   Observaciones - {editingLeadObservaciones.nombre}
                 </h3>
                 <button
@@ -3342,14 +3432,14 @@ if (!isAuthenticated) {
                     setShowObservacionesModal(false);
                     setEditingLeadObservaciones(null);
                   }}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-slate-400 transition-colors"
                 >
                   <X size={24} />
                 </button>
               </div>
 
-              <div className="mb-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-3">
-                <p className="text-sm text-gray-600">
+              <div className="mb-4 bg-slate-700 rounded-lg p-3">
+                <p className="text-sm text-slate-400">
                   <span className="font-medium">Cliente:</span>{" "}
                   {editingLeadObservaciones.nombre} |{" "}
                   <span className="font-medium ml-2">Teléfono:</span>{" "}
@@ -3360,7 +3450,7 @@ if (!isAuthenticated) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-300 mb-2">
                   Observaciones
                 </label>
                 <textarea
@@ -3393,7 +3483,7 @@ if (!isAuthenticated) {
                     setShowObservacionesModal(false);
                     setEditingLeadObservaciones(null);
                   }}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3405,9 +3495,9 @@ if (!isAuthenticated) {
         {/* Modal: Historial */}
         {showHistorialModal && viewingLeadHistorial && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 w-full max-w-2xl shadow-2xl">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-2xl shadow-2xl">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-gray-800">
+                <h3 className="text-xl font-semibold text-slate-200">
                   Historial - {viewingLeadHistorial.nombre}
                 </h3>
                 <button
@@ -3415,14 +3505,14 @@ if (!isAuthenticated) {
                     setShowHistorialModal(false);
                     setViewingLeadHistorial(null);
                   }}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-slate-400 transition-colors"
                 >
                   <X size={24} />
                 </button>
               </div>
 
-              <div className="mb-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-3">
-                <p className="text-sm text-gray-600">
+              <div className="mb-4 bg-slate-700 rounded-lg p-3">
+                <p className="text-sm text-slate-400">
                   <span className="font-medium">Cliente:</span>{" "}
                   {viewingLeadHistorial.nombre} |{" "}
                   <span className="font-medium ml-2">Teléfono:</span>{" "}
@@ -3440,7 +3530,7 @@ if (!isAuthenticated) {
                 ) : (
                   <div className="space-y-3">
                     {viewingLeadHistorial.historial?.map((entry, index) => (
-                      <div key={index} className="border-l-4 border-purple-600 pl-4 py-2 bg-gray-50 rounded-r-lg">
+                      <div key={index} className="border-l-4 border-purple-600 pl-4 py-2 bg-slate-800 rounded-r-lg">
                         <div className="flex items-center justify-between">
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-medium text-white ${
@@ -3454,7 +3544,7 @@ if (!isAuthenticated) {
                             {new Date(entry.timestamp).toLocaleTimeString("es-AR")}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-700 mt-1">
+                        <p className="text-sm text-slate-300 mt-1">
                           Actualizado por: {entry.usuario}
                         </p>
                       </div>
@@ -3469,7 +3559,7 @@ if (!isAuthenticated) {
                     setShowHistorialModal(false);
                     setViewingLeadHistorial(null);
                   }}
-                  className="px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                  className="px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cerrar
                 </button>
@@ -3481,19 +3571,19 @@ if (!isAuthenticated) {
         {/* Modal: Nuevo Lead */}
         {showNewLeadModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 w-full max-w-3xl shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-3xl shadow-2xl max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-gray-800">Nuevo Lead</h3>
+                <h3 className="text-xl font-semibold text-slate-200">Nuevo Lead</h3>
                 <button 
                   onClick={() => setShowNewLeadModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-slate-400 transition-colors"
                 >
                   <X size={24} />
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Nombre *
                   </label>
                   <input
@@ -3503,7 +3593,7 @@ if (!isAuthenticated) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Teléfono *
                   </label>
                   <input
@@ -3513,7 +3603,7 @@ if (!isAuthenticated) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Modelo *
                   </label>
                   <input
@@ -3523,7 +3613,7 @@ if (!isAuthenticated) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Forma de Pago
                   </label>
                   <select
@@ -3535,7 +3625,7 @@ if (!isAuthenticated) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Info Usado
                   </label>
                   <input
@@ -3546,7 +3636,7 @@ if (!isAuthenticated) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Fecha
                   </label>
                   <input
@@ -3561,7 +3651,7 @@ if (!isAuthenticated) {
                     id="new-entrega"
                     className="rounded border-gray-300 text-purple-600 focus:ring-2 focus:ring-purple-600"
                   />
-                  <span className="text-sm text-gray-700">
+                  <span className="text-sm text-slate-300">
                     Entrega de vehículo usado
                   </span>
                 </div>
@@ -3572,12 +3662,12 @@ if (!isAuthenticated) {
                     defaultChecked
                     className="rounded border-gray-300 text-purple-600 focus:ring-2 focus:ring-purple-600"
                   />
-                  <span className="text-sm text-gray-700">
+                  <span className="text-sm text-slate-300">
                     Asignación automática y equitativa
                   </span>
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Asignar a vendedor específico (opcional)
                   </label>
                   <select
@@ -3611,7 +3701,7 @@ if (!isAuthenticated) {
                 </button>
                 <button
                   onClick={() => setShowNewLeadModal(false)}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3623,12 +3713,12 @@ if (!isAuthenticated) {
         {/* Modal: Nuevo Evento */}
         {showNewEventModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-2xl">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-lg shadow-2xl">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-gray-800">Nuevo Evento</h3>
+                <h3 className="text-xl font-semibold text-slate-200">Nuevo Evento</h3>
                 <button 
                   onClick={() => setShowNewEventModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-slate-400 transition-colors"
                 >
                   <X size={24} />
                 </button>
@@ -3636,7 +3726,7 @@ if (!isAuthenticated) {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Título *
                   </label>
                   <input
@@ -3646,7 +3736,7 @@ if (!isAuthenticated) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Fecha *
                   </label>
                   <input
@@ -3656,7 +3746,7 @@ if (!isAuthenticated) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Hora
                   </label>
                   <input
@@ -3667,7 +3757,7 @@ if (!isAuthenticated) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Usuario
                   </label>
                   <select
@@ -3696,7 +3786,7 @@ if (!isAuthenticated) {
                 </button>
                 <button
                   onClick={() => setShowNewEventModal(false)}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3708,14 +3798,14 @@ if (!isAuthenticated) {
         {/* Modal: Usuario */}
         {showUserModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-2xl">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-lg shadow-2xl">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-gray-800">
+                <h3 className="text-xl font-semibold text-slate-200">
                   {editingUser ? "Editar Usuario" : "Nuevo Usuario"}
                 </h3>
                 <button 
                   onClick={() => setShowUserModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-slate-400 transition-colors"
                 >
                   <X size={24} />
                 </button>
@@ -3723,7 +3813,7 @@ if (!isAuthenticated) {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Nombre *
                   </label>
                   <input
@@ -3734,7 +3824,7 @@ if (!isAuthenticated) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Email *
                   </label>
                   <input
@@ -3745,7 +3835,7 @@ if (!isAuthenticated) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Contraseña {editingUser ? "(dejar vacío para mantener)" : "*"}
                   </label>
                   <input
@@ -3758,7 +3848,7 @@ if (!isAuthenticated) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Rol
                   </label>
                   <select
@@ -3780,7 +3870,7 @@ if (!isAuthenticated) {
                 </div>
                 {modalRole !== "owner" && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-300 mb-1">
                       Reporta a *
                     </label>
                     <select
@@ -3807,7 +3897,7 @@ if (!isAuthenticated) {
                     defaultChecked={editingUser?.active !== false}
                     className="rounded border-gray-300 text-purple-600 focus:ring-2 focus:ring-purple-600"
                   />
-                  <label htmlFor="u-active" className="text-sm text-gray-700">
+                  <label htmlFor="u-active" className="text-sm text-slate-300">
                     Usuario activo
                   </label>
                 </div>
@@ -3822,7 +3912,7 @@ if (!isAuthenticated) {
                 </button>
                 <button
                   onClick={() => setShowUserModal(false)}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3834,13 +3924,13 @@ if (!isAuthenticated) {
         {/* Modal: Seleccionar Presupuesto */}
         {showPresupuestoSelectModal && selectedLeadForPresupuesto && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-800">
+                  <h3 className="text-xl font-semibold text-slate-200">
                     Enviar Presupuesto a {selectedLeadForPresupuesto.nombre}
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-slate-400">
                     Selecciona una plantilla para enviar por WhatsApp
                   </p>
                 </div>
@@ -3849,7 +3939,7 @@ if (!isAuthenticated) {
                     setShowPresupuestoSelectModal(false);
                     setSelectedLeadForPresupuesto(null);
                   }}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-slate-400 transition-colors"
                 >
                   <X size={24} />
                 </button>
@@ -3904,7 +3994,7 @@ if (!isAuthenticated) {
                         setShowPresupuestoSelectModal(false);
                         setSelectedLeadForPresupuesto(null);
                       }}
-                      className="cursor-pointer border-2 border-gray-200 rounded-xl overflow-hidden hover:border-purple-500 hover:shadow-lg transition-all"
+                      className="cursor-pointer border-2 border-slate-600 rounded-xl overflow-hidden hover:border-purple-500 hover:shadow-lg transition-all"
                     >
                       {presupuesto.imagen_url && (
                         <div className="h-40 bg-gray-200 overflow-hidden">
@@ -3919,13 +4009,16 @@ if (!isAuthenticated) {
                         </div>
                       )}
                       <div className="p-4">
-                        <h4 className="text-lg font-bold text-gray-900">
+                        <h4 className="text-lg font-bold text-white
+
+
+">
                           {presupuesto.marca} {presupuesto.modelo}
                         </h4>
                         
                         {presupuesto.precio_contado && (
                           <div className="mt-2 p-2 bg-emerald-50 rounded">
-                            <p className="text-xs text-gray-600">Precio Contado</p>
+                            <p className="text-xs text-slate-400">Precio Contado</p>
                             <p className="text-lg font-bold text-emerald-600">
                               {presupuesto.precio_contado}
                             </p>
@@ -3952,7 +4045,7 @@ if (!isAuthenticated) {
                     setShowPresupuestoSelectModal(false);
                     setSelectedLeadForPresupuesto(null);
                   }}
-                  className="px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                  className="px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3964,16 +4057,16 @@ if (!isAuthenticated) {
         {/* Modal: Presupuesto */}
         {showPresupuestoModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-gray-800">
+                <h3 className="text-xl font-semibold text-slate-200">
                   {editingPresupuesto ? "Editar Plantilla" : "Nueva Plantilla de Presupuesto"}
                 </h3>
                 <button onClick={() => {
                   setShowPresupuestoModal(false);
                   setEditingPresupuesto(null);
                 }}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 hover:text-slate-400 transition-colors"
                 >
                   <X size={24} />
                 </button>
@@ -3982,7 +4075,7 @@ if (!isAuthenticated) {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-300 mb-1">
                       Marca *
                     </label>
                     <input
@@ -3994,7 +4087,7 @@ if (!isAuthenticated) {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-300 mb-1">
                       Modelo *
                     </label>
                     <input
@@ -4008,7 +4101,7 @@ if (!isAuthenticated) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     URL de Imagen
                   </label>
                   <input
@@ -4021,7 +4114,7 @@ if (!isAuthenticated) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Precio Contado
                   </label>
                   <input
@@ -4034,7 +4127,7 @@ if (!isAuthenticated) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Anticipo
                   </label>
                   <input
@@ -4047,7 +4140,7 @@ if (!isAuthenticated) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Bonificaciones
                   </label>
                   <textarea
@@ -4059,7 +4152,7 @@ if (!isAuthenticated) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Especificaciones Técnicas
                   </label>
                   <textarea
@@ -4071,7 +4164,7 @@ if (!isAuthenticated) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Planes de Cuotas (JSON)
                   </label>
                   <textarea
@@ -4149,7 +4242,7 @@ if (!isAuthenticated) {
                     setShowPresupuestoModal(false);
                     setEditingPresupuesto(null);
                   }}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
