@@ -2547,9 +2547,6 @@ if (!isAuthenticated) {
                         <div>
                           <p className={`font-medium ${
                             vendedor.id === currentUser?.id ? "text-purple-900" : "text-white"
-
-
-"
                           }`}>
                             {vendedor.nombre}
                             {vendedor.id === currentUser?.id && (
