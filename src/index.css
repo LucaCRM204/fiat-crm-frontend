@@ -26,7 +26,7 @@ body {
 .bg-gray-500 { background-color: #6b7280; }
 .bg-gray-600 { background-color: #4b5563; }
 .bg-white { background-color: #ffffff; }
-
+.bg-transparent { background-color: transparent !important; }
 /* Red */
 .bg-red-50 { background-color: #fef2f2; }
 .bg-red-100 { background-color: #fee2e2; }
@@ -442,8 +442,9 @@ input, select, textarea, button {
 
 button {
   cursor: pointer;
+  background: transparent;
+  border: none;
 }
-
 input::placeholder,
 textarea::placeholder {
   color: #9ca3af;
