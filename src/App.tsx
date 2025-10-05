@@ -1560,7 +1560,7 @@ const getDashboardStats = (teamFilter?: string) => {
               className={`w-full flex items-center justify-between space-x-3 px-3 py-2 rounded-lg transition-colors ${
                 activeSection === (key as any)
                   ? "bg-blue-600 text-white"
-                  : "text-white hover:bg-slate-800" 
+                  : "bg-transparent text-white hover:bg-slate-800"
               }`}
             >
               <div className="flex items-center space-x-3">
