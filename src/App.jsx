@@ -1838,7 +1838,7 @@ if (!isAuthenticated) {
                                           e.stopPropagation();
                                           setActiveSection("leads");
                                         }}
-                                        className="px-3 py-2 text-sm rounded-xl bg-slate-700 text-slate-300 hover:bg-gray-200 transition-all font-bold shadow-sm"
+                                        className="px-3 py-2 text-sm rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 transition-all font-bold shadow-sm"
                                         title="Ver en tabla"
                                       >
                                         Ver
@@ -1989,7 +1989,7 @@ if (!isAuthenticated) {
                       <select
                         value={selectedVendedorFilter || ""}
                         onChange={(e) => setSelectedVendedorFilter(e.target.value ? parseInt(e.target.value, 10) : null)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
+                        className="w-full px-3 py-2 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                       >
                         <option value="">Todos los vendedores</option>
                         <option value="0">Sin asignar</option>
@@ -2013,7 +2013,7 @@ if (!isAuthenticated) {
                       <select
                         value={selectedEstadoFilter}
                         onChange={(e) => setSelectedEstadoFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
+                        className="w-full px-3 py-2 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                       >
                         <option value="">Todos los estados</option>
                         {Object.entries(estados).map(([key, estado]) => (
@@ -2031,7 +2031,7 @@ if (!isAuthenticated) {
                       <select
                         value={selectedFuenteFilter}
                         onChange={(e) => setSelectedFuenteFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
+                        className="w-full px-3 py-2 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                       >
                         <option value="">Todas las fuentes</option>
                         {Object.entries(fuentes).map(([key, fuente]) => (
@@ -2213,7 +2213,7 @@ if (!isAuthenticated) {
                                     setViewingLeadHistorial(lead);
                                     setShowHistorialModal(true);
                                   }}
-                                  className="px-2 py-1 text-xs rounded-lg bg-slate-700 text-slate-300 hover:bg-gray-200 transition-colors"
+                                  className="px-2 py-1 text-xs rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600 transition-colors"
                                 >
                                   Historial
                                 </button>
@@ -2836,7 +2836,7 @@ if (!isAuthenticated) {
                     <select
                       value={userSortBy}
                       onChange={(e) => setUserSortBy(e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-600 transition-all"
+                      className="px-3 py-2 border border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-purple-600 transition-all"
                     >
                       <option value="team">Equipo</option>
                       <option value="name">Nombre</option>
@@ -2893,7 +2893,7 @@ if (!isAuthenticated) {
                       <select
                         value={selectedTeamFilter}
                         onChange={(e) => setSelectedTeamFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
+                        className="w-full px-3 py-2 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                       >
                         <option value="todos">Todos los equipos</option>
                         <option value="sin_equipo">Sin equipo asignado</option>
@@ -2921,7 +2921,7 @@ if (!isAuthenticated) {
                       <select
                         value={selectedRoleFilter}
                         onChange={(e) => setSelectedRoleFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
+                        className="w-full px-3 py-2 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                       >
                         <option value="todos">Todos los roles</option>
                         {Object.entries(roles).map(([key, label]) => {
@@ -3159,7 +3159,7 @@ if (!isAuthenticated) {
                     setShowDeleteLeadConfirmModal(false);
                     setLeadToDelete(null);
                   }}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3227,7 +3227,7 @@ if (!isAuthenticated) {
                     setShowDeleteConfirmModal(false);
                     setUserToDelete(null);
                   }}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3407,7 +3407,7 @@ if (!isAuthenticated) {
                     setLeadToReassign(null);
                     setSelectedVendorForReassign(null);
                   }}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3480,7 +3480,7 @@ if (!isAuthenticated) {
                     setShowObservacionesModal(false);
                     setEditingLeadObservaciones(null);
                   }}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3556,7 +3556,7 @@ if (!isAuthenticated) {
                     setShowHistorialModal(false);
                     setViewingLeadHistorial(null);
                   }}
-                  className="px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
+                  className="px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cerrar
                 </button>
@@ -3586,7 +3586,7 @@ if (!isAuthenticated) {
                   <input
                     type="text"
                     id="new-nombre"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3596,7 +3596,7 @@ if (!isAuthenticated) {
                   <input
                     type="text"
                     id="new-telefono"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3606,7 +3606,7 @@ if (!isAuthenticated) {
                   <input
                     type="text"
                     id="new-modelo"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3615,7 +3615,7 @@ if (!isAuthenticated) {
                   </label>
                   <select
                     id="new-formaPago"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   >
                     <option value="Contado">Contado</option>
                     <option value="Financiado">Financiado</option>
@@ -3629,7 +3629,7 @@ if (!isAuthenticated) {
                     type="text"
                     id="new-infoUsado"
                     placeholder="Marca Modelo Año"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3639,7 +3639,7 @@ if (!isAuthenticated) {
                   <input
                     type="date"
                     id="new-fecha"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div className="col-span-2 flex items-center space-x-3">
@@ -3669,7 +3669,7 @@ if (!isAuthenticated) {
                   </label>
                   <select
                     id="new-vendedor"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   >
                     <option value="">Sin asignar</option>
                     {getAvailableVendorsForAssignment().map((u) => (
@@ -3698,7 +3698,7 @@ if (!isAuthenticated) {
                 </button>
                 <button
                   onClick={() => setShowNewLeadModal(false)}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3729,7 +3729,7 @@ if (!isAuthenticated) {
                   <input
                     type="text"
                     id="ev-title"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3739,7 +3739,7 @@ if (!isAuthenticated) {
                   <input
                     type="date"
                     id="ev-date"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3750,7 +3750,7 @@ if (!isAuthenticated) {
                     type="time"
                     id="ev-time"
                     defaultValue="09:00"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3759,7 +3759,7 @@ if (!isAuthenticated) {
                   </label>
                   <select
                     id="ev-user"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                     defaultValue={currentUser?.id}
                   >
                     <option value={currentUser?.id}>{currentUser?.name} (Yo)</option>
@@ -3783,7 +3783,7 @@ if (!isAuthenticated) {
                 </button>
                 <button
                   onClick={() => setShowNewEventModal(false)}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3817,7 +3817,7 @@ if (!isAuthenticated) {
                     type="text"
                     id="u-name"
                     defaultValue={editingUser?.name || ""}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3828,7 +3828,7 @@ if (!isAuthenticated) {
                     type="email"
                     id="u-email"
                     defaultValue={editingUser?.email || ""}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   />
                 </div>
                 <div>
@@ -3838,7 +3838,7 @@ if (!isAuthenticated) {
                   <input
                     type="password"
                     id="u-pass"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                     placeholder={
                       editingUser ? "Nueva contraseña (opcional)" : "Contraseña obligatoria"
                     }
@@ -3856,7 +3856,7 @@ if (!isAuthenticated) {
                       const validManagers = validManagersByRole(newRole);
                       setModalReportsTo(validManagers[0]?.id ?? null);
                     }}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                   >
                     {validRolesByUser(currentUser).map((role) => (
                       <option key={role} value={role}>
@@ -3877,7 +3877,7 @@ if (!isAuthenticated) {
                           e.target.value ? parseInt(e.target.value, 10) : null
                         )
                       }
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                      className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
                     >
                       {validManagersByRole(modalRole).map((manager) => (
                         <option key={manager.id} value={manager.id}>
@@ -3909,7 +3909,7 @@ if (!isAuthenticated) {
                 </button>
                 <button
                   onClick={() => setShowUserModal(false)}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -4042,7 +4042,7 @@ if (!isAuthenticated) {
                     setShowPresupuestoSelectModal(false);
                     setSelectedLeadForPresupuesto(null);
                   }}
-                  className="px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
+                  className="px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -4079,7 +4079,7 @@ if (!isAuthenticated) {
                       type="text"
                       id="pres-marca"
                       defaultValue={editingPresupuesto?.marca || ""}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
+                      className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                       placeholder="ej: ALLUMA"
                     />
                   </div>
@@ -4091,7 +4091,7 @@ if (!isAuthenticated) {
                       type="text"
                       id="pres-modelo"
                       defaultValue={editingPresupuesto?.modelo || ""}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
+                      className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                       placeholder="ej: Cronos 1.3"
                     />
                   </div>
@@ -4105,7 +4105,7 @@ if (!isAuthenticated) {
                     type="url"
                     id="pres-imagen"
                     defaultValue={editingPresupuesto?.imagen_url || ""}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                     placeholder="https://ejemplo.com/imagen.jpg"
                   />
                 </div>
@@ -4118,7 +4118,7 @@ if (!isAuthenticated) {
                     type="text"
                     id="pres-precio"
                     defaultValue={editingPresupuesto?.precio_contado || ""}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                     placeholder="ej: $25.000.000"
                   />
                 </div>
@@ -4131,7 +4131,7 @@ if (!isAuthenticated) {
                     type="text"
                     id="pres-anticipo"
                     defaultValue={editingPresupuesto?.anticipo || ""}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
                     placeholder="ej: 30% - $7.500.000"
                   />
                 </div>
@@ -4143,7 +4143,7 @@ if (!isAuthenticated) {
                   <textarea
                     id="pres-bonificaciones"
                     defaultValue={editingPresupuesto?.bonificaciones || ""}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 h-20 resize-none transition-all"
+                    className="w-full px-4 py-3 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 h-20 resize-none transition-all"
                     placeholder="Bonificaciones disponibles"
                   />
                 </div>
@@ -4155,7 +4155,7 @@ if (!isAuthenticated) {
                   <textarea
                     id="pres-specs"
                     defaultValue={editingPresupuesto?.especificaciones_tecnicas || ""}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 h-24 resize-none transition-all"
+                    className="w-full px-4 py-3 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 h-24 resize-none transition-all"
                     placeholder="Motor, transmisión, equipamiento..."
                   />
                 </div>
@@ -4167,7 +4167,7 @@ if (!isAuthenticated) {
                   <textarea
                     id="pres-cuotas"
                     defaultValue={editingPresupuesto?.planes_cuotas ? JSON.stringify(editingPresupuesto.planes_cuotas, null, 2) : ""}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 h-24 resize-none font-mono text-xs transition-all"
+                    className="w-full px-4 py-3 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 h-24 resize-none font-mono text-xs transition-all"
                     placeholder='{"12": "cuota de $2.000.000", "24": "cuota de $1.100.000"}'
                   />
                   <p className="text-xs text-gray-500 mt-1">
@@ -4239,7 +4239,7 @@ if (!isAuthenticated) {
                     setShowPresupuestoModal(false);
                     setEditingPresupuesto(null);
                   }}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
                 >
                   Cancelar
                 </button>
