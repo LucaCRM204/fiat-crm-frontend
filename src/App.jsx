@@ -39,31 +39,36 @@ import {
   updatePresupuesto as apiUpdatePresupuesto,
   deletePresupuesto as apiDeletePresupuesto,
 } from "./services/presupuestos";
-
 // ===== Utilidades de jerarquía =====
-function buildIndex(users) {
-  const byId = new Map(users.map((u) => [u.id, u]));
-  const children = new Map();
-  users.forEach((u) => children.set(u.id, []));
-  users.forEach((u) => {
-    if (u.reportsTo) children.get(u.reportsTo)?.push(u.id);
+function buildIndex(users: any[]) {
+  const byId = new Map(users.map((u: any) => [u.id, u]));
+  const children = new Map<number, number[]>();
+  users.forEach((u: any) => children.set(u.id, []));
+  users.forEach((u: any) => {
+    if (u.reportsTo) (children.get(u.reportsTo) as number[] | undefined)?.push(u.id);
   });
   return { byId, children };
 }
 
-function getDescendantUserIds(rootId, childrenIndex) {
-  const out = [];
+function getDescendantUserIds(
+  rootId: number,
+  childrenIndex: Map<number, number[]>
+) {
+  const out: number[] = [];
   const stack = [...(childrenIndex.get(rootId) || [])];
+  console.log(`=== getDescendantUserIds para ID ${rootId} ===`);
+  console.log('Hijos directos:', childrenIndex.get(rootId));
   while (stack.length) {
-    const id = stack.pop();
+    const id = stack.pop()!;
     out.push(id);
     const kids = childrenIndex.get(id) || [];
     for (const k of kids) stack.push(k);
   }
+ console.log('Descendientes totales:', out);
   return out;
 }
 
-const roles = {
+const roles: Record<string, string> = {
   owner: "Dueño",
   gerente_general: "Gerente General",
   gerente: "Gerente",
@@ -71,47 +76,98 @@ const roles = {
   vendedor: "Vendedor",
 };
 
-const estados = {
-  nuevo: { label: "Nuevo", color: "bg-blue-500", icon: "🆕" },
-  contactado: { label: "Contactado", color: "bg-amber-500", icon: "📞" },
-  interesado: { label: "Interesado", color: "bg-orange-500", icon: "👀" },
-  negociacion: { label: "Negociación", color: "bg-purple-500", icon: "💼" },
-  vendido: { label: "Vendido", color: "bg-emerald-500", icon: "✅" },
-  perdido: { label: "Perdido", color: "bg-rose-500", icon: "❌" },
-  numero_invalido: { label: "Número inválido", color: "bg-slate-500", icon: "🚫" },
-  no_contesta_1: { label: "No contesta 1", color: "bg-amber-600", icon: "📵" },
-  no_contesta_2: { label: "No contesta 2", color: "bg-orange-700", icon: "📵" },
-  no_contesta_3: { label: "No contesta 3", color: "bg-red-700", icon: "📵" },
+const estados: Record<string, { label: string; color: string }> = {
+  nuevo: { label: "Nuevo", color: "bg-blue-500" },
+  contactado: { label: "Contactado", color: "bg-yellow-500" },
+  interesado: { label: "Interesado", color: "bg-orange-500" },
+  negociacion: { label: "Negociación", color: "bg-purple-500" },
+  vendido: { label: "Vendido", color: "bg-green-600" },
+  perdido: { label: "Perdido", color: "bg-red-500" },
+  numero_invalido: { label: "Número inválido", color: "bg-gray-500" },
+  no_contesta_1: { label: "No contesta 1", color: "bg-amber-500" },
+  no_contesta_2: { label: "No contesta 2", color: "bg-orange-600" },
+  no_contesta_3: { label: "No contesta 3", color: "bg-red-600" },
 };
 
-const fuentes = {
+const fuentes: Record<
+  string,
+  { label: string; color: string; icon: string }
+> = {
   meta: { label: "Meta/Facebook", color: "bg-blue-600", icon: "📱" },
-  whatsapp: { label: "WhatsApp Bot", color: "bg-emerald-600", icon: "💬" },
-  whatsapp_100: { label: "WhatsApp Bot 100", color: "bg-emerald-700", icon: "💬" },
-  sitio_web: { label: "Sitio Web", color: "bg-violet-600", icon: "🌐" },
-  referido: { label: "Referido", color: "bg-orange-600", icon: "👥" },
-  telefono: { label: "Llamada", color: "bg-indigo-600", icon: "📞" },
-  showroom: { label: "Showroom", color: "bg-slate-600", icon: "🏢" },
-  google: { label: "Google Ads", color: "bg-red-600", icon: "🎯" },
-  instagram: { label: "Instagram", color: "bg-pink-600", icon: "📸" },
-  otro: { label: "Otro", color: "bg-gray-500", icon: "❓" },
-  creado_por: { label: "Creado por", color: "bg-teal-600", icon: "👤" },
+  whatsapp: { label: "WhatsApp Bot", color: "bg-green-500", icon: "💬" },
+  whatsapp_100: { label: "WhatsApp Bot 100", color: "bg-green-700", icon: "💬" },
+  sitio_web: { label: "Sitio Web", color: "bg-purple-600", icon: "🌐" },
+  referido: { label: "Referido", color: "bg-orange-500", icon: "👥" },
+  telefono: { label: "Llamada", color: "bg-indigo-500", icon: "📞" },
+  showroom: { label: "Showroom", color: "bg-gray-600", icon: "🏢" },
+  google: { label: "Google Ads", color: "bg-red-500", icon: "🎯" },
+  instagram: { label: "Instagram", color: "bg-pink-500", icon: "📸" },
+  otro: { label: "Otro", color: "bg-gray-400", icon: "❓" },
+  creado_por: { label: "Creado por", color: "bg-teal-500", icon: "👤" },
 };
 
-const botConfig = {
-  whatsapp_bot_cm1: { targetTeam: "sauer", label: "Bot CM 1" },
-  whatsapp_bot_cm2: { targetTeam: "daniel", label: "Bot CM 2" },
-  whatsapp_100: { targetTeam: null, label: "Bot 100" },
-};
+// Configuración de bots
+const botConfig: Record<string, { targetTeam: string | null; label: string }> =
+  {
+    whatsapp_bot_cm1: { targetTeam: null, label: "Bot CM 1" },
+    whatsapp_bot_cm2: { targetTeam: null, label: "Bot CM 2" },
+    whatsapp_100: { targetTeam: null, label: "Bot 100" }, // null = distribución general
+  };
 
+type LeadRow = {
+  id: number;
+  nombre: string;
+  telefono: string;
+  modelo: string;
+  formaPago?: string;
+  infoUsado?: string;
+  entrega?: boolean;
+  fecha?: string;
+  estado: keyof typeof estados;
+  vendedor: number | null;
+  notas?: string;
+  fuente: keyof typeof fuentes | string;
+  historial?: Array<{
+    estado: string;
+    timestamp: string;
+    usuario: string;
+  }>;
+  created_by?: number;
+  created_at?: string;  // AGREGAR ESTA LÍNEA
+  last_status_change?: string;
+};
+type Alert = {
+  id: number;
+  userId: number;
+  type: "lead_assigned" | "ranking_change";
+  message: string;
+  ts: string;
+  read: boolean;
+};
+type Presupuesto = {
+  id: number;
+  modelo: string;
+  marca: string;
+  imagen_url?: string;
+  precio_contado?: string;
+  especificaciones_tecnicas?: string;
+  planes_cuotas?: any;
+  bonificaciones?: string;
+  anticipo?: string;
+  activo: boolean;
+  created_by?: number;
+  created_at?: string;
+  updated_at?: string;
+};
 // ===== Funciones de descarga Excel =====
-const formatDate = (dateString) => {
+const formatDate = (dateString: string): string => {
   if (!dateString) return "Sin fecha";
   const date = new Date(dateString);
   return date.toLocaleDateString("es-AR");
 };
 
-const downloadAllLeadsExcel = (leads, userById, fuentes) => {
+const downloadAllLeadsExcel = (leads: LeadRow[], userById: Map<number, any>, fuentes: any): void => {
+  // Crear datos para Excel
   const excelData = leads.map(lead => {
     const vendedor = lead.vendedor ? userById.get(lead.vendedor) : null;
     const fuente = fuentes[lead.fuente] || { label: lead.fuente };
@@ -135,17 +191,20 @@ const downloadAllLeadsExcel = (leads, userById, fuentes) => {
     };
   });
 
+  // Crear contenido CSV
   const headers = Object.keys(excelData[0] || {});
   const csvContent = [
     headers.join(','),
     ...excelData.map(row => 
       headers.map(header => {
-        const value = row[header] || '';
+        const value = (row as any)[header] || '';
+        // Escapar comillas y comas
         return `"${String(value).replace(/"/g, '""')}"`;
       }).join(',')
     )
   ].join('\n');
 
+  // Crear y descargar archivo
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   const url = URL.createObjectURL(blob);
@@ -157,7 +216,7 @@ const downloadAllLeadsExcel = (leads, userById, fuentes) => {
   document.body.removeChild(link);
 };
 
-const downloadLeadsByStateExcel = (leads, estado, userById, fuentes) => {
+const downloadLeadsByStateExcel = (leads: LeadRow[], estado: string, userById: Map<number, any>, fuentes: any): void => {
   const leadsByState = leads.filter(l => l.estado === estado);
 
   if (leadsByState.length === 0) {
@@ -165,6 +224,7 @@ const downloadLeadsByStateExcel = (leads, estado, userById, fuentes) => {
     return;
   }
 
+  // Crear datos para Excel
   const excelData = leadsByState.map(lead => {
     const vendedor = lead.vendedor ? userById.get(lead.vendedor) : null;
     const fuente = fuentes[lead.fuente] || { label: lead.fuente };
@@ -189,18 +249,20 @@ const downloadLeadsByStateExcel = (leads, estado, userById, fuentes) => {
       ).join(' | ') || ''
     };
   });
-
+     // Crear contenido CSV
   const headers = Object.keys(excelData[0] || {});
   const csvContent = [
     headers.join(','),
     ...excelData.map(row => 
       headers.map(header => {
-        const value = row[header] || '';
+        const value = (row as any)[header] || '';
+        // Escapar comillas y comas
         return `"${String(value).replace(/"/g, '""')}"`;
       }).join(',')
     )
   ].join('\n');
 
+  // Crear y descargar archivo
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   const url = URL.createObjectURL(blob);
@@ -212,81 +274,98 @@ const downloadLeadsByStateExcel = (leads, estado, userById, fuentes) => {
   link.click();
   document.body.removeChild(link);
 };
-
+  
 export default function CRM() {
-  const [users, setUsers] = useState([]);
-  const [leads, setLeads] = useState([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [leads, setLeads] = useState<LeadRow[]>([]);
   const { byId: userById, children: childrenIndex } = useMemo(
     () => buildIndex(users),
     [users]
   );
 
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeSection, setActiveSection] = useState("dashboard");
+  const [activeSection, setActiveSection] = useState<
+  "dashboard" | "leads" | "calendar" | "ranking" | "users" | "alerts" | "team" | "presupuestos"
+>("dashboard");
   const [loginError, setLoginError] = useState("");
-  const [selectedEstado, setSelectedEstado] = useState(null);
-  const [selectedTeam, setSelectedTeam] = useState("todos");
+  const [selectedEstado, setSelectedEstado] = useState<string | null>(null);
+  const [selectedTeam, setSelectedTeam] = useState<string>("todos");
 
+  // Estados para búsqueda y filtrado de leads
   const [searchText, setSearchText] = useState("");
-  const [selectedVendedorFilter, setSelectedVendedorFilter] = useState(null);
-  const [selectedEstadoFilter, setSelectedEstadoFilter] = useState("");
-  const [selectedFuenteFilter, setSelectedFuenteFilter] = useState("");
+  const [selectedVendedorFilter, setSelectedVendedorFilter] = useState<number | null>(null);
+  const [selectedEstadoFilter, setSelectedEstadoFilter] = useState<string>("");
+  const [selectedFuenteFilter, setSelectedFuenteFilter] = useState<string>("");
   const [showFilters, setShowFilters] = useState(false);
-
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+  const [dateFilterType, setDateFilterType] = useState<"created" | "status_change">("status_change");
+  // Estados para filtrado de usuarios
   const [userSearchText, setUserSearchText] = useState("");
-  const [selectedTeamFilter, setSelectedTeamFilter] = useState("todos");
-  const [selectedRoleFilter, setSelectedRoleFilter] = useState("todos");
-  const [userSortBy, setUserSortBy] = useState("team");
+  const [selectedTeamFilter, setSelectedTeamFilter] = useState<string>("todos");
+  const [selectedRoleFilter, setSelectedRoleFilter] = useState<string>("todos");
+  const [userSortBy, setUserSortBy] = useState<"name" | "role" | "team" | "performance">("team");
   const [showUserFilters, setShowUserFilters] = useState(false);
 
+  // Estados para reasignación
   const [showReassignModal, setShowReassignModal] = useState(false);
-  const [leadToReassign, setLeadToReassign] = useState(null);
-  const [selectedVendorForReassign, setSelectedVendorForReassign] = useState(null);
+  const [leadToReassign, setLeadToReassign] = useState<LeadRow | null>(null);
+  const [selectedVendorForReassign, setSelectedVendorForReassign] =
+    useState<number | null>(null);
 
+  // Estados para confirmación de eliminación
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
-  const [userToDelete, setUserToDelete] = useState(null);
+  const [userToDelete, setUserToDelete] = useState<any>(null);
 
+  // Estados para confirmación de eliminación de leads
   const [showDeleteLeadConfirmModal, setShowDeleteLeadConfirmModal] = useState(false);
-  const [leadToDelete, setLeadToDelete] = useState(null);
+  const [leadToDelete, setLeadToDelete] = useState<LeadRow | null>(null);
 
+  // Estados para modales
   const [showNewLeadModal, setShowNewLeadModal] = useState(false);
   const [showObservacionesModal, setShowObservacionesModal] = useState(false);
   const [showHistorialModal, setShowHistorialModal] = useState(false);
-  const [editingLeadObservaciones, setEditingLeadObservaciones] = useState(null);
-  const [viewingLeadHistorial, setViewingLeadHistorial] = useState(null);
+  const [editingLeadObservaciones, setEditingLeadObservaciones] =
+    useState<LeadRow | null>(null);
+  const [viewingLeadHistorial, setViewingLeadHistorial] =
+    useState<LeadRow | null>(null);
 
-  const [events, setEvents] = useState([]);
-  const [selectedCalendarUserId, setSelectedCalendarUserId] = useState(null);
+  // Estados para calendario
+  const [events, setEvents] = useState<any[]>([]);
+  const [selectedCalendarUserId, setSelectedCalendarUserId] = useState<number | null>(null);
   const [showNewEventModal, setShowNewEventModal] = useState(false);
 
+  // Estados para gestión de usuarios
   const [showUserModal, setShowUserModal] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
-  const [modalRole, setModalRole] = useState("vendedor");
-  const [modalReportsTo, setModalReportsTo] = useState(null);
-
-  const [presupuestos, setPresupuestos] = useState([]);
-  const [showPresupuestoModal, setShowPresupuestoModal] = useState(false);
-  const [editingPresupuesto, setEditingPresupuesto] = useState(null);
-  const [showPresupuestoSelectModal, setShowPresupuestoSelectModal] = useState(false);
-  const [selectedLeadForPresupuesto, setSelectedLeadForPresupuesto] = useState(null);
-
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [modalRole, setModalRole] = useState<
+    "owner" | "gerente_general" | "gerente" | "supervisor" | "vendedor"
+  >("vendedor");
+  const [modalReportsTo, setModalReportsTo] = useState<number | null>(null);
+  // Estados para presupuestos
+const [presupuestos, setPresupuestos] = useState<Presupuesto[]>([]);
+const [showPresupuestoModal, setShowPresupuestoModal] = useState(false);
+const [editingPresupuesto, setEditingPresupuesto] = useState<Presupuesto | null>(null);
+const [showPresupuestoSelectModal, setShowPresupuestoSelectModal] = useState(false);
+const [selectedLeadForPresupuesto, setSelectedLeadForPresupuesto] = useState<LeadRow | null>(null);
   // ===== Login contra backend =====
-  const handleLogin = async (email, password) => {
-    try {
-      const r = await api.post("/auth/login", { 
-        email, 
-        password, 
-        allowInactiveUsers: true
-      });
+  const handleLogin = async (email: string, password: string) => {
+  try {
+    const r = await api.post("/auth/login", { 
+      email, 
+      password, 
+      allowInactiveUsers: true
+    });
 
-      if (r.data?.ok && r.data?.token) {
-        localStorage.setItem("token", r.data.token);
-        localStorage.setItem("user", JSON.stringify(r.data.user));
+    if (r.data?.ok && r.data?.token) {
+      localStorage.setItem("token", r.data.token);
+      localStorage.setItem("user", JSON.stringify(r.data.user));
 
-        api.defaults.headers.common["Authorization"] = `Bearer ${r.data.token}`;
+      api.defaults.headers.common["Authorization"] = `Bearer ${r.data.token}`;
 
-        const u = r.data.user || {
+      const u =
+        r.data.user || {
           id: 0,
           name: r.data?.user?.email || email,
           email,
@@ -295,79 +374,95 @@ export default function CRM() {
           active: r.data?.user?.active ?? true,
         };
 
-        setCurrentUser(u);
-        setIsAuthenticated(true);
-        setLoginError("");
+      setCurrentUser(u);
+      setIsAuthenticated(true);
+      setLoginError("");
 
-        const [uu, ll] = await Promise.all([listUsers(), listLeads()]);
-        const mappedLeads = (ll || []).map((L) => ({
-          id: L.id,
-          nombre: L.nombre,
-          telefono: L.telefono,
-          modelo: L.modelo,
-          formaPago: L.formaPago,
-          infoUsado: L.infoUsado,
-          entrega: L.entrega,
-          fecha: L.fecha || L.created_at || "",
-          estado: L.estado || "nuevo",
-          vendedor: L.assigned_to ?? null,
-          notas: L.notas || "",
-          fuente: L.fuente || "otro",
-          historial: L.historial || [],
-          created_by: L.created_by || null,
-        }));
-        setUsers(uu || []);
-        setLeads(mappedLeads);
+      const [uu, ll] = await Promise.all([listUsers(), listLeads()]);
+      const mappedLeads: LeadRow[] = (ll || []).map((L: any) => ({
+        id: L.id,
+        nombre: L.nombre,
+        telefono: L.telefono,
+        modelo: L.modelo,
+        formaPago: L.formaPago,
+        infoUsado: L.infoUsado,
+        entrega: L.entrega,
+        fecha: L.fecha || L.created_at || "",
+        estado: (L.estado || "nuevo") as LeadRow["estado"],
+        vendedor: L.assigned_to ?? null,
+        notas: L.notas || "",
+        fuente: (L.fuente || "otro") as LeadRow["fuente"],
+        historial: L.historial || [],
+        created_by: L.created_by || null,
+      }));
+      setUsers(uu || []);
+      setLeads(mappedLeads);
 
-        try {
-          const pp = await listPresupuestos();
-          setPresupuestos(pp || []);
-        } catch (error) {
-          console.error('Error cargando presupuestos:', error);
-        }
-      } else {
-        throw new Error("Respuesta inválida del servidor");
+      // AGREGAR ESTO AQUÍ DENTRO
+      try {
+        const pp = await listPresupuestos();
+        setPresupuestos(pp || []);
+      } catch (error) {
+        console.error('Error cargando presupuestos:', error);
       }
-    } catch (err) {
-      setLoginError(err?.response?.data?.error || "Credenciales incorrectas");
-      setIsAuthenticated(false);
-    }
-  };
+      // FIN DEL CÓDIGO AGREGADO
 
+    } else {
+      throw new Error("Respuesta inválida del servidor");
+    }
+  } catch (err: any) {
+    setLoginError(err?.response?.data?.error || "Credenciales incorrectas");
+    setIsAuthenticated(false);
+  }
+};
+     
   // ===== Acceso por rol =====
-  const getAccessibleUserIds = (user) => {
-    if (!user) return [];
+  const getAccessibleUserIds = (user: any) => {
+    if (!user) return [] as number[];
     if (["owner", "gerente_general", "dueño"].includes(user.role))
-      return users.map((u) => u.id);
+      return users.map((u: any) => u.id);
     const ids = [user.id, ...getDescendantUserIds(user.id, childrenIndex)];
+    console.log('=== getAccessibleUserIds ===');
+  console.log('Usuario:', user.name, 'ID:', user.id, 'Role:', user.role);
+  console.log('IDs visibles:', ids);
+  console.log('Leads filtrados:', leads.filter(l => l.vendedor && ids.includes(l.vendedor)).length);
+  console.log('Primeros 5 leads:', leads.slice(0, 5).map(l => ({ id: l.id, nombre: l.nombre, vendedor: l.vendedor })));
+console.log('Leads de Molina (ID 38):', leads.filter(l => l.vendedor === 38).length);
+console.log('=== getAccessibleUserIds ===');
+console.log('Usuario:', user.name, 'ID:', user.id, 'Role:', user.role);
+console.log('IDs visibles:', ids);
+console.log('Total leads en sistema:', leads.length);
+console.log('Primeros 3 leads completos:', leads.slice(0, 3));
+console.log('Leads con vendedor === 38:', leads.filter(l => l.vendedor === 38).length);
+console.log('Leads con vendedor tipo:', leads.slice(0, 3).map(l => ({ id: l.id, vendedor: l.vendedor, tipo: typeof l.vendedor })));
+console.log('Leads filtrados:', leads.filter(l => l.vendedor && ids.includes(l.vendedor)).length);
     return ids;
   };
-
+  
   const canCreateUsers = () =>
     currentUser && ["owner", "gerente_general", "gerente"].includes(currentUser.role);
 
   const canManageUsers = () =>
     currentUser && ["owner", "gerente_general", "gerente", "dueño"].includes(currentUser.role);
-  
   const isOwner = () => currentUser?.role === "owner" || currentUser?.role === "dueño";
 
   const canCreateLeads = () =>
     currentUser && ["owner", "gerente_general", "gerente", "supervisor", "vendedor"].includes(currentUser.role);
 
   const canDeleteLeads = () => {
-    const canDelete = currentUser && ["owner", "dueño"].includes(currentUser.role);
-    return canDelete;
-  };
+  const canDelete = currentUser && ["owner", "dueño"].includes(currentUser.role);
+  return canDelete;
+};
 
   // ===== Funciones de filtro por equipo =====
-  const getTeamManagerById = (teamId) => {
+  const getTeamManagerById = (teamId: string) => {
     if (teamId === "todos") return null;
     return users.find(
-      (u) => u.role === "gerente" && u.id.toString() === teamId
+      (u: any) => u.role === "gerente" && u.id.toString() === teamId
     );
   };
 
-  const getTeamUserIds = (teamId) => {
+  const getTeamUserIds = (teamId: string) => {
     if (teamId === "todos") return [];
     const manager = getTeamManagerById(teamId);
     if (!manager) return [];
@@ -376,8 +471,8 @@ export default function CRM() {
     return [manager.id, ...descendants];
   };
 
-  const getFilteredLeadsByTeam = (teamId) => {
-    if (!currentUser) return [];
+  const getFilteredLeadsByTeam = (teamId?: string) => {
+    if (!currentUser) return [] as LeadRow[];
 
     if (teamId && teamId !== "todos" && ["owner", "gerente_general", "dueño"].includes(currentUser.role)) {
       const teamUserIds = getTeamUserIds(teamId);
@@ -392,7 +487,7 @@ export default function CRM() {
 
     const visibleUserIds = getAccessibleUserIds(currentUser);
     
-    return users.filter((u) => {
+    return users.filter((u: any) => {
       if (u.role !== "vendedor" || !u.active) return false;
       if (!visibleUserIds.includes(u.id)) return false;
       return true;
@@ -402,14 +497,16 @@ export default function CRM() {
   const getVisibleUsers = () => {
     if (!currentUser) return [];
 
-    return users.filter((u) => {
+    return users.filter((u: any) => {
       if (currentUser.role === "owner") return true;
 
       if (currentUser.role === "gerente_general") return u.role !== "owner";
 
       if (currentUser.role === "gerente") {
         if (u.id === currentUser.id) return true;
+
         if (u.reportsTo === currentUser.id) return true;
+
         const userSupervisor = userById.get(u.reportsTo);
         return userSupervisor && userSupervisor.reportsTo === currentUser.id;
       }
@@ -431,9 +528,10 @@ export default function CRM() {
   const getFilteredAndSortedUsers = () => {
     let filteredUsers = getVisibleUsers();
 
+    // Aplicar filtro de búsqueda
     if (userSearchText.trim()) {
       const searchLower = userSearchText.toLowerCase().trim();
-      filteredUsers = filteredUsers.filter((u) => {
+      filteredUsers = filteredUsers.filter((u: any) => {
         const manager = u.reportsTo ? userById.get(u.reportsTo) : null;
         return (
           u.name.toLowerCase().includes(searchLower) ||
@@ -444,22 +542,25 @@ export default function CRM() {
       });
     }
 
+    // Aplicar filtro por equipo
     if (selectedTeamFilter !== "todos") {
       if (selectedTeamFilter === "sin_equipo") {
-        filteredUsers = filteredUsers.filter((u) => !u.reportsTo);
+        filteredUsers = filteredUsers.filter((u: any) => !u.reportsTo);
       } else {
         const teamUserIds = getTeamUserIds(selectedTeamFilter);
-        filteredUsers = filteredUsers.filter((u) => 
+        filteredUsers = filteredUsers.filter((u: any) => 
           teamUserIds.includes(u.id) || u.id.toString() === selectedTeamFilter
         );
       }
     }
 
+    // Aplicar filtro por rol
     if (selectedRoleFilter !== "todos") {
-      filteredUsers = filteredUsers.filter((u) => u.role === selectedRoleFilter);
+      filteredUsers = filteredUsers.filter((u: any) => u.role === selectedRoleFilter);
     }
 
-    filteredUsers.sort((a, b) => {
+    // Ordenar según criterio seleccionado
+    filteredUsers.sort((a: any, b: any) => {
       switch (userSortBy) {
         case "name":
           return a.name.localeCompare(b.name);
@@ -487,10 +588,11 @@ export default function CRM() {
             const aVentas = aLeads.filter((l) => l.estado === "vendido").length;
             const bVentas = bLeads.filter((l) => l.estado === "vendido").length;
             if (aVentas !== bVentas) {
-              return bVentas - aVentas;
+              return bVentas - aVentas; // Mayor ventas primero
             }
-            return bLeads.length - aLeads.length;
+            return bLeads.length - aLeads.length; // Más leads primero
           }
+          // Si no son vendedores, ordenar por nombre
           return a.name.localeCompare(b.name);
         default:
           return a.name.localeCompare(b.name);
@@ -513,27 +615,21 @@ export default function CRM() {
     if (selectedRoleFilter !== "todos") count++;
     return count;
   };
-
-  const getFilteredAndSearchedLeads = () => {
-    if (!currentUser) return [];
-
+const getFilteredAndSearchedLeads = () => {
+    if (!currentUser) return [] as LeadRow[];
     const visibleUserIds = getAccessibleUserIds(currentUser);
     let filteredLeads = leads.filter((l) =>
       l.vendedor ? visibleUserIds.includes(l.vendedor) : true
     );
-
     if (selectedVendedorFilter) {
       filteredLeads = filteredLeads.filter((l) => l.vendedor === selectedVendedorFilter);
     }
-
     if (selectedEstadoFilter) {
       filteredLeads = filteredLeads.filter((l) => l.estado === selectedEstadoFilter);
     }
-
     if (selectedFuenteFilter) {
       filteredLeads = filteredLeads.filter((l) => l.fuente === selectedFuenteFilter);
     }
-
     if (searchText.trim()) {
       const searchLower = searchText.toLowerCase().trim();
       filteredLeads = filteredLeads.filter((l) => {
@@ -551,15 +647,37 @@ export default function CRM() {
         );
       });
     }
-
     return filteredLeads;
   };
 
+  const getFilteredLeadsByDate = () => {
+    let filteredLeads = getFilteredAndSearchedLeads();
+    
+    if (selectedMonth && selectedYear) {
+      filteredLeads = filteredLeads.filter((lead) => {
+        const dateToCheck = dateFilterType === "status_change" 
+          ? (lead.last_status_change || lead.fecha || lead.created_at)
+          : (lead.fecha || lead.created_at);
+        
+        if (!dateToCheck) return false;
+        
+        const leadDate = new Date(dateToCheck);
+        const leadMonth = (leadDate.getMonth() + 1).toString().padStart(2, '0');
+        const leadYear = leadDate.getFullYear().toString();
+        
+        return leadMonth === selectedMonth && leadYear === selectedYear;
+      });
+    }
+    
+    return filteredLeads;
+  };
   const clearFilters = () => {
     setSearchText("");
     setSelectedVendedorFilter(null);
     setSelectedEstadoFilter("");
     setSelectedFuenteFilter("");
+    setSelectedMonth("");
+    setSelectedYear(new Date().getFullYear().toString());
   };
 
   const getActiveFiltersCount = () => {
@@ -568,6 +686,7 @@ export default function CRM() {
     if (selectedVendedorFilter) count++;
     if (selectedEstadoFilter) count++;
     if (selectedFuenteFilter) count++;
+    if (selectedMonth) count++;
     return count;
   };
 
@@ -575,10 +694,10 @@ export default function CRM() {
     if (!currentUser) return [];
 
     const visibleUsers = getVisibleUsers();
-    return visibleUsers.filter((u) => u.role === "vendedor" && u.active);
+    return visibleUsers.filter((u: any) => u.role === "vendedor" && u.active);
   };
 
-  const openReassignModal = (lead) => {
+  const openReassignModal = (lead: LeadRow) => {
     setLeadToReassign(lead);
     setSelectedVendorForReassign(lead.vendedor);
     setShowReassignModal(true);
@@ -590,14 +709,14 @@ export default function CRM() {
     try {
       await apiUpdateLead(
         leadToReassign.id,
-        { vendedor: selectedVendorForReassign }
+        { vendedor: selectedVendorForReassign } as any
       );
 
       setLeads((prev) =>
         prev.map((l) =>
           l.id === leadToReassign.id
-            ? { ...l, vendedor: selectedVendorForReassign }
-            : l
+          ? { ...l, vendedor: selectedVendorForReassign }
+          : l
         )
       );
 
@@ -626,7 +745,7 @@ export default function CRM() {
     }
   };
 
-  const openDeleteLeadConfirm = (lead) => {
+  const openDeleteLeadConfirm = (lead: LeadRow) => {
     setLeadToDelete(lead);
     setShowDeleteLeadConfirmModal(true);
   };
@@ -640,28 +759,28 @@ export default function CRM() {
       setShowDeleteLeadConfirmModal(false);
       setLeadToDelete(null);
       alert("Lead eliminado exitosamente");
-    } catch (e) {
+    } catch (e: any) {
       console.error("No pude eliminar el lead", e);
       alert(`Error al eliminar el lead: ${e?.response?.data?.error || e.message}`);
     }
   };
 
-  // ===== Round-robin =====
+  // ===== Round-robin con soporte para bots específicos =====
   const [rrIndex, setRrIndex] = useState(0);
 
-  const getActiveVendorIdsInScope = (scopeUser) => {
-    if (!scopeUser) return [];
+  const getActiveVendorIdsInScope = (scopeUser?: any) => {
+    if (!scopeUser) return [] as number[];
     const scope = getAccessibleUserIds(scopeUser);
     return users
       .filter(
-        (u) => u.role === "vendedor" && u.active && scope.includes(u.id)
+        (u: any) => u.role === "vendedor" && u.active && scope.includes(u.id)
       )
-      .map((u) => u.id);
+      .map((u: any) => u.id);
   };
 
-  const getVendorsByTeam = (teamName) => {
+  const getVendorsByTeam = (teamName: string) => {
     const manager = users.find(
-      (u) =>
+      (u: any) =>
         u.role === "gerente" &&
         u.name.toLowerCase().includes(teamName.toLowerCase())
     );
@@ -671,14 +790,14 @@ export default function CRM() {
     const descendants = getDescendantUserIds(manager.id, childrenIndex);
     return users
       .filter(
-        (u) =>
+        (u: any) =>
           u.role === "vendedor" && u.active && descendants.includes(u.id)
       )
-      .map((u) => u.id);
+      .map((u: any) => u.id);
   };
 
-  const pickNextVendorId = (scopeUser, botSource) => {
-    let pool = [];
+  const pickNextVendorId = (scopeUser?: any, botSource?: string) => {
+    let pool: number[] = [];
 
     if (botSource && botConfig[botSource]) {
       const botConf = botConfig[botSource];
@@ -697,34 +816,34 @@ export default function CRM() {
     return id;
   };
 
-  // ===== Alertas =====
-  const [alerts, setAlerts] = useState([]);
+  // ===== Alertas (locales de UI) =====
+   const [alerts, setAlerts] = useState<Alert[]>([]);
   const nextAlertId = useRef(1);
-
-  const pushAlert = (userId, type, message) => {
-    setAlerts((prev) => [
-      ...prev,
-      {
-        id: nextAlertId.current++,
-        userId,
-        type,
-        message,
-        ts: new Date().toISOString(),
-        read: false,
-      },
-    ]);
-  };
-
-  const pushAlertToChain = (vendorId, type, message) => {
-    pushAlert(vendorId, type, message);
-    const sup = users.find((u) => u.id === userById.get(vendorId)?.reportsTo);
-    if (sup) pushAlert(sup.id, type, message);
-    const gerente = sup ? users.find((u) => u.id === sup.reportsTo) : null;
-    if (gerente) pushAlert(gerente.id, type, message);
-  };
-
+const pushAlert = (userId: number, type: Alert["type"], message: string) => {
+  setAlerts((prev) => [
+    ...prev,
+    {
+      id: nextAlertId.current++,
+      userId,
+      type,
+      message,
+      ts: new Date().toISOString(),
+      read: false,
+    },
+  ]);
+};
+const pushAlertToChain = (
+  vendorId: number,
+  type: Alert["type"],
+  message: string
+) => {
+  pushAlert(vendorId, type, message);
+  const sup = users.find((u: any) => u.id === userById.get(vendorId)?.reportsTo);
+  if (sup) pushAlert(sup.id, type, message);
+  const gerente = sup ? users.find((u: any) => u.id === sup.reportsTo) : null;
+  if (gerente) pushAlert(gerente.id, type, message);
+};// Usar las alertas en el navbar para mostrar contador
   const unreadAlerts = alerts.filter(a => a.userId === currentUser?.id && !a.read).length;
-
   // ===== Filtrados y ranking =====
   const visibleUserIds = useMemo(
     () => getAccessibleUserIds(currentUser),
@@ -732,7 +851,7 @@ export default function CRM() {
   );
 
   const getFilteredLeads = () => {
-    if (!currentUser) return [];
+    if (!currentUser) return [] as LeadRow[];
     
     const visibleUserIds = getAccessibleUserIds(currentUser);
     return leads.filter((l) =>
@@ -741,9 +860,9 @@ export default function CRM() {
   };
 
   const getRanking = () => {
-    const vendedores = users.filter((u) => u.role === "vendedor");
+    const vendedores = users.filter((u: any) => u.role === "vendedor");
     return vendedores
-      .map((v) => {
+      .map((v: any) => {
         const ventas = leads.filter(
           (l) => l.vendedor === v.id && l.estado === "vendido"
         ).length;
@@ -761,10 +880,10 @@ export default function CRM() {
 
   const getRankingInScope = () => {
     const vendedores = users.filter(
-      (u) => u.role === "vendedor" && visibleUserIds.includes(u.id)
+      (u: any) => u.role === "vendedor" && visibleUserIds.includes(u.id)
     );
     return vendedores
-      .map((v) => {
+      .map((v: any) => {
         const ventas = leads.filter(
           (l) => l.vendedor === v.id && l.estado === "vendido"
         ).length;
@@ -792,11 +911,11 @@ export default function CRM() {
       
       const teamUserIds = getDescendantUserIds(gerente.id, childrenIndex);
       const vendedores = users.filter(
-        (u) => u.role === "vendedor" && teamUserIds.includes(u.id)
+        (u: any) => u.role === "vendedor" && teamUserIds.includes(u.id)
       );
       
       return vendedores
-        .map((v) => {
+        .map((v: any) => {
           const ventas = leads.filter(
             (l) => l.vendedor === v.id && l.estado === "vendido"
           ).length;
@@ -815,11 +934,10 @@ export default function CRM() {
     return getRankingInScope();
   };
 
-  const prevRankingRef = useRef(new Map());
-
+  const prevRankingRef = useRef(new Map<number, number>());
   useEffect(() => {
     const r = getRanking();
-    const curr = new Map();
+    const curr = new Map<number, number>();
     r.forEach((row, idx) => curr.set(row.id, idx + 1));
     const prev = prevRankingRef.current;
     curr.forEach((pos, vid) => {
@@ -835,15 +953,31 @@ export default function CRM() {
     });
     prevRankingRef.current = curr;
   }, [leads, users, userById]);
-
-  const getDashboardStats = (teamFilter) => {
-    let filteredLeads;
+const getDashboardStats = (teamFilter?: string) => {
+    let filteredLeads: LeadRow[];
     
     if (teamFilter && teamFilter !== "todos" && ["owner", "gerente_general", "dueño"].includes(currentUser?.role)) {
       const teamUserIds = getTeamUserIds(teamFilter);
       filteredLeads = leads.filter((l) => l.vendedor && teamUserIds.includes(l.vendedor));
     } else {
       filteredLeads = getFilteredLeads();
+    }
+    
+    // AGREGAR FILTRO POR FECHA
+    if (selectedMonth && selectedYear) {
+      filteredLeads = filteredLeads.filter((lead) => {
+        const dateToCheck = dateFilterType === "status_change" 
+          ? (lead.last_status_change || lead.fecha || lead.created_at)
+          : (lead.fecha || lead.created_at);
+        
+        if (!dateToCheck) return false;
+        
+        const leadDate = new Date(dateToCheck);
+        const leadMonth = (leadDate.getMonth() + 1).toString().padStart(2, '0');
+        const leadYear = leadDate.getFullYear().toString();
+        
+        return leadMonth === selectedMonth && leadYear === selectedYear;
+      });
     }
     
     const vendidos = filteredLeads.filter((lead) => lead.estado === "vendido").length;
@@ -853,15 +987,31 @@ export default function CRM() {
     
     return { totalLeads: filteredLeads.length, vendidos, conversion };
   };
-
-  const getSourceMetrics = (teamFilter) => {
-    let filteredLeads;
+  const getSourceMetrics = (teamFilter?: string) => {
+    let filteredLeads: LeadRow[];
     
     if (teamFilter && teamFilter !== "todos" && ["owner", "gerente_general", "dueño"].includes(currentUser?.role)) {
       const teamUserIds = getTeamUserIds(teamFilter);
       filteredLeads = leads.filter((l) => l.vendedor && teamUserIds.includes(l.vendedor));
     } else {
       filteredLeads = getFilteredLeads();
+    }
+    
+    // AGREGAR FILTRO POR FECHA
+    if (selectedMonth && selectedYear) {
+      filteredLeads = filteredLeads.filter((lead) => {
+        const dateToCheck = dateFilterType === "status_change" 
+          ? (lead.last_status_change || lead.fecha || lead.created_at)
+          : (lead.fecha || lead.created_at);
+        
+        if (!dateToCheck) return false;
+        
+        const leadDate = new Date(dateToCheck);
+        const leadMonth = (leadDate.getMonth() + 1).toString().padStart(2, '0');
+        const leadYear = leadDate.getFullYear().toString();
+        
+        return leadMonth === selectedMonth && leadYear === selectedYear;
+      });
     }
     
     const sourceData = Object.keys(fuentes)
@@ -884,26 +1034,28 @@ export default function CRM() {
 
     return sourceData;
   };
-
+ 
   // ===== Acciones de Leads (API) =====
-  const mapLeadFromApi = (L) => ({
-    id: L.id,
-    nombre: L.nombre,
-    telefono: L.telefono,
-    modelo: L.modelo,
-    formaPago: L.formaPago,
-    infoUsado: L.infoUsado,
-    entrega: L.entrega,
-    fecha: L.fecha || L.created_at || "",
-    estado: L.estado || "nuevo",
-    vendedor: L.assigned_to ?? null,
-    notas: L.notas || "",
-    fuente: L.fuente || "otro",
-    historial: L.historial || [],
-    created_by: L.created_by || null,
-  });
+  const mapLeadFromApi = (L: any): LeadRow => ({
+  id: L.id,
+  nombre: L.nombre,
+  telefono: L.telefono,
+  modelo: L.modelo,
+  formaPago: L.formaPago,
+  infoUsado: L.infoUsado,
+  entrega: L.entrega,
+  fecha: L.fecha || L.created_at || "",
+  estado: (L.estado || "nuevo") as LeadRow["estado"],
+  vendedor: L.assigned_to ?? null,
+  notas: L.notas || "",
+  fuente: (L.fuente || "otro") as LeadRow["fuente"],
+  historial: L.historial || [],
+  created_by: L.created_by || null,
+  created_at: L.created_at || null,  // AGREGAR ESTA LÍNEA
+  last_status_change: L.last_status_change || null,
+});
 
-  const addHistorialEntry = (leadId, estado) => {
+  const addHistorialEntry = (leadId: number, estado: string) => {
     if (!currentUser) return;
     setLeads((prev) =>
       prev.map((lead) =>
@@ -924,9 +1076,9 @@ export default function CRM() {
     );
   };
 
-  const handleUpdateLeadStatus = async (leadId, newStatus) => {
+  const handleUpdateLeadStatus = async (leadId: number, newStatus: string) => {
     try {
-      const updated = await apiUpdateLead(leadId, { estado: newStatus });
+      const updated = await apiUpdateLead(leadId, { estado: newStatus } as any);
       setLeads((prev) =>
         prev.map((l) => (l.id === leadId ? { ...l, ...mapLeadFromApi(updated) } : l))
       );
@@ -937,9 +1089,12 @@ export default function CRM() {
     }
   };
 
-  const handleUpdateObservaciones = async (leadId, observaciones) => {
+  const handleUpdateObservaciones = async (
+    leadId: number,
+    observaciones: string
+  ) => {
     try {
-      const updated = await apiUpdateLead(leadId, { notas: observaciones });
+      const updated = await apiUpdateLead(leadId, { notas: observaciones } as any);
       setLeads((prev) =>
         prev.map((l) => (l.id === leadId ? { ...l, ...mapLeadFromApi(updated) } : l))
       );
@@ -952,15 +1107,28 @@ export default function CRM() {
 
   const handleCreateLead = async () => {
     try {
-      const nombre = document.getElementById("new-nombre")?.value?.trim();
-      const telefono = document.getElementById("new-telefono")?.value?.trim();
-      const modelo = document.getElementById("new-modelo")?.value?.trim();
-      const formaPago = document.getElementById("new-formaPago")?.value;
-      const infoUsado = document.getElementById("new-infoUsado")?.value?.trim();
-      const entrega = document.getElementById("new-entrega")?.checked;
-      const fecha = document.getElementById("new-fecha")?.value;
-      const autoAssign = document.getElementById("new-autoassign")?.checked;
-      const vendedorSelVal = document.getElementById("new-vendedor")?.value;
+      const nombre = (document.getElementById("new-nombre") as HTMLInputElement)
+        ?.value
+        ?.trim();
+      const telefono = (
+        document.getElementById("new-telefono") as HTMLInputElement
+      )?.value?.trim();
+      const modelo = (document.getElementById("new-modelo") as HTMLInputElement)
+        ?.value
+        ?.trim();
+      const formaPago = (document.getElementById("new-formaPago") as HTMLSelectElement)?.value;
+      const infoUsado = (
+        document.getElementById("new-infoUsado") as HTMLInputElement
+      )?.value?.trim();
+      const entrega = (document.getElementById("new-entrega") as HTMLInputElement)
+        ?.checked;
+      const fecha = (document.getElementById("new-fecha") as HTMLInputElement)
+        ?.value;
+      const autoAssign = (
+        document.getElementById("new-autoassign") as HTMLInputElement
+      )?.checked;
+      const vendedorSelVal = (document.getElementById("new-vendedor") as HTMLSelectElement)
+        ?.value;
 
       if (!nombre || !telefono || !modelo) {
         alert("Por favor completa los campos obligatorios: Nombre, Teléfono y Modelo");
@@ -974,7 +1142,7 @@ export default function CRM() {
 
       const fuente = "creado_por";
 
-      let vendedorId = null;
+      let vendedorId: number | null = null;
       if (autoAssign) {
         vendedorId = pickNextVendorId(currentUser) ?? null;
       } else {
@@ -993,7 +1161,7 @@ export default function CRM() {
         }
       }
 
-      let equipo = 'equipo1';
+      let equipo = 'roberto';
       
       if (vendedorId) {
         const vendedorAsignado = users.find(u => u.id === vendedorId);
@@ -1004,7 +1172,11 @@ export default function CRM() {
             if (!manager) break;
             
             if (manager.role === 'gerente') {
-              equipo = manager.name.toLowerCase().replace(/\s+/g, '_');
+              if (manager.name === 'Daniel Mottino') {
+                equipo = 'daniel';
+              } else if (manager.name === 'Roberto Sauer') {
+                equipo = 'roberto';
+              }
               break;
             }
             currentUserForTeam = manager;
@@ -1017,7 +1189,11 @@ export default function CRM() {
           if (!manager) break;
           
           if (manager.role === 'gerente') {
-            equipo = manager.name.toLowerCase().replace(/\s+/g, '_');
+            if (manager.name === 'Daniel Mottino') {
+              equipo = 'daniel';
+            } else if (manager.name === 'Roberto Sauer') {
+              equipo = 'roberto';
+            }
             break;
           }
           currentUserForTeam = manager;
@@ -1037,46 +1213,44 @@ export default function CRM() {
         equipo: equipo,
       };
 
-      const created = await apiCreateLead(leadData);
+      const created = await apiCreateLead(leadData as any);
       const mapped = mapLeadFromApi(created);
       
       if (mapped.vendedor) {
         pushAlert(
           mapped.vendedor,
           "lead_assigned",
-          `Nuevo lead asignado: ${mapped.nombre}`
+          `Nuevo lead asignado: ${mapped.nombre} (creado por ${currentUser?.name})`
         );
       }
       
       setLeads((prev) => [mapped, ...prev]);
       setShowNewLeadModal(false);
 
-      document.getElementById("new-nombre").value = "";
-      document.getElementById("new-telefono").value = "";
-      document.getElementById("new-modelo").value = "";
-      document.getElementById("new-infoUsado").value = "";
-      document.getElementById("new-fecha").value = "";
-      document.getElementById("new-entrega").checked = false;
+      (document.getElementById("new-nombre") as HTMLInputElement).value = "";
+      (document.getElementById("new-telefono") as HTMLInputElement).value = "";
+      (document.getElementById("new-modelo") as HTMLInputElement).value = "";
+      (document.getElementById("new-infoUsado") as HTMLInputElement).value = "";
+      (document.getElementById("new-fecha") as HTMLInputElement).value = "";
+      (document.getElementById("new-entrega") as HTMLInputElement).checked = false;
 
       addHistorialEntry(mapped.id, `Creado por ${currentUser?.name}`);
       alert("Lead creado exitosamente");
       
-    } catch (e) {
+    } catch (e: any) {
       console.error("Error completo al crear el lead:", e);
       alert(`Error al crear el lead: ${e?.response?.data?.error || e?.message || 'Error desconocido'}`);
     }
   };
 
-  // ===== Calendario =====
+  // ===== Calendario (UI local) =====
   const visibleUsers = useMemo(() => (currentUser ? getVisibleUsers() : []), [currentUser, users]);
-  
   const eventsForSelectedUser = useMemo(() => {
     const uid = selectedCalendarUserId || currentUser?.id;
     return events
       .filter((e) => e.userId === uid)
       .sort((a, b) => ((a.date + (a.time || "")) > (b.date + (b.time || "")) ? 1 : -1));
   }, [events, selectedCalendarUserId, currentUser]);
-
   const formatterEs = new Intl.DateTimeFormat("es-AR", {
     weekday: "long",
     day: "2-digit",
@@ -1084,15 +1258,15 @@ export default function CRM() {
   });
 
   const createEvent = () => {
-    const title = document.getElementById("ev-title").value;
-    const date = document.getElementById("ev-date").value;
-    const time = document.getElementById("ev-time").value;
-    const userId = parseInt(document.getElementById("ev-user").value, 10);
+    const title = (document.getElementById("ev-title") as HTMLInputElement).value;
+    const date = (document.getElementById("ev-date") as HTMLInputElement).value;
+    const time = (document.getElementById("ev-time") as HTMLInputElement).value;
+    const userId = parseInt((document.getElementById("ev-user") as HTMLSelectElement).value, 10);
     if (title && date && userId) {
       setEvents((prev) => [
         ...prev,
         {
-          id: Math.max(0, ...prev.map((e) => e.id)) + 1,
+          id: Math.max(0, ...prev.map((e: any) => e.id)) + 1,
           title,
           date,
           time: time || "09:00",
@@ -1102,12 +1276,11 @@ export default function CRM() {
       setShowNewEventModal(false);
     }
   };
+  const deleteEvent = (id: number) =>
+    setEvents((prev) => prev.filter((e: any) => e.id !== id));
 
-  const deleteEvent = (id) =>
-    setEvents((prev) => prev.filter((e) => e.id !== id));
-
-  // ===== Gestión de Usuarios =====
-  const validRolesByUser = (user) => {
+  // ===== Gestión de Usuarios (API) =====
+  const validRolesByUser = (user: any) => {
     if (!user) return [];
     switch (user.role) {
       case "owner":
@@ -1120,19 +1293,18 @@ export default function CRM() {
         return [];
     }
   };
-
-  const validManagersByRole = (role) => {
+  const validManagersByRole = (role: string) => {
     switch (role) {
       case "owner":
         return [];
       case "gerente_general":
-        return users.filter((u) => u.role === "owner");
+        return users.filter((u: any) => u.role === "owner");
       case "gerente":
-        return users.filter((u) => u.role === "gerente_general");
+        return users.filter((u: any) => u.role === "gerente_general");
       case "supervisor":
-        return users.filter((u) => u.role === "gerente");
+        return users.filter((u: any) => u.role === "gerente");
       case "vendedor":
-        return users.filter((u) => u.role === "supervisor");
+        return users.filter((u: any) => u.role === "supervisor");
       default:
         return [];
     }
@@ -1141,25 +1313,25 @@ export default function CRM() {
   const openCreateUser = () => {
     setEditingUser(null);
     const availableRoles = validRolesByUser(currentUser);
-    const roleDefault = availableRoles?.[0] || "vendedor";
+    const roleDefault = (availableRoles?.[0] as typeof modalRole) || "vendedor";
     const validManagers = validManagersByRole(roleDefault);
     setModalRole(roleDefault);
     setModalReportsTo(validManagers[0]?.id ?? null);
     setShowUserModal(true);
   };
 
-  const openEditUser = (u) => {
+  const openEditUser = (u: any) => {
     setEditingUser(u);
-    const roleCurrent = u.role;
-    const availableRoles =
+    const roleCurrent = u.role as typeof modalRole;
+    const availableRoles: string[] =
       currentUser.role === "owner" && u.id === currentUser?.id
         ? ["owner", ...validRolesByUser(currentUser)]
         : validRolesByUser(currentUser);
     const roleToSet = availableRoles.includes(roleCurrent)
       ? roleCurrent
-      : availableRoles[0];
+      : (availableRoles[0] as any);
     const validManagers = validManagersByRole(roleToSet);
-    setModalRole(roleToSet);
+    setModalRole(roleToSet as any);
     setModalReportsTo(
       roleToSet === "owner" ? null : u.reportsTo ?? validManagers[0]?.id ?? null
     );
@@ -1167,10 +1339,10 @@ export default function CRM() {
   };
 
   const saveUser = async () => {
-    const name = document.getElementById("u-name").value.trim();
-    const email = document.getElementById("u-email").value.trim();
-    const password = document.getElementById("u-pass").value;
-    const active = document.getElementById("u-active").checked;
+    const name = (document.getElementById("u-name") as HTMLInputElement).value.trim();
+    const email = (document.getElementById("u-email") as HTMLInputElement).value.trim();
+    const password = (document.getElementById("u-pass") as HTMLInputElement).value;
+    const active = (document.getElementById("u-active") as HTMLInputElement).checked;
 
     if (!name || !email) {
       alert("Nombre y email son obligatorios");
@@ -1186,7 +1358,7 @@ export default function CRM() {
 
     try {
       if (editingUser) {
-        const updateData = {
+        const updateData: any = {
           name,
           email,
           role: modalRole,
@@ -1199,7 +1371,7 @@ export default function CRM() {
         }
 
         const updated = await apiUpdateUser(editingUser.id, updateData);
-        setUsers((prev) => prev.map((u) => (u.id === editingUser.id ? updated : u)));
+        setUsers((prev) => prev.map((u: any) => (u.id === editingUser.id ? updated : u)));
       } else {
         const createData = {
           name,
@@ -1210,23 +1382,23 @@ export default function CRM() {
           active: active ? 1 : 0,
         };
         
-        const created = await apiCreateUser(createData);
+        const created = await apiCreateUser(createData as any);
         setUsers((prev) => [...prev, created]);
       }
       setShowUserModal(false);
-    } catch (e) {
+    } catch (e: any) {
       console.error("No pude guardar usuario", e);
       alert(`Error al ${editingUser ? 'actualizar' : 'crear'} usuario: ${e?.response?.data?.error || e.message}`);
     }
   };
 
-  const openDeleteConfirm = (user) => {
+  const openDeleteConfirm = (user: any) => {
     if (user.role === "owner") {
       alert("No podés eliminar al Dueño.");
       return;
     }
     
-    const hasChildren = users.some((u) => u.reportsTo === user.id);
+    const hasChildren = users.some((u: any) => u.reportsTo === user.id);
     if (hasChildren) {
       alert("No se puede eliminar: el usuario tiene integrantes a cargo. Primero reasigne o elimine a sus subordinados.");
       return;
@@ -1247,7 +1419,7 @@ export default function CRM() {
 
     try {
       await apiDeleteUser(userToDelete.id);
-      setUsers((prev) => prev.filter((u) => u.id !== userToDelete.id));
+      setUsers((prev) => prev.filter((u: any) => u.id !== userToDelete.id));
       setShowDeleteConfirmModal(false);
       setUserToDelete(null);
     } catch (e) {
@@ -1257,236 +1429,273 @@ export default function CRM() {
   };
 
   // ===== UI: Login =====
-  // Reemplazar la sección del login (líneas 1260-1335) con esto:
-if (!isAuthenticated) {
-  return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-slate-800 rounded-2xl mb-6">
-            <span className="text-6xl">🚗</span>
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center mb-4">
+              <svg width="48" height="42" viewBox="0 0 40 36" fill="none">
+                <path d="M10 2L30 2L35 12L30 22L10 22L5 12Z" fill="url(#gradient2)" />
+                <defs>
+                  <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#FFB800" />
+                    <stop offset="25%" stopColor="#FF6B9D" />
+                    <stop offset="50%" stopColor="#8B5CF6" />
+                    <stop offset="75%" stopColor="#06B6D4" />
+                    <stop offset="100%" stopColor="#10B981" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div className="ml-3">
+                <h1 className="text-2xl font-bold text-gray-800">Alluma</h1>
+                <p className="text-sm text-gray-600">Publicidad</p>
+              </div>
+            </div>
+            <p className="text-gray-600">Sistema de gestión CRM</p>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2">Alluma CRM</h1>
-          <p className="text-slate-400">Concesionario Fiat</p>
-        </div>
 
-        <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700">
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-bold text-slate-300 mb-2">
-                Correo Electrónico
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
               <input
                 type="email"
                 id="email"
-                placeholder="nombre@alluma.com"
-                className="w-full px-4 py-3 bg-slate-900 border-2 border-slate-700 text-white rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleLogin(
-                      document.getElementById("email").value,
-                      document.getElementById("password").value
-                    );
-                  }
-                }}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="tu@alluma.com"
               />
             </div>
-
             <div>
-              <label className="block text-sm font-bold text-slate-300 mb-2">
-                Contraseña
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
               <input
                 type="password"
                 id="password"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="••••••••"
-                className="w-full px-4 py-3 bg-slate-900 border-2 border-slate-700 text-white rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleLogin(
-                      document.getElementById("email").value,
-                      document.getElementById("password").value
-                    );
-                  }
-                }}
               />
             </div>
-
             {loginError && (
-              <div className="bg-red-900 border-2 border-red-700 text-red-300 px-4 py-3 rounded-xl text-sm">
-                {loginError}
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-red-700 text-sm">{loginError}</p>
               </div>
             )}
 
             <button
-              onClick={() => handleLogin(
-                document.getElementById("email").value,
-                document.getElementById("password").value
-              )}
-              className="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl font-bold"
+              onClick={() =>
+                handleLogin(
+                  (document.getElementById("email") as HTMLInputElement).value,
+                  (document.getElementById("password") as HTMLInputElement).value
+                )
+              }
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700"
             >
               Iniciar Sesión
             </button>
-
-            <div className="text-center pt-4">
-              <button className="text-sm text-slate-400 hover:text-red-500">
-                ¿Olvidaste tu contraseña?
-              </button>
-            </div>
           </div>
-        </div>
-
-        <div className="mt-8 text-center">
-          <p className="text-slate-500 text-sm">Sistema de Gestión de Clientes y Ventas</p>
-          <p className="text-slate-600 text-xs mt-2">Fiat Argentina - Alluma CRM © 2025</p>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
+
   // ===== UI autenticada =====
   return (
-    <div className="flex h-screen bg-slate-900">
-      {/* Sidebar mejorado */}
-      <div className="w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white shadow-2xl flex flex-col">
-        <div className="p-6 border-b border-slate-700/50">
-          <div className="flex items-center space-x-4 mb-6">
-            <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-600 rounded-2xl flex items-center justify-center shadow-xl transform hover:scale-110 transition-all">
-              <span className="text-3xl">⚡</span>
+    <div className="min-h-screen bg-gray-100 flex">
+      {/* Sidebar */}
+      <div className="bg-slate-900 text-white w-64 min-h-screen p-4">
+        <div className="mb-8">
+          <div className="flex items-center mb-4">
+            <div className="relative">
+              <svg width="40" height="36" viewBox="0 0 40 36" fill="none">
+                <path d="M10 2L30 2L35 12L30 22L10 22L5 12Z" fill="url(#gradient1)" />
+                <defs>
+                  <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#FFB800" />
+                    <stop offset="25%" stopColor="#FF6B9D" />
+                    <stop offset="50%" stopColor="#8B5CF6" />
+                    <stop offset="75%" stopColor="#06B6D4" />
+                    <stop offset="100%" stopColor="#10B981" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-2 h-2 bg-white rounded-full"></div>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-extrabold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Alluma</h1>
-              <p className="text-xs text-gray-400 font-medium">CRM Professional</p>
+            <div className="ml-3">
+              <h1 className="text-xl font-bold text-white">Alluma</h1>
+              <p className="text-xs text-gray-400">Publicidad</p>
             </div>
           </div>
-          <div className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50">
-            <p className="font-bold text-white text-sm mb-1">{currentUser?.name || currentUser?.email}</p>
-            <p className="text-xs text-gray-400">{roles[currentUser?.role] || currentUser?.role}</p>
+
+          <div className="text-sm text-gray-300">
+            <p>{currentUser?.name || currentUser?.email}</p>
+            <p className="text-blue-300">
+              {roles[currentUser?.role] || currentUser?.role}
+            </p>
             {!currentUser?.active && (
-              <p className="text-xs text-amber-400 mt-2 font-semibold">⚠ Usuario desactivado</p>
+              <p className="text-red-300 text-xs mt-1">
+                ⚠️ Usuario desactivado - No recibe leads nuevos
+              </p>
             )}
           </div>
         </div>
-
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        <nav className="space-y-2">
           {[
-            { key: "dashboard", label: "Dashboard", icon: "🏠" },
-            { key: "leads", label: "Leads", icon: "👥" },
-            { key: "calendar", label: "Calendario", icon: "📅" },
-            { key: "presupuestos", label: "Presupuestos", icon: "📄" },
-            { key: "ranking", label: "Ranking", icon: "🏆" },
+            { key: "dashboard", label: "Dashboard", Icon: Home },
+            { key: "leads", label: "Leads", Icon: Users },
+            { key: "calendar", label: "Calendario", Icon: Calendar },
+            { key: "presupuestos", label: "Presupuestos", Icon: FileText },
+            { key: "ranking", label: "Ranking", Icon: Trophy },
             ...(["supervisor", "gerente", "gerente_general", "owner"].includes(currentUser?.role)
-              ? [{ key: "team", label: "Mi Equipo", icon: "👔" }]
+              ? [{ key: "team", label: "Mi Equipo", Icon: UserCheck }]
               : []),
-            { key: "alerts", label: "Alertas", icon: "🔔", badge: unreadAlerts },
+            { key: "alerts", label: "Alertas", Icon: Bell, badge: unreadAlerts },
             ...(canManageUsers()
-              ? [{ key: "users", label: "Usuarios", icon: "⚙️" }]
+              ? [{ key: "users", label: "Usuarios", Icon: Settings }]
               : []),
-          ].map(({ key, label, icon, badge }) => (
+          ].map(({ key, label, Icon, badge }) => (
             <button
               key={key}
-              onClick={() => setActiveSection(key)}
-              className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-all font-semibold ${
-                activeSection === key
-                  ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-2xl transform scale-105"
-                  : "text-gray-300 hover:bg-slate-700/50 hover:text-white"
+              onClick={() => setActiveSection(key as any)}
+              className={`w-full flex items-center justify-between space-x-3 px-3 py-2 rounded-lg transition-colors ${
+                activeSection === (key as any)
+                  ? "bg-blue-600 text-white"
+                  : "text-gray-300 hover:bg-slate-800"
               }`}
             >
               <div className="flex items-center space-x-3">
-                <span className="text-2xl">{icon}</span>
-                <span className="text-sm">{label}</span>
+                <Icon size={20} />
+                <span>{label}</span>
               </div>
               {badge !== undefined && badge > 0 && (
-                <span className="bg-gradient-to-r from-pink-500 to-red-500 text-white text-xs rounded-full px-3 py-1 font-extrabold shadow-lg min-w-[24px] text-center">
+                <span className="bg-red-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center">
                   {badge}
                 </span>
               )}
             </button>
           ))}
         </nav>
-
-        <div className="p-4 border-t border-slate-700/50">
+      {/* Botón de Cerrar Sesión */}
+        <div className="mt-auto pt-4 border-t border-slate-700">
           <button
             onClick={async () => {
               try {
+                // Llamar al endpoint de logout
                 await api.post('/auth/logout');
               } catch (error) {
                 console.error('Error al cerrar sesión:', error);
               } finally {
+                // Limpiar todo el storage local
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
                 localStorage.clear();
                 sessionStorage.clear();
+                
+                // Limpiar el header de autorización
                 delete api.defaults.headers.common['Authorization'];
+                
+                // Cambiar estado a no autenticado
                 setIsAuthenticated(false);
                 setCurrentUser(null);
                 setUsers([]);
                 setLeads([]);
+                
+                // Opcional: recargar la página para limpiar todo
                 window.location.reload();
               }
             }}
-            className="w-full flex items-center space-x-3 px-4 py-4 rounded-2xl text-gray-300 hover:bg-red-600/20 hover:text-red-400 transition-all font-semibold"
+            className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-red-300 hover:bg-red-900/20 transition-colors"
           >
-            <span className="text-2xl">🚪</span>
-            <span className="text-sm">Cerrar Sesión</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Cerrar Sesión</span>
           </button>
         </div>
       </div>
+     
 
-      {/* Área de contenido principal */}
-      <div className="flex-1 p-8 overflow-y-auto bg-slate-900">
+      {/* Main */}
+      <div className="flex-1 p-6">
+        {/* Dashboard */}
         {activeSection === "dashboard" && (
-          <div className="space-y-8">
+          <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-4xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Dashboard</h2>
-                <p className="text-slate-400 mt-2 font-medium">Resumen general de tu actividad</p>
-              </div>
-              <div className="flex items-center space-x-4">
-                {["owner", "gerente_general", "dueño"].includes(currentUser?.role) && (
-                  <select
-                    value={selectedTeam}
-                    onChange={(e) => setSelectedTeam(e.target.value)}
-                    className="px-6 py-3 border-2 border-slate-600 rounded-2xl bg-slate-800 border border-slate-700 shadow-sm hover:border-purple-300 focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all font-semibold"
-                  >
-                    <option value="todos">Todos los equipos</option>
-                    {users
-                      .filter((u) => u.role === "gerente")
-                      .map((gerente) => (
-                        <option key={gerente.id} value={gerente.id.toString()}>
-                          Equipo {gerente.name}
-                        </option>
-                      ))}
-                  </select>
-                )}
-                {canCreateLeads() && (
-                  <button
-                    onClick={() => setShowNewLeadModal(true)}
-                    className="flex items-center space-x-3 px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl hover:from-indigo-700 hover:to-purple-700 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all font-bold"
-                  >
-                    <Plus size={24} />
-                    <span>Nuevo Lead</span>
-                  </button>
-                )}
-              </div>
-            </div>
+  <h2 className="text-3xl font-bold text-gray-800">Dashboard</h2>
+  <div className="flex items-center space-x-3">
+    {["owner", "gerente_general", "dueño"].includes(currentUser?.role) && (
+      <select
+        value={selectedTeam}
+        onChange={(e) => setSelectedTeam(e.target.value)}
+        className="px-3 py-2 border border-gray-300 rounded-lg bg-white"
+      >
+        <option value="todos">Todos los equipos</option>
+        {users
+          .filter((u: any) => u.role === "gerente")
+          .map((gerente: any) => (
+            <option key={gerente.id} value={gerente.id.toString()}>
+              Equipo {gerente.name}
+            </option>
+          ))}
+      </select>
+    )}
+    
+    {/* AGREGAR ESTOS SELECTORES DE FECHA */}
+    <select
+      value={dateFilterType}
+      onChange={(e) => setDateFilterType(e.target.value as "created" | "status_change")}
+      className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm"
+    >
+      <option value="status_change">Por cambio de estado</option>
+      <option value="created">Por fecha de creación</option>
+    </select>
+    
+    <select
+      value={selectedMonth}
+      onChange={(e) => setSelectedMonth(e.target.value)}
+      className="px-3 py-2 border border-gray-300 rounded-lg bg-white"
+    >
+      <option value="">Todos los meses</option>
+      <option value="01">Enero</option>
+      <option value="02">Febrero</option>
+      <option value="03">Marzo</option>
+      <option value="04">Abril</option>
+      <option value="05">Mayo</option>
+      <option value="06">Junio</option>
+      <option value="07">Julio</option>
+      <option value="08">Agosto</option>
+      <option value="09">Septiembre</option>
+      <option value="10">Octubre</option>
+      <option value="11">Noviembre</option>
+      <option value="12">Diciembre</option>
+    </select>
+    
+    <select
+      value={selectedYear}
+      onChange={(e) => setSelectedYear(e.target.value)}
+      className="px-3 py-2 border border-gray-300 rounded-lg bg-white"
+    >
+      <option value="2024">2024</option>
+      <option value="2025">2025</option>
+      <option value="2026">2026</option>
+    </select>
+    
+    {canCreateLeads() && (
+      <button
+        onClick={() => setShowNewLeadModal(true)}
+        className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+      >
+        <Plus size={20} />
+        <span>Nuevo Lead</span>
+      </button>
+    )}
+  </div>
+</div>
 
-            {!currentUser?.active && (
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 p-6 rounded-2xl shadow-lg">
-                <div className="flex items-start space-x-4">
-                  <Bell className="h-8 w-8 text-amber-600 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-bold text-amber-900 text-lg mb-2">Usuario Desactivado</h4>
-                    <p className="text-sm text-amber-800">
-                      No recibirás nuevos leads automáticamente. Solo podrás gestionar los leads que ya tienes asignados.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Estadísticas principales mejoradas */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Estadísticas principales */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {(() => {
                 const teamFilter = ["owner", "gerente_general", "dueño"].includes(currentUser?.role)
                   ? selectedTeam
@@ -1494,57 +1703,45 @@ if (!isAuthenticated) {
                 const stats = getDashboardStats(teamFilter);
                 return (
                   <>
-                    <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-xl hover:shadow-2xl transition-all p-8 border-2 border-gray-100 transform hover:scale-105">
-                      <div className="flex items-center justify-between mb-6">
+                    <div className="bg-white rounded-xl shadow-lg p-6">
+                      <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-bold text-gray-500 uppercase tracking-wide">Total Leads</p>
-                          <p className="text-5xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mt-3">
+                          <p className="text-sm font-medium text-gray-600">Total Leads</p>
+                          <p className="text-3xl font-bold text-gray-900">
                             {stats.totalLeads}
                           </p>
                         </div>
-                        <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-6 rounded-3xl shadow-2xl">
-                          <Users className="h-10 w-10 text-white" />
+                        <div className="bg-blue-500 p-3 rounded-full">
+                          <Users className="h-6 w-6 text-white" />
                         </div>
                       </div>
-                      <div className="flex items-center text-emerald-600 font-semibold">
-                        <BarChart3 size={16} className="mr-2" />
-                        <span className="text-sm">+12% vs mes anterior</span>
-                      </div>
                     </div>
-
-                    <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-xl hover:shadow-2xl transition-all p-8 border-2 border-gray-100 transform hover:scale-105">
-                      <div className="flex items-center justify-between mb-6">
+                    <div className="bg-white rounded-xl shadow-lg p-6">
+                      <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-bold text-gray-500 uppercase tracking-wide">Ventas</p>
-                          <p className="text-5xl font-extrabold text-emerald-600 mt-3">
+                          <p className="text-sm font-medium text-gray-600">Ventas</p>
+                          <p className="text-3xl font-bold text-green-600">
                             {stats.vendidos}
                           </p>
                         </div>
-                        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-6 rounded-3xl shadow-2xl">
-                          <Trophy className="h-10 w-10 text-white" />
+                        <div className="bg-green-500 p-3 rounded-full">
+                          <Trophy className="h-6 w-6 text-white" />
                         </div>
                       </div>
-                      <div className="flex items-center text-emerald-600 font-semibold">
-                        <Trophy size={16} className="mr-2" />
-                        <span className="text-sm">Excelente desempeño</span>
-                      </div>
                     </div>
-
-                    <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-xl hover:shadow-2xl transition-all p-8 border-2 border-gray-100 transform hover:scale-105">
-                      <div className="flex items-center justify-between mb-6">
+                    <div className="bg-white rounded-xl shadow-lg p-6">
+                      <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-bold text-gray-500 uppercase tracking-wide">Conversión</p>
-                          <p className="text-5xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mt-3">
+                          <p className="text-sm font-medium text-gray-600">
+                            Conversión
+                          </p>
+                          <p className="text-3xl font-bold text-purple-600">
                             {stats.conversion}%
                           </p>
                         </div>
-                        <div className="bg-gradient-to-br from-purple-600 to-pink-600 p-6 rounded-3xl shadow-2xl">
-                          <BarChart3 className="h-10 w-10 text-white" />
+                        <div className="bg-purple-500 p-3 rounded-full">
+                          <BarChart3 className="h-6 w-6 text-white" />
                         </div>
-                      </div>
-                      <div className="flex items-center text-purple-600 font-semibold">
-                        <BarChart3 size={16} className="mr-2" />
-                        <span className="text-sm">Por encima del promedio</span>
                       </div>
                     </div>
                   </>
@@ -1552,17 +1749,14 @@ if (!isAuthenticated) {
               })()}
             </div>
 
-            {/* Estados de Leads mejorado */}
-            <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-xl p-8 border-2 border-gray-100">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-2xl font-extrabold text-white
-
-
-">Estados de Leads</h3>
-                <div className="flex items-center space-x-3">
+            {/* Estados de Leads con posibilidad de editar estados */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-semibold text-gray-800">Estados de Leads</h3>
+                <div className="flex items-center space-x-2">
                   {["owner", "gerente_general"].includes(currentUser?.role) && (
                     <>
-                      <span className="text-sm text-slate-400 font-bold">Descargar Excel:</span>
+                      <span className="text-sm text-gray-600">Descargar Excel:</span>
                       <button
                         onClick={() => {
                           const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
@@ -1573,9 +1767,10 @@ if (!isAuthenticated) {
                             : getFilteredLeads();
                           downloadAllLeadsExcel(filteredLeads, userById, fuentes);
                         }}
-                        className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-xs rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all flex items-center space-x-2 shadow-lg font-bold"
+                        className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 flex items-center space-x-1"
+                        title="Descargar Excel completo"
                       >
-                        <Download size={16} />
+                        <Download size={12} />
                         <span>Todos</span>
                       </button>
                     </>
@@ -1583,15 +1778,15 @@ if (!isAuthenticated) {
                   {selectedEstado && (
                     <button
                       onClick={() => setSelectedEstado(null)}
-                      className="text-sm text-purple-600 hover:text-purple-800 flex items-center space-x-2 font-bold"
+                      className="text-sm text-blue-600 hover:text-blue-800 flex items-center space-x-1"
                     >
-                      <X size={18} />
+                      <X size={16} />
                       <span>Cerrar filtro</span>
                     </button>
                   )}
                 </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {Object.entries(estados).map(([key, estado]) => {
                   const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
                     ? selectedTeam
@@ -1608,14 +1803,14 @@ if (!isAuthenticated) {
                     <div key={key} className="relative group">
                       <button
                         onClick={() => setSelectedEstado(selectedEstado === key ? null : key)}
-                        className={`w-full text-center transition-all duration-300 ${
-                          selectedEstado === key ? "ring-4 ring-purple-400 ring-opacity-50 transform scale-110" : "hover:scale-110"
+                        className={`w-full text-center transition-all duration-200 transform hover:scale-105 ${
+                          selectedEstado === key ? "ring-4 ring-blue-300 ring-opacity-50" : ""
                         }`}
+                        title={`Ver todos los leads en estado: ${estado.label}`}
                       >
-                        <div className={`${estado.color} text-white rounded-2xl p-6 mb-3 relative cursor-pointer shadow-xl hover:shadow-2xl transition-all`}>
-                          <div className="text-xl mb-2">{estado.icon}</div>
-                          <div className="text-4xl font-extrabold">{count}</div>
-                          <div className="text-sm opacity-90 mt-2 font-semibold">{percentage}%</div>
+                        <div className={`${estado.color} text-white rounded-lg p-4 mb-2 relative cursor-pointer hover:opacity-90 transition-opacity`}>
+                          <div className="text-2xl font-bold">{count}</div>
+                          <div className="text-xs opacity-75">{percentage}%</div>
                           
                           {["owner", "dueño"].includes(currentUser?.role) && count > 0 && (
                             <button
@@ -1629,14 +1824,15 @@ if (!isAuthenticated) {
                                   : getFilteredLeads();
                                 downloadLeadsByStateExcel(filteredLeads, key, userById, fuentes);
                               }}
-                              className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-800 border border-slate-700/30 hover:bg-slate-800 border border-slate-700/50 rounded-xl p-2 shadow-lg"
+                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white bg-opacity-20 hover:bg-opacity-40 rounded p-1"
+                              title={`Descargar Excel: ${estado.label}`}
                             >
-                              <Download size={16} />
+                              <Download size={12} />
                             </button>
                           )}
                         </div>
                       </button>
-                      <div className="text-sm text-slate-300 text-center font-bold">
+                      <div className="text-sm text-gray-600 text-center font-medium">
                         {estado.label}
                       </div>
                     </div>
@@ -1644,13 +1840,17 @@ if (!isAuthenticated) {
                 })}
               </div>
 
-              {/* Lista filtrada por estado */}
+              {/* Lista filtrada con edición de estados y botón de eliminar */}
               {selectedEstado && (
-                <div className="mt-8 border-t-2 border-slate-600 pt-8">
-                  <h4 className="text-xl font-extrabold text-slate-200 mb-6 flex items-center">
-                    <span className="mr-3">Leads en estado:</span>
-                    <span className={`px-4 py-2 rounded-full text-white text-sm font-bold ${estados[selectedEstado].color} shadow-lg`}>
-                      {estados[selectedEstado].icon} {estados[selectedEstado].label}
+                <div className="mt-6 border-t pt-6">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                    Leads en estado:{" "}
+                    <span
+                      className={`px-3 py-1 rounded-full text-white text-sm ${
+                        estados[selectedEstado].color
+                      }`}
+                    >
+                      {estados[selectedEstado].label}
                     </span>
                   </h4>
 
@@ -1667,28 +1867,44 @@ if (!isAuthenticated) {
 
                     if (leadsFiltrados.length === 0) {
                       return (
-                        <p className="text-gray-500 text-center py-12 text-lg">
+                        <p className="text-gray-500 text-center py-8">
                           No hay leads en estado "{estados[selectedEstado].label}"
                         </p>
                       );
                     }
 
                     return (
-                      <div className="overflow-x-auto rounded-2xl border-2 border-slate-600">
-                        <table className="w-full">
-                          <thead className="bg-gradient-to-r from-gray-100 to-gray-50">
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead className="bg-gray-50">
                             <tr>
-                              <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-400 uppercase tracking-wider">Cliente</th>
-                              <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-400 uppercase tracking-wider">Contacto</th>
-                              <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-400 uppercase tracking-wider">Vehículo</th>
-                              <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-400 uppercase tracking-wider">Estado</th>
-                              <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-400 uppercase tracking-wider">Fuente</th>
-                              <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-400 uppercase tracking-wider">Vendedor</th>
-                              <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-400 uppercase tracking-wider">Fecha</th>
-                              <th className="px-6 py-4 text-center text-xs font-extrabold text-slate-400 uppercase tracking-wider">Acciones</th>
+                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                Cliente
+                              </th>
+                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                Contacto
+                              </th>
+                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                Vehículo
+                              </th>
+                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                Estado
+                              </th>
+                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                Fuente
+                              </th>
+                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                Vendedor
+                              </th>
+                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                Fecha
+                              </th>
+                              <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                                Acciones
+                              </th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y-2 divide-slate-700 bg-slate-800 border border-slate-700">
+                          <tbody className="divide-y divide-gray-200">
                             {leadsFiltrados.map((lead) => {
                               const vendedor = lead.vendedor
                                 ? userById.get(lead.vendedor)
@@ -1697,92 +1913,90 @@ if (!isAuthenticated) {
                                 canManageUsers() ||
                                 (currentUser?.role === "supervisor" &&
                                   lead.vendedor &&
-                                  getVisibleUsers().some((u) => u.id === lead.vendedor));
+                                  getVisibleUsers().some((u: any) => u.id === lead.vendedor));
                               
                               return (
-                                <tr key={lead.id} className="hover:bg-purple-50 transition-all">
-                                  <td className="px-6 py-5">
-                                    <div className="font-bold text-white
-
-
- text-base">
+                                <tr key={lead.id} className="hover:bg-gray-50">
+                                  <td className="px-4 py-2">
+                                    <div className="font-medium text-gray-900">
                                       {lead.nombre}
                                     </div>
                                   </td>
-                                  <td className="px-6 py-5">
-                                    <div className="flex items-center space-x-2">
-                                      <Phone size={16} className="text-gray-400" />
-                                      <span className="text-slate-300 font-semibold">{lead.telefono}</span>
+                                  <td className="px-4 py-2">
+                                    <div className="flex items-center space-x-1">
+                                      <Phone size={12} className="text-gray-400" />
+                                      <span className="text-gray-700">{lead.telefono}</span>
                                     </div>
                                   </td>
-                                  <td className="px-6 py-5">
+                                  <td className="px-4 py-2">
                                     <div>
-                                      <div className="font-bold text-white
-
-
-">{lead.modelo}</div>
-                                      <div className="text-sm text-gray-500 font-medium">{lead.formaPago}</div>
+                                      <div className="font-medium text-gray-900">
+                                        {lead.modelo}
+                                      </div>
+                                      <div className="text-xs text-gray-500">
+                                        {lead.formaPago}
+                                      </div>
                                       {lead.infoUsado && (
-                                        <div className="text-xs text-orange-600 font-semibold mt-1">
+                                        <div className="text-xs text-orange-600">
                                           Usado: {lead.infoUsado}
                                         </div>
                                       )}
                                     </div>
                                   </td>
-                                  <td className="px-6 py-5">
+                                  <td className="px-4 py-2">
                                     <select
                                       value={lead.estado}
                                       onChange={(e) =>
                                         handleUpdateLeadStatus(lead.id, e.target.value)
                                       }
-                                      className={`text-sm font-bold rounded-full px-4 py-2 border-0 text-white ${estados[lead.estado].color} cursor-pointer hover:opacity-90 transition-opacity shadow-lg`}
+                                      className={`text-xs font-medium rounded-full px-2 py-1 border-0 text-white ${estados[lead.estado].color}`}
                                     >
                                       {Object.entries(estados).map(([key, estado]) => (
                                         <option key={key} value={key} className="text-black">
-                                          {estado.icon} {estado.label}
+                                          {estado.label}
                                         </option>
                                       ))}
                                     </select>
                                   </td>
-                                  <td className="px-6 py-5">
-                                    <div className="flex items-center space-x-2">
-                                      <span className="text-lg">{fuentes[lead.fuente]?.icon || "❓"}</span>
-                                      <span className="text-sm text-slate-400 font-semibold">
-                                        {fuentes[lead.fuente]?.label || String(lead.fuente)}
+                                  <td className="px-4 py-2">
+                                    <div className="flex items-center space-x-1">
+                                      <span className="text-sm">
+                                        {fuentes[lead.fuente as string]?.icon || "❓"}
+                                      </span>
+                                      <span className="text-xs text-gray-600">
+                                        {fuentes[lead.fuente as string]?.label ||
+                                          String(lead.fuente)}
                                       </span>
                                     </div>
                                   </td>
-                                  <td className="px-6 py-5">
-                                    <div className="font-semibold text-white
-
-
-">
+                                  <td className="px-4 py-2 text-gray-700">
+                                    <div>
                                       {vendedor?.name || "Sin asignar"}
                                       {vendedor && !vendedor.active && (
-                                        <div className="text-xs text-red-600 font-bold mt-1">
+                                        <div className="text-xs text-red-600">
                                           (Desactivado)
                                         </div>
                                       )}
                                     </div>
                                   </td>
-                                  <td className="px-6 py-5 text-slate-400 text-sm font-medium">
+                                  <td className="px-4 py-2 text-gray-500 text-xs">
                                     {lead.fecha ? String(lead.fecha).slice(0, 10) : "—"}
                                   </td>
-                                  <td className="px-6 py-5">
-                                    <div className="flex items-center justify-center space-x-2">
+                                  <td className="px-4 py-2 text-center">
+                                    <div className="flex items-center justify-center space-x-1">
                                       <button
                                         onClick={() => {
                                           const phoneNumber = lead.telefono.replace(/\D/g, '');
                                           const message = encodeURIComponent(
-                                            `Hola ${lead.nombre}, me contacto desde Alluma CRM por su consulta sobre el ${lead.modelo}. ¿Cómo está?`
+                                            `Hola ${lead.nombre}, me contacto desde GRUPO ALRA por su consulta sobre el vehiculo ${lead.modelo}. ¿Cómo está? ¿Tiene un minuto?`
                                           );
                                           const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
                                           window.open(whatsappUrl, '_blank');
                                         }}
-                                        className="px-3 py-2 text-sm rounded-xl bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-all flex items-center space-x-1 font-bold shadow-sm"
+                                        className="px-2 py-1 text-xs rounded bg-green-100 text-green-700 hover:bg-green-200 flex items-center space-x-1"
                                         title="Chatear por WhatsApp"
                                       >
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                                           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.89 3.587"/>
                                         </svg>
                                       </button>
@@ -1792,10 +2006,10 @@ if (!isAuthenticated) {
                                           setSelectedLeadForPresupuesto(lead);
                                           setShowPresupuestoSelectModal(true);
                                         }}
-                                        className="px-3 py-2 text-sm rounded-xl bg-purple-100 text-purple-700 hover:bg-purple-200 transition-all flex items-center space-x-1 font-bold shadow-sm"
-                                        title="Enviar presupuesto"
+                                        className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700 hover:bg-purple-200 flex items-center space-x-1"
+                                        title="Enviar presupuesto por WhatsApp"
                                       >
-                                        <FileText size={14} />
+                                        <FileText size={12} />
                                         <span>Pres</span>
                                       </button>
                                       <button
@@ -1804,8 +2018,8 @@ if (!isAuthenticated) {
                                           setEditingLeadObservaciones(lead);
                                           setShowObservacionesModal(true);
                                         }}
-                                        className="px-3 py-2 text-sm rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition-all font-bold shadow-sm"
-                                        title="Observaciones"
+                                        className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                        title="Ver/Editar observaciones"
                                       >
                                         {lead.notas && lead.notas.length > 0 ? "Ver" : "Obs"}
                                       </button>
@@ -1815,8 +2029,8 @@ if (!isAuthenticated) {
                                             e.stopPropagation();
                                             openReassignModal(lead);
                                           }}
-                                          className="px-3 py-2 text-sm rounded-xl bg-purple-100 text-purple-700 hover:bg-purple-200 transition-all font-bold shadow-sm"
-                                          title="Reasignar"
+                                          className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700 hover:bg-purple-200"
+                                          title="Reasignar lead"
                                         >
                                           Reasignar
                                         </button>
@@ -1827,10 +2041,10 @@ if (!isAuthenticated) {
                                             e.stopPropagation();
                                             openDeleteLeadConfirm(lead);
                                           }}
-                                          className="p-2 text-sm rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-all shadow-sm"
-                                          title="Eliminar"
+                                          className="px-2 py-1 text-xs rounded bg-red-100 text-red-700 hover:bg-red-200"
+                                          title="Eliminar lead permanentemente"
                                         >
-                                          <Trash2 size={14} />
+                                          <Trash2 size={12} />
                                         </button>
                                       )}
                                       <button
@@ -1838,8 +2052,8 @@ if (!isAuthenticated) {
                                           e.stopPropagation();
                                           setActiveSection("leads");
                                         }}
-                                        className="px-3 py-2 text-sm rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 transition-all font-bold shadow-sm"
-                                        title="Ver en tabla"
+                                        className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                        title="Ver en tabla completa"
                                       >
                                         Ver
                                       </button>
@@ -1857,43 +2071,34 @@ if (!isAuthenticated) {
               )}
             </div>
 
-            {/* Métricas por fuente mejoradas */}
-            <div className="bg-slate-800 border border-slate-700 rounded-3xl shadow-xl p-8 border-2 border-gray-100">
-              <h3 className="text-2xl font-extrabold text-white
-
-
- mb-8">
+            {/* Métricas por fuente */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">
                 Performance por Fuente
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {(() => {
                   const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
                     ? selectedTeam
                     : undefined;
                   return getSourceMetrics(teamFilter).map((item) => (
-                    <div key={item.source} className="border-2 border-slate-600 rounded-2xl p-6 hover:shadow-2xl hover:border-purple-300 transition-all transform hover:scale-105">
-                      <div className="flex items-center space-x-3 mb-4">
-                        <span className="text-3xl">{item.icon}</span>
-                        <span className="font-extrabold text-white
-
-
- text-lg">{item.label}</span>
+                    <div key={item.source} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <span className="text-lg">{item.icon}</span>
+                        <span className="font-medium text-gray-900">{item.label}</span>
                       </div>
-                      <div className="space-y-3 text-sm">
+                      <div className="space-y-1 text-sm">
                         <div className="flex justify-between">
-                          <span className="text-slate-400 font-semibold">Total:</span>
-                          <span className="font-extrabold text-white
-
-
- text-lg">{item.total}</span>
+                          <span>Total:</span>
+                          <span className="font-semibold">{item.total}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-400 font-semibold">Ventas:</span>
-                          <span className="font-extrabold text-emerald-600 text-lg">{item.vendidos}</span>
+                          <span>Ventas:</span>
+                          <span className="font-semibold text-green-600">{item.vendidos}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-400 font-semibold">Conversión:</span>
-                          <span className="font-extrabold text-purple-600 text-lg">
+                          <span>Conversión:</span>
+                          <span className="font-semibold text-purple-600">
                             {item.conversion}%
                           </span>
                         </div>
@@ -1906,54 +2111,53 @@ if (!isAuthenticated) {
           </div>
         )}
 
-        {/* Sección Leads */}
+        {/* Leads */}
         {activeSection === "leads" && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-white
-
-
-">Gestión de Leads</h2>
+              <h2 className="text-3xl font-bold text-gray-800">Gestión de Leads</h2>
               {canCreateLeads() && (
                 <button
                   onClick={() => setShowNewLeadModal(true)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all"
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   <Plus size={20} />
-                  <span className="font-medium">Nuevo Lead</span>
+                  <span>Nuevo Lead</span>
                 </button>
               )}
             </div>
 
             {/* Barra de búsqueda y filtros */}
-            <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6">
+            <div className="bg-white rounded-xl shadow-lg p-6">
               <div className="flex flex-col lg:flex-row gap-4">
+                {/* Búsqueda de texto */}
                 <div className="flex-1">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                     <input
                       type="text"
-                      placeholder="Buscar por cliente, teléfono, modelo, vendedor..."
+                      placeholder="Buscar por cliente, teléfono, modelo, vendedor, observaciones..."
                       value={searchText}
                       onChange={(e) => setSearchText(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 </div>
 
+                {/* Botón para mostrar/ocultar filtros */}
                 <div className="flex items-center space-x-3">
                   <button
                     onClick={() => setShowFilters(!showFilters)}
-                    className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg border transition-all ${
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
                       showFilters || getActiveFiltersCount() > 0
-                        ? "bg-purple-100 border-purple-300 text-purple-700"
-                        : "bg-slate-800 border border-slate-700 border-gray-300 text-slate-300 hover:bg-slate-800"
+                        ? "bg-blue-100 border-blue-300 text-blue-700"
+                        : "bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100"
                     }`}
                   >
                     <Filter size={20} />
-                    <span className="font-medium">Filtros</span>
+                    <span>Filtros</span>
                     {getActiveFiltersCount() > 0 && (
-                      <span className="bg-purple-600 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center font-bold">
+                      <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
                         {getActiveFiltersCount()}
                       </span>
                     )}
@@ -1962,40 +2166,39 @@ if (!isAuthenticated) {
                   {getActiveFiltersCount() > 0 && (
                     <button
                       onClick={clearFilters}
-                      className="flex items-center space-x-2 px-4 py-2.5 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
+                      className="flex items-center space-x-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
                     >
                       <X size={16} />
-                      <span className="font-medium">Limpiar</span>
+                      <span>Limpiar</span>
                     </button>
                   )}
 
-                  <div className="text-sm text-slate-400">
-                    <span className="font-semibold text-white
-
-
-">{getFilteredAndSearchedLeads().length}</span> leads
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">{getFilteredLeadsByDate().length}</span> leads encontrados
                   </div>
                 </div>
               </div>
 
+              {/* Panel de filtros expandible */}
               {showFilters && (
-                <div className="mt-4 pt-4 border-t border-slate-600">
+                <div className="mt-4 pt-4 border-t border-gray-200">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Filtro por vendedor */}
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         <User size={16} className="inline mr-1" />
                         Vendedor
                       </label>
                       <select
                         value={selectedVendedorFilter || ""}
                         onChange={(e) => setSelectedVendedorFilter(e.target.value ? parseInt(e.target.value, 10) : null)}
-                        className="w-full px-3 py-2 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="">Todos los vendedores</option>
                         <option value="0">Sin asignar</option>
                         {getVisibleUsers()
-                          .filter((u) => u.role === "vendedor")
-                          .map((vendedor) => {
+                          .filter((u: any) => u.role === "vendedor")
+                          .map((vendedor: any) => {
                             const leadsCount = leads.filter(l => l.vendedor === vendedor.id).length;
                             return (
                               <option key={vendedor.id} value={vendedor.id}>
@@ -2006,14 +2209,15 @@ if (!isAuthenticated) {
                       </select>
                     </div>
 
+                    {/* Filtro por estado */}
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Estado
                       </label>
                       <select
                         value={selectedEstadoFilter}
                         onChange={(e) => setSelectedEstadoFilter(e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="">Todos los estados</option>
                         {Object.entries(estados).map(([key, estado]) => (
@@ -2024,14 +2228,15 @@ if (!isAuthenticated) {
                       </select>
                     </div>
 
+                    {/* Filtro por fuente */}
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Fuente
                       </label>
                       <select
                         value={selectedFuenteFilter}
                         onChange={(e) => setSelectedFuenteFilter(e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="">Todas las fuentes</option>
                         {Object.entries(fuentes).map(([key, fuente]) => (
@@ -2045,77 +2250,138 @@ if (!isAuthenticated) {
                 </div>
               )}
             </div>
-
-            {/* Tabla de leads */}
-            <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden">
+{/* AGREGAR ESTE NUEVO FILTRO DE FECHA */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Filtrar por fecha
+                      </label>
+                      <div className="space-y-2">
+                        <select
+                          value={dateFilterType}
+                          onChange={(e) => setDateFilterType(e.target.value as "created" | "status_change")}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                        >
+                          <option value="status_change">Último cambio de estado</option>
+                          <option value="created">Fecha de creación</option>
+                        </select>
+                        
+                        <div className="flex space-x-2">
+                          <select
+                            value={selectedMonth}
+                            onChange={(e) => setSelectedMonth(e.target.value)}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                          >
+                            <option value="">Todos los meses</option>
+                            <option value="01">Enero</option>
+                            <option value="02">Febrero</option>
+                            <option value="03">Marzo</option>
+                            <option value="04">Abril</option>
+                            <option value="05">Mayo</option>
+                            <option value="06">Junio</option>
+                            <option value="07">Julio</option>
+                            <option value="08">Agosto</option>
+                            <option value="09">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                          </select>
+                          
+                          <select
+                            value={selectedYear}
+                            onChange={(e) => setSelectedYear(e.target.value)}
+                            className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                          >
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+            {/* Tabla de leads con búsqueda y filtros aplicados */}
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-slate-700">
+                  <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Cliente</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Contacto</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Vehículo</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Estado</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Fuente</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Vendedor</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Fecha</th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-slate-300 uppercase">Acciones</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Cliente
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Contacto
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Vehículo
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Estado
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Fuente
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Vendedor
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Fecha
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                        Acciones
+                      </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-slate-800 border border-slate-700 divide-y divide-gray-200">
-                    {getFilteredAndSearchedLeads().length === 0 ? (
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {getFilteredLeadsByDate().length === 0 ? (
                       <tr>
-                        <td colSpan={8} className="px-4 py-12 text-center text-gray-500">
+                        <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
                           {searchText.trim() || selectedVendedorFilter || selectedEstadoFilter || selectedFuenteFilter
-                            ? "No se encontraron leads con los filtros aplicados"
+                            ? "No se encontraron leads que coincidan con los filtros aplicados"
                             : "No hay leads para mostrar"}
                         </td>
                       </tr>
                     ) : (
-                      getFilteredAndSearchedLeads().map((lead) => {
+                      getFilteredLeadsByDate().map((lead) => {
                         const vendedor = lead.vendedor ? userById.get(lead.vendedor) : null;
                         const canReassign =
                           canManageUsers() ||
                           (currentUser?.role === "supervisor" &&
                             lead.vendedor &&
-                            getVisibleUsers().some((u) => u.id === lead.vendedor));
+                            getVisibleUsers().some((u: any) => u.id === lead.vendedor));
 
                         return (
-                          <tr key={lead.id} className="hover:bg-slate-800 transition-colors">
+                          <tr key={lead.id} className="hover:bg-gray-50">
                             <td className="px-4 py-4">
-                              <div className="font-medium text-white
-
-
-">{lead.nombre}</div>
+                              <div className="font-medium text-gray-900">{lead.nombre}</div>
                               {lead.created_by && (
                                 <div className="text-xs text-gray-500">
-                                  Creado por: {userById.get(lead.created_by)?.name || 'Sistema'}
+                                  Creado por: {userById.get(lead.created_by)?.name || 'Usuario eliminado'}
                                 </div>
                               )}
                             </td>
                             <td className="px-4 py-4">
-                              <div className="flex items-center space-x-2">
-                                <Phone size={14} className="text-gray-400" />
-                                <span className="text-slate-300">{lead.telefono}</span>
+                              <div className="flex items-center space-x-1">
+                                <Phone size={12} className="text-gray-400" />
+                                <span className="text-gray-700">{lead.telefono}</span>
                               </div>
                             </td>
                             <td className="px-4 py-4">
                               <div>
-                                <div className="font-medium text-white
-
-
-">{lead.modelo}</div>
+                                <div className="font-medium text-gray-900">{lead.modelo}</div>
                                 <div className="text-xs text-gray-500">{lead.formaPago}</div>
                                 {lead.infoUsado && (
-                                  <div className="text-xs text-orange-600">Usado: {lead.infoUsado}</div>
+                                  <div className="text-xs text-orange-600">
+                                    Usado: {lead.infoUsado}
+                                  </div>
                                 )}
                               </div>
                             </td>
                             <td className="px-4 py-4">
                               <select
                                 value={lead.estado}
-                                onChange={(e) => handleUpdateLeadStatus(lead.id, e.target.value)}
-                                className={`text-xs font-medium rounded-full px-3 py-1 border-0 text-white ${estados[lead.estado].color} cursor-pointer hover:opacity-90 transition-opacity`}
+                                onChange={(e) =>
+                                  handleUpdateLeadStatus(lead.id, e.target.value)
+                                }
+                                className={`text-xs font-medium rounded-full px-2 py-1 border-0 text-white ${estados[lead.estado].color}`}
                               >
                                 {Object.entries(estados).map(([key, estado]) => (
                                   <option key={key} value={key} className="text-black">
@@ -2126,72 +2392,77 @@ if (!isAuthenticated) {
                             </td>
                             <td className="px-4 py-4">
                               <div className="flex items-center space-x-1">
-                                <span>{fuentes[lead.fuente]?.icon || "❓"}</span>
-                                <span className="text-xs text-slate-400">
-                                  {fuentes[lead.fuente]?.label || String(lead.fuente)}
+                                <span className="text-sm">
+                                  {fuentes[lead.fuente as string]?.icon || "❓"}
+                                </span>
+                                <span className="text-xs text-gray-600">
+                                  {fuentes[lead.fuente as string]?.label || String(lead.fuente)}
                                 </span>
                               </div>
                             </td>
-                            <td className="px-4 py-4">
+                            <td className="px-4 py-4 text-gray-700">
                               <div>
-                                <span className="text-white
-
-
-">{vendedor?.name || "Sin asignar"}</span>
+                                {vendedor?.name || "Sin asignar"}
                                 {vendedor && !vendedor.active && (
-                                  <div className="text-xs text-red-600">(Desactivado)</div>
+                                  <div className="text-xs text-red-600">
+                                    (Desactivado)
+                                  </div>
                                 )}
                               </div>
                             </td>
                             <td className="px-4 py-4 text-gray-500 text-xs">
                               {lead.fecha ? String(lead.fecha).slice(0, 10) : "—"}
                             </td>
-                            <td className="px-4 py-4">
+                            <td className="px-4 py-4 text-center">
                               <div className="flex items-center justify-center space-x-1">
                                 <button
                                   onClick={() => {
                                     const phoneNumber = lead.telefono.replace(/\D/g, '');
                                     const message = encodeURIComponent(
-                                      `Hola ${lead.nombre}, me contacto desde Alluma CRM por su consulta sobre el ${lead.modelo}. ¿Cómo está?`
+                                      `Hola ${lead.nombre}, me contacto desde Alra por su consulta sobre el ${lead.modelo}. ¿Cómo está?`
                                     );
-                                    window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+                                    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+                                    window.open(whatsappUrl, '_blank');
                                   }}
-                                  className="px-2 py-1 text-xs rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors"
-                                  title="WhatsApp"
+                                  className="px-2 py-1 text-xs rounded bg-green-100 text-green-700 hover:bg-green-200 flex items-center space-x-1"
+                                  title="Chatear por WhatsApp"
                                 >
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.89 3.587"/>
                                   </svg>
                                 </button>
                                 <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedLeadForPresupuesto(lead);
-                                    setShowPresupuestoSelectModal(true);
-                                  }}
-                                  className="px-2 py-1 text-xs rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors"
-                                  title="Presupuesto"
-                                >
-                                  <FileText size={12} />
-                                </button>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setEditingLeadObservaciones(lead);
-                                    setShowObservacionesModal(true);
-                                  }}
-                                  className="px-2 py-1 text-xs rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
-                                  title="Observaciones"
-                                >
-                                  Obs
-                                </button>
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedLeadForPresupuesto(lead);
+                                            setShowPresupuestoSelectModal(true);
+                                          }}
+                                          className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700 hover:bg-purple-200 flex items-center space-x-1"
+                                          title="Enviar presupuesto por WhatsApp"
+                                        >
+                                          <FileText size={12} />
+                                          <span>Pres</span>
+                                        </button>
+
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setEditingLeadObservaciones(lead);
+                                            setShowObservacionesModal(true);
+                                          }}
+                                          className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                          title="Ver/Editar observaciones"
+                                        >
+                                          {lead.notas && lead.notas.length > 0 ? "Ver" : "Obs"}
+                                        </button>
                                 {canReassign && (
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       openReassignModal(lead);
                                     }}
-                                    className="px-2 py-1 text-xs rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors"
+                                    className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700 hover:bg-purple-200"
+                                    title="Reasignar lead"
                                   >
                                     Reasignar
                                   </button>
@@ -2202,7 +2473,8 @@ if (!isAuthenticated) {
                                       e.stopPropagation();
                                       openDeleteLeadConfirm(lead);
                                     }}
-                                    className="px-2 py-1 text-xs rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+                                    className="px-2 py-1 text-xs rounded bg-red-100 text-red-700 hover:bg-red-200"
+                                    title="Eliminar lead permanentemente"
                                   >
                                     <Trash2 size={12} />
                                   </button>
@@ -2213,7 +2485,8 @@ if (!isAuthenticated) {
                                     setViewingLeadHistorial(lead);
                                     setShowHistorialModal(true);
                                   }}
-                                  className="px-2 py-1 text-xs rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600 transition-colors"
+                                  className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                  title="Ver historial"
                                 >
                                   Historial
                                 </button>
@@ -2234,10 +2507,7 @@ if (!isAuthenticated) {
         {activeSection === "calendar" && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-white
-
-
-">Calendario</h2>
+              <h2 className="text-3xl font-bold text-gray-800">Calendario</h2>
               <div className="flex items-center space-x-3">
                 <select
                   value={selectedCalendarUserId ?? ""}
@@ -2246,12 +2516,12 @@ if (!isAuthenticated) {
                       e.target.value ? parseInt(e.target.value, 10) : null
                     )
                   }
-                  className="px-4 py-2 border border-gray-300 rounded-lg bg-slate-800 border border-slate-700 shadow-sm hover:border-gray-400 focus:ring-2 focus:ring-purple-600 transition-all"
+                  className="px-3 py-2 border border-gray-300 rounded-lg"
                 >
                   <option value="">Mi calendario</option>
                   {visibleUsers
-                    .filter((u) => u.id !== currentUser?.id)
-                    .map((u) => (
+                    .filter((u: any) => u.id !== currentUser?.id)
+                    .map((u: any) => (
                       <option key={u.id} value={u.id}>
                         {u.name} — {roles[u.role] || u.role}
                       </option>
@@ -2259,16 +2529,16 @@ if (!isAuthenticated) {
                 </select>
                 <button
                   onClick={() => setShowNewEventModal(true)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all"
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   <Plus size={20} />
-                  <span className="font-medium">Nuevo Evento</span>
+                  <span>Nuevo Evento</span>
                 </button>
               </div>
             </div>
 
-            <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6">
-              <h3 className="text-xl font-semibold text-slate-200 mb-4">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">
                 Próximos eventos -{" "}
                 {selectedCalendarUserId
                   ? userById.get(selectedCalendarUserId)?.name
@@ -2276,36 +2546,34 @@ if (!isAuthenticated) {
               </h3>
 
               {eventsForSelectedUser.length === 0 ? (
-                <div className="text-center py-12">
-                  <Calendar size={48} className="mx-auto text-gray-300 mb-4" />
-                  <p className="text-gray-500">No hay eventos programados</p>
-                </div>
+                <p className="text-gray-500 text-center py-8">
+                  No hay eventos programados
+                </p>
               ) : (
                 <div className="space-y-3">
-                  {eventsForSelectedUser.map((event) => (
+                  {eventsForSelectedUser.map((event: any) => (
                     <div
                       key={event.id}
-                      className="flex items-center justify-between p-4 border border-slate-600 rounded-lg hover:bg-slate-800 hover:shadow-sm transition-all"
+                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
                     >
                       <div>
-                        <h4 className="font-medium text-white
-
-
-">{event.title}</h4>
-                        <p className="text-sm text-slate-400">
+                        <h4 className="font-medium text-gray-900">{event.title}</h4>
+                        <p className="text-sm text-gray-600">
                           {formatterEs.format(new Date(event.date))} a las {event.time}
                         </p>
                         <p className="text-xs text-gray-500">
                           {userById.get(event.userId)?.name || "Usuario desconocido"}
                         </p>
                       </div>
-                      <button
-                        onClick={() => deleteEvent(event.id)}
-                        className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Eliminar evento"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => deleteEvent(event.id)}
+                          className="p-2 text-red-600 hover:text-red-800"
+                          title="Eliminar evento"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -2314,188 +2582,51 @@ if (!isAuthenticated) {
           </div>
         )}
 
-        {/* Sección Presupuestos */}
-        {activeSection === "presupuestos" && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-white
-
-
-">Plantillas de Presupuesto</h2>
-              {isOwner() && (
-                <button
-                  onClick={() => {
-                    setEditingPresupuesto(null);
-                    setShowPresupuestoModal(true);
-                  }}
-                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all"
-                >
-                  <Plus size={20} />
-                  <span className="font-medium">Nueva Plantilla</span>
-                </button>
-              )}
-            </div>
-
-            {!isOwner() && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-700">
-                  <strong>Nota:</strong> Solo puedes ver las plantillas de presupuesto. 
-                  Para enviar un presupuesto a un cliente, usa el botón en la tabla de leads.
-                </p>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {presupuestos.length === 0 ? (
-                <div className="col-span-full text-center py-12">
-                  <FileText size={48} className="mx-auto text-gray-300 mb-4" />
-                  <p className="text-gray-500">No hay plantillas de presupuesto creadas</p>
-                  {isOwner() && (
-                    <button
-                      onClick={() => {
-                        setEditingPresupuesto(null);
-                        setShowPresupuestoModal(true);
-                      }}
-                      className="mt-4 text-purple-600 hover:text-purple-800 font-medium"
-                    >
-                      Crear la primera plantilla
-                    </button>
-                  )}
-                </div>
-              ) : (
-                presupuestos.map((presupuesto) => (
-                  <div
-                    key={presupuesto.id}
-                    className="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all"
-                  >
-                    {presupuesto.imagen_url && (
-                      <div className="h-48 bg-gray-200 overflow-hidden">
-                        <img
-                          src={presupuesto.imagen_url}
-                          alt={presupuesto.modelo}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.src = 'https://via.placeholder.com/400x300?text=Sin+Imagen';
-                          }}
-                        />
-                      </div>
-                    )}
-                    <div className="p-4">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h3 className="text-lg font-bold text-white
-
-
-">
-                            {presupuesto.modelo}
-                          </h3>
-                          <p className="text-sm text-slate-400">{presupuesto.marca}</p>
-                        </div>
-                      </div>
-                      
-                      {presupuesto.precio_contado && (
-                        <div className="mt-3 p-3 bg-emerald-50 rounded-lg">
-                          <p className="text-xs text-slate-400">Precio Contado</p>
-                          <p className="text-xl font-bold text-emerald-600">
-                            {presupuesto.precio_contado}
-                          </p>
-                        </div>
-                      )}
-
-                      {presupuesto.anticipo && (
-                        <div className="mt-2 text-sm text-slate-400">
-                          <strong>Anticipo:</strong> {presupuesto.anticipo}
-                        </div>
-                      )}
-
-                      {isOwner() && (
-                        <div className="mt-4 flex space-x-2">
-                          <button
-                            onClick={() => {
-                              setEditingPresupuesto(presupuesto);
-                              setShowPresupuestoModal(true);
-                            }}
-                            className="flex-1 px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium"
-                          >
-                            <Edit3 size={14} className="inline mr-1" />
-                            Editar
-                          </button>
-                          <button
-                            onClick={async () => {
-                              if (confirm(`¿Eliminar plantilla de ${presupuesto.modelo}?`)) {
-                                try {
-                                  await apiDeletePresupuesto(presupuesto.id);
-                                  setPresupuestos(prev => prev.filter(p => p.id !== presupuesto.id));
-                                } catch (error) {
-                                  console.error('Error al eliminar:', error);
-                                  alert('Error al eliminar la plantilla');
-                                }
-                              }
-                            }}
-                            className="px-3 py-2 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Sección Ranking */}
         {activeSection === "ranking" && (
           <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-white
-
-
-">Ranking de Vendedores</h2>
+            <h2 className="text-3xl font-bold text-gray-800">Ranking de Vendedores</h2>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Ranking General - Solo para Owner */}
               {isOwner() && (
-                <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6">
-                  <h3 className="text-xl font-semibold text-slate-200 mb-4">
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4">
                     Ranking General
                   </h3>
                   <div className="space-y-3">
                     {getRanking().map((vendedor, index) => (
                       <div
                         key={vendedor.id}
-                        className="flex items-center justify-between p-4 border border-slate-600 rounded-lg hover:shadow-sm transition-all"
+                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
                       >
                         <div className="flex items-center space-x-3">
                           <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-md ${
+                            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white ${
                               index === 0
-                                ? "bg-gradient-to-br from-yellow-400 to-yellow-500"
+                                ? "bg-yellow-500"
                                 : index === 1
-                                ? "bg-gradient-to-br from-gray-300 to-gray-400"
+                                ? "bg-gray-400"
                                 : index === 2
-                                ? "bg-gradient-to-br from-orange-500 to-orange-600"
-                                : "bg-gradient-to-br from-gray-400 to-gray-500"
+                                ? "bg-orange-600"
+                                : "bg-gray-300"
                             }`}
                           >
                             {index + 1}
                           </div>
                           <div>
-                            <p className="font-medium text-white
-
-
-">
+                            <p className="font-medium text-gray-900">
                               {vendedor.nombre}
                             </p>
                             <p className="text-xs text-gray-500">{vendedor.team}</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-emerald-600">
+                          <p className="font-bold text-green-600">
                             {vendedor.ventas} ventas
                           </p>
                           <p className="text-xs text-gray-500">
-                            {vendedor.leadsAsignados} leads
+                            {vendedor.leadsAsignados} leads asignados
                           </p>
                         </div>
                       </div>
@@ -2509,8 +2640,9 @@ if (!isAuthenticated) {
                 </div>
               )}
 
-              <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6">
-                <h3 className="text-xl font-semibold text-slate-200 mb-4">
+              {/* Ranking en Mi Scope / Vendedores de la misma gerencia */}
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">
                   {currentUser?.role === "vendedor" 
                     ? "Ranking Vendedores" 
                     : isOwner() 
@@ -2524,40 +2656,38 @@ if (!isAuthenticated) {
                   ).map((vendedor, index) => (
                     <div
                       key={vendedor.id}
-                      className={`flex items-center justify-between p-4 border rounded-lg transition-all ${
-                        vendedor.id === currentUser?.id 
-                          ? "bg-purple-50 border-purple-300 shadow-sm" 
-                          : "border-slate-600 hover:shadow-sm"
+                      className={`flex items-center justify-between p-4 border border-gray-200 rounded-lg ${
+                        vendedor.id === currentUser?.id ? "bg-blue-50 border-blue-300" : ""
                       }`}
                     >
                       <div className="flex items-center space-x-3">
                         <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-md ${
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white ${
                             index === 0
-                              ? "bg-gradient-to-br from-yellow-400 to-yellow-500"
+                              ? "bg-yellow-500"
                               : index === 1
-                              ? "bg-gradient-to-br from-gray-300 to-gray-400"
+                              ? "bg-gray-400"
                               : index === 2
-                              ? "bg-gradient-to-br from-orange-500 to-orange-600"
-                              : "bg-gradient-to-br from-gray-400 to-gray-500"
+                              ? "bg-orange-600"
+                              : "bg-gray-300"
                           }`}
                         >
                           {index + 1}
                         </div>
                         <div>
                           <p className={`font-medium ${
-                            vendedor.id === currentUser?.id ? "text-purple-900" : "text-white"
+                            vendedor.id === currentUser?.id ? "text-blue-900" : "text-gray-900"
                           }`}>
                             {vendedor.nombre}
                             {vendedor.id === currentUser?.id && (
-                              <span className="ml-2 text-xs text-purple-600 font-normal">(Tú)</span>
+                              <span className="ml-2 text-xs text-blue-600 font-normal">(Tú)</span>
                             )}
                           </p>
                           <p className="text-xs text-gray-500">{vendedor.team}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-emerald-600">
+                        <p className="font-bold text-green-600">
                           {vendedor.ventas} ventas
                         </p>
                         <p className="text-xs text-gray-500">
@@ -2576,7 +2706,9 @@ if (!isAuthenticated) {
                   : getRankingInScope()
                 ).length === 0 && (
                   <p className="text-gray-500 text-center py-8">
-                    No hay vendedores para mostrar
+                    {currentUser?.role === "vendedor" 
+                      ? "No hay otros vendedores en tu gerencia"
+                      : "No hay vendedores en tu scope"}
                   </p>
                 )}
               </div>
@@ -2589,20 +2721,17 @@ if (!isAuthenticated) {
           ["supervisor", "gerente", "gerente_general", "owner"].includes(currentUser?.role) && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold text-white
-
-
-">Mi Equipo</h2>
+                <h2 className="text-3xl font-bold text-gray-800">Mi Equipo</h2>
                 {["owner", "gerente_general"].includes(currentUser?.role) && (
                   <select
                     value={selectedTeam}
                     onChange={(e) => setSelectedTeam(e.target.value)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg bg-slate-800 border border-slate-700 shadow-sm hover:border-gray-400 focus:ring-2 focus:ring-purple-600 transition-all"
+                    className="px-3 py-2 border border-gray-300 rounded-lg bg-white"
                   >
                     <option value="todos">Todos los equipos</option>
                     {users
-                      .filter((u) => u.role === "gerente")
-                      .map((gerente) => (
+                      .filter((u: any) => u.role === "gerente")
+                      .map((gerente: any) => (
                         <option key={gerente.id} value={gerente.id.toString()}>
                           Equipo {gerente.name}
                         </option>
@@ -2611,16 +2740,65 @@ if (!isAuthenticated) {
                 )}
               </div>
 
-              {/* Estadísticas por estado */}
-              <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold text-slate-200">
+              {/* Panel de Debug solo para Owner/gerente_general */}
+              {["owner", "gerente_general"].includes(currentUser?.role) && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <details>
+                    <summary className="cursor-pointer font-semibold text-yellow-800 mb-2">
+                      🔧 Panel de Depuración - Jerarquía
+                    </summary>
+                    <div className="text-xs space-y-2 mt-3">
+                      <div>
+                        <strong>Tu información:</strong>
+                        <div className="ml-4">Nombre: {currentUser?.name}</div>
+                        <div className="ml-4">Rol: {currentUser?.role}</div>
+                        <div className="ml-4">IDs visibles: {visibleUserIds.join(', ')}</div>
+                      </div>
+                      <div className="border-t pt-2 mt-2">
+                        <strong>Jerarquía completa:</strong>
+                        {users.filter((u: any) => u.role === "gerente").map((gerente: any) => {
+                          const gerenteChildren = childrenIndex.get(gerente.id) || [];
+                          return (
+                            <div key={gerente.id} className="ml-4 mt-2">
+                              <div className="font-semibold">👔 {gerente.name} (Gerente)</div>
+                              {gerenteChildren.map((supId: number) => {
+                                const supervisor = userById.get(supId);
+                                const supChildren = childrenIndex.get(supId) || [];
+                                const supLeads = leads.filter(l => l.vendedor === supId || supChildren.includes(l.vendedor || 0));
+                                return (
+                                  <div key={supId} className="ml-4">
+                                    <div>👨‍💼 {supervisor?.name} ({supervisor?.role}) - {supLeads.length} leads</div>
+                                    {supChildren.map((vendId: number) => {
+                                      const vendedor = userById.get(vendId);
+                                      const vendLeads = leads.filter(l => l.vendedor === vendId);
+                                      return (
+                                        <div key={vendId} className="ml-4">
+                                          👤 {vendedor?.name} ({vendedor?.role}) - {vendLeads.length} leads
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </details>
+                </div>
+              )}
+
+              {/* Estadísticas por estado tipo dashboard */}
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold text-gray-800">
                     Estados de Leads - Mi Equipo
                   </h3>
                   {selectedEstado && (
                     <button
                       onClick={() => setSelectedEstado(null)}
-                      className="text-sm text-purple-600 hover:text-purple-800 flex items-center space-x-1 font-medium"
+                      className="text-sm text-blue-600 hover:text-blue-800 flex items-center space-x-1"
                     >
                       <X size={16} />
                       <span>Cerrar filtro</span>
@@ -2629,32 +2807,273 @@ if (!isAuthenticated) {
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   {Object.entries(estados).map(([key, estado]) => {
-                    const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
-                      ? selectedTeam
-                      : undefined;
-                    const filteredLeads = getFilteredLeadsByTeam(teamFilter);
-                    const count = filteredLeads.filter((l) => l.estado === key).length;
+  const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
+    ? selectedTeam
+    : undefined;
+  let filteredLeads = getFilteredLeadsByTeam(teamFilter);
+  
+  // Aplicar filtro de fecha
+  if (selectedMonth && selectedYear) {
+    filteredLeads = filteredLeads.filter((lead) => {
+      const dateToCheck = dateFilterType === "status_change" 
+        ? (lead.last_status_change || lead.fecha || lead.created_at)
+        : (lead.fecha || lead.created_at);
+      
+      if (!dateToCheck) return false;
+      
+      const leadDate = new Date(dateToCheck);
+      const leadMonth = (leadDate.getMonth() + 1).toString().padStart(2, '0');
+      const leadYear = leadDate.getFullYear().toString();
+      
+      return leadMonth === selectedMonth && leadYear === selectedYear;
+    });
+  }
+  
+  const count = filteredLeads.filter((l) => l.estado === key).length;
                     return (
                       <button
                         key={key}
                         onClick={() => setSelectedEstado(selectedEstado === key ? null : key)}
-                        className={`text-center transition-all duration-200 ${
-                          selectedEstado === key ? "ring-4 ring-purple-400 ring-opacity-50 scale-105" : "hover:scale-105"
+                        className={`text-center transition-all duration-200 transform hover:scale-105 ${
+                          selectedEstado === key ? "ring-4 ring-blue-300 ring-opacity-50" : ""
                         }`}
+                        title={`Ver todos los leads en estado: ${estado.label}`}
                       >
-                        <div className={`${estado.color} text-white rounded-xl p-4 mb-2 shadow-md hover:shadow-lg transition-all cursor-pointer`}>
+                        <div className={`${estado.color} text-white rounded-lg p-4 mb-2 hover:opacity-90`}>
                           <div className="text-2xl font-bold">{count}</div>
                         </div>
-                        <div className="text-sm text-slate-300 font-medium">{estado.label}</div>
+                        <div className="text-sm text-gray-600">{estado.label}</div>
                       </button>
                     );
                   })}
                 </div>
+
+                {/* Lista filtrada de leads por estado en Mi Equipo */}
+                {selectedEstado && (
+                  <div className="mt-6 border-t pt-6">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                      Leads de mi equipo en estado:{" "}
+                      <span
+                        className={`px-3 py-1 rounded-full text-white text-sm ${
+                          estados[selectedEstado].color
+                        }`}
+                      >
+                        {estados[selectedEstado].label}
+                      </span>
+                    </h4>
+
+                    {(() => {
+                      const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
+                        ? selectedTeam
+                        : undefined;
+                      const filteredLeads = getFilteredLeadsByTeam(teamFilter);
+                      const leadsFiltrados = filteredLeads.filter(
+                        (l) => l.estado === selectedEstado
+                      );
+
+                      if (leadsFiltrados.length === 0) {
+                        return (
+                          <p className="text-gray-500 text-center py-8">
+                            No hay leads de tu equipo en estado "
+                            {estados[selectedEstado].label}"
+                          </p>
+                        );
+                      }
+
+                      return (
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                  Cliente
+                                </th>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                  Contacto
+                                </th>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                  Vehículo
+                                </th>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                  Estado
+                                </th>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                  Fuente
+                                </th>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                  Vendedor
+                                </th>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                  Fecha
+                                </th>
+                                <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                                  Acciones
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                              {leadsFiltrados.map((lead) => {
+                                const vendedor = lead.vendedor
+                                  ? userById.get(lead.vendedor)
+                                  : null;
+                                return (
+                                  <tr key={lead.id} className="hover:bg-gray-50">
+                                    <td className="px-4 py-2">
+                                      <div className="font-medium text-gray-900">
+                                        {lead.nombre}
+                                      </div>
+                                    </td>
+                                    <td className="px-4 py-2">
+                                      <div className="flex items-center space-x-1">
+                                        <Phone size={12} className="text-gray-400" />
+                                        <span className="text-gray-700">{lead.telefono}</span>
+                                      </div>
+                                    </td>
+                                    <td className="px-4 py-2">
+                                      <div>
+                                        <div className="font-medium text-gray-900">
+                                          {lead.modelo}
+                                        </div>
+                                        <div className="text-xs text-gray-500">
+                                          {lead.formaPago}
+                                        </div>
+                                        {lead.infoUsado && (
+                                          <div className="text-xs text-orange-600">
+                                            Usado: {lead.infoUsado}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </td>
+                                    <td className="px-4 py-2">
+                                      <select
+                                        value={lead.estado}
+                                        onChange={(e) =>
+                                          handleUpdateLeadStatus(lead.id, e.target.value)
+                                        }
+                                        className={`text-xs font-medium rounded-full px-2 py-1 border-0 text-white ${estados[lead.estado].color}`}
+                                      >
+                                        {Object.entries(estados).map(([key, estado]) => (
+                                          <option key={key} value={key} className="text-black">
+                                            {estado.label}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </td>
+                                    <td className="px-4 py-2">
+                                      <div className="flex items-center space-x-1">
+                                        <span className="text-sm">
+                                          {fuentes[lead.fuente as string]?.icon || "❓"}
+                                        </span>
+                                        <span className="text-xs text-gray-600">
+                                          {fuentes[lead.fuente as string]?.label ||
+                                            String(lead.fuente)}
+                                        </span>
+                                      </div>
+                                    </td>
+                                    <td className="px-4 py-2 text-gray-700">
+                                      {vendedor?.name || "Sin asignar"}
+                                    </td>
+                                    <td className="px-4 py-2 text-gray-500 text-xs">
+                                      {lead.fecha ? String(lead.fecha).slice(0, 10) : "—"}
+                                    </td>
+                                    <td className="px-4 py-2 text-center">
+                                      <div className="flex items-center justify-center space-x-1">
+                                        <button
+                                          onClick={() => {
+                                            const phoneNumber = lead.telefono.replace(/\D/g, '');
+                                            const message = encodeURIComponent(
+                                              `Hola ${lead.nombre}, me contacto desde Alluma por su consulta sobre el ${lead.modelo}. ¿Cómo está?`
+                                            );
+                                            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+                                            window.open(whatsappUrl, '_blank');
+                                          }}
+                                          className="px-2 py-1 text-xs rounded bg-green-100 text-green-700 hover:bg-green-200 flex items-center space-x-1"
+                                          title="Chatear por WhatsApp"
+                                        >
+                                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.89 3.587"/>
+                                          </svg>
+                                        </button>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedLeadForPresupuesto(lead);
+                                            setShowPresupuestoSelectModal(true);
+                                          }}
+                                          className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700 hover:bg-purple-200 flex items-center space-x-1"
+                                          title="Enviar presupuesto por WhatsApp"
+                                        >
+                                          <FileText size={12} />
+                                          <span>Pres</span>
+                                        </button>
+
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setEditingLeadObservaciones(lead);
+                                            setShowObservacionesModal(true);
+                                          }}
+                                          className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                          title="Ver/Editar observaciones"
+                                        >
+                                          {lead.notas && lead.notas.length > 0 ? "Ver" : "Obs"}
+                                        </button>
+                                        {(canManageUsers() ||
+                                          (currentUser?.role === "supervisor" &&
+                                            lead.vendedor &&
+                                            getVisibleUsers().some(
+                                              (u: any) => u.id === lead.vendedor
+                                            ))) && (
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              openReassignModal(lead);
+                                            }}
+                                            className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700 hover:bg-purple-200"
+                                            title="Reasignar lead"
+                                          >
+                                            Reasignar
+                                          </button>
+                                        )}
+                                        {canDeleteLeads() && (
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              openDeleteLeadConfirm(lead);
+                                            }}
+                                            className="px-2 py-1 text-xs rounded bg-red-100 text-red-700 hover:bg-red-200"
+                                            title="Eliminar lead permanentemente"
+                                          >
+                                            <Trash2 size={12} />
+                                          </button>
+                                        )}
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setActiveSection("leads");
+                                          }}
+                                          className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                          title="Ver en tabla completa"
+                                        >
+                                          Ver
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
               </div>
 
-              {/* Top vendedores en el equipo */}
-              <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6">
-                <h3 className="text-xl font-semibold text-slate-200 mb-4">
+              {/* Top vendedores en mi organización */}
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">
                   Top Vendedores en Mi Organización
                 </h3>
                 <div className="space-y-3">
@@ -2665,11 +3084,11 @@ if (!isAuthenticated) {
                     const filteredLeads = getFilteredLeadsByTeam(teamFilter);
                     
                     const vendedoresEnScope = users.filter(
-                      (u) => u.role === "vendedor" && visibleUserIds.includes(u.id)
+                      (u: any) => u.role === "vendedor" && visibleUserIds.includes(u.id)
                     );
                     
                     const ranking = vendedoresEnScope
-                      .map((v) => {
+                      .map((v: any) => {
                         const vendedorLeads = filteredLeads.filter((l) => l.vendedor === v.id);
                         const ventas = vendedorLeads.filter((l) => l.estado === "vendido").length;
                         return {
@@ -2685,34 +3104,31 @@ if (!isAuthenticated) {
                     return ranking.map((vendedor, index) => (
                       <div
                         key={vendedor.id}
-                        className="flex items-center justify-between p-4 border border-slate-600 rounded-lg hover:shadow-sm transition-all"
+                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
                       >
                         <div className="flex items-center space-x-3">
                           <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-md ${
+                            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white ${
                               index === 0
-                                ? "bg-gradient-to-br from-yellow-400 to-yellow-500"
+                                ? "bg-yellow-500"
                                 : index === 1
-                                ? "bg-gradient-to-br from-gray-300 to-gray-400"
+                                ? "bg-gray-400"
                                 : index === 2
-                                ? "bg-gradient-to-br from-orange-500 to-orange-600"
-                                : "bg-gradient-to-br from-gray-400 to-gray-500"
+                                ? "bg-orange-600"
+                                : "bg-gray-300"
                             }`}
                           >
                             {index + 1}
                           </div>
                           <div>
-                            <p className="font-medium text-white
-
-
-">
+                            <p className="font-medium text-gray-900">
                               {vendedor.nombre}
                             </p>
                             <p className="text-xs text-gray-500">{vendedor.team}</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-emerald-600">
+                          <p className="font-bold text-green-600">
                             {vendedor.ventas} ventas
                           </p>
                           <p className="text-xs text-gray-500">
@@ -2727,96 +3143,40 @@ if (!isAuthenticated) {
                     ));
                   })()}
                 </div>
+                {(() => {
+                  const vendedoresEnScope = users.filter(
+                    (u: any) => u.role === "vendedor" && visibleUserIds.includes(u.id)
+                  );
+                  return vendedoresEnScope.length === 0 && (
+                    <p className="text-gray-500 text-center py-8">
+                      No hay vendedores en tu equipo
+                    </p>
+                  );
+                })()}
               </div>
             </div>
           )}
-
-        {/* Sección Alertas */}
-        {activeSection === "alerts" && (
-          <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-white
-
-
-">Notificaciones y Alertas</h2>
-
-            <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6">
-              {alerts.filter(a => a.userId === currentUser?.id).length === 0 ? (
-                <div className="text-center py-12">
-                  <Bell size={48} className="mx-auto text-gray-300 mb-4" />
-                  <p className="text-gray-500">No tienes alertas pendientes</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {alerts
-                    .filter(a => a.userId === currentUser?.id)
-                    .sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime())
-                    .map((alert) => (
-                      <div
-                        key={alert.id}
-                        className={`p-4 border rounded-lg transition-all ${
-                          alert.read ? 'bg-slate-800 border border-slate-700 border-slate-600' : 'bg-purple-50 border-purple-300 shadow-sm'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start space-x-3">
-                            {alert.type === 'lead_assigned' ? (
-                              <Users className="h-5 w-5 text-purple-600 mt-0.5" />
-                            ) : (
-                              <Trophy className="h-5 w-5 text-yellow-500 mt-0.5" />
-                            )}
-                            <div>
-                              <p className="font-medium text-white
-
-
-">{alert.message}</p>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {new Date(alert.ts).toLocaleString('es-AR')}
-                              </p>
-                            </div>
-                          </div>
-                          {!alert.read && (
-                            <button
-                              onClick={() => {
-                                setAlerts(prev => 
-                                  prev.map(a => a.id === alert.id ? {...a, read: true} : a)
-                                );
-                              }}
-                              className="text-xs text-purple-600 hover:text-purple-800 font-medium"
-                            >
-                              Marcar como leída
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Sección Usuarios */}
+        
+        {/* Sección Usuarios con filtros mejorados */}
         {activeSection === "users" && canManageUsers() && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-white
-
-
-">Gestión de Usuarios</h2>
+              <h2 className="text-3xl font-bold text-gray-800">Gestión de Usuarios</h2>
               {canCreateUsers() && (
                 <button
                   onClick={openCreateUser}
-                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all"
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   <Plus size={20} />
-                  <span className="font-medium">Nuevo Usuario</span>
+                  <span>Nuevo Usuario</span>
                 </button>
               )}
             </div>
 
-            {/* Barra de búsqueda y filtros usuarios */}
-            <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6">
+            {/* Barra de búsqueda y filtros para usuarios */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
               <div className="flex flex-col lg:flex-row gap-4">
+                {/* Búsqueda de texto */}
                 <div className="flex-1">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -2825,18 +3185,19 @@ if (!isAuthenticated) {
                       placeholder="Buscar por nombre, email, rol o equipo..."
                       value={userSearchText}
                       onChange={(e) => setUserSearchText(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 </div>
 
+                {/* Controles de ordenamiento y filtros */}
                 <div className="flex items-center space-x-3">
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm text-slate-400 font-medium">Ordenar:</span>
+                    <span className="text-sm text-gray-600">Ordenar por:</span>
                     <select
                       value={userSortBy}
-                      onChange={(e) => setUserSortBy(e.target.value)}
-                      className="px-3 py-2 border border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-purple-600 transition-all"
+                      onChange={(e) => setUserSortBy(e.target.value as any)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="team">Equipo</option>
                       <option value="name">Nombre</option>
@@ -2847,16 +3208,16 @@ if (!isAuthenticated) {
 
                   <button
                     onClick={() => setShowUserFilters(!showUserFilters)}
-                    className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg border transition-all ${
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
                       showUserFilters || getActiveUserFiltersCount() > 0
-                        ? "bg-purple-100 border-purple-300 text-purple-700"
-                        : "bg-slate-800 border border-slate-700 border-gray-300 text-slate-300 hover:bg-slate-800"
+                        ? "bg-blue-100 border-blue-300 text-blue-700"
+                        : "bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100"
                     }`}
                   >
                     <Filter size={20} />
-                    <span className="font-medium">Filtros</span>
+                    <span>Filtros</span>
                     {getActiveUserFiltersCount() > 0 && (
-                      <span className="bg-purple-600 text-white text-xs rounded-full px-2 py-0.5 font-bold">
+                      <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
                         {getActiveUserFiltersCount()}
                       </span>
                     )}
@@ -2866,41 +3227,40 @@ if (!isAuthenticated) {
                   {getActiveUserFiltersCount() > 0 && (
                     <button
                       onClick={clearUserFilters}
-                      className="flex items-center space-x-2 px-4 py-2.5 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
+                      className="flex items-center space-x-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
                     >
                       <X size={16} />
-                      <span className="font-medium">Limpiar</span>
+                      <span>Limpiar</span>
                     </button>
                   )}
 
-                  <div className="text-sm text-slate-400">
-                    <span className="font-semibold text-white
-
-
-">{getFilteredAndSortedUsers().length}</span> usuarios
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">{getFilteredAndSortedUsers().length}</span> usuarios
                   </div>
                 </div>
               </div>
 
+              {/* Panel de filtros expandible */}
               {showUserFilters && (
-                <div className="mt-4 pt-4 border-t border-slate-600">
+                <div className="mt-4 pt-4 border-t border-gray-200">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Filtro por equipo/gerente */}
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         <Users size={16} className="inline mr-1" />
                         Equipo
                       </label>
                       <select
                         value={selectedTeamFilter}
                         onChange={(e) => setSelectedTeamFilter(e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="todos">Todos los equipos</option>
                         <option value="sin_equipo">Sin equipo asignado</option>
                         {users
-                          .filter((u) => u.role === "gerente" && getVisibleUsers().some((vu) => vu.id === u.id))
-                          .map((gerente) => {
-                            const teamCount = users.filter((u) => {
+                          .filter((u: any) => u.role === "gerente" && getVisibleUsers().some((vu: any) => vu.id === u.id))
+                          .map((gerente: any) => {
+                            const teamCount = users.filter((u: any) => {
                               const teamUserIds = getTeamUserIds(gerente.id.toString());
                               return teamUserIds.includes(u.id) || u.id === gerente.id;
                             }).length;
@@ -2913,19 +3273,20 @@ if (!isAuthenticated) {
                       </select>
                     </div>
 
+                    {/* Filtro por rol */}
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         <User size={16} className="inline mr-1" />
                         Rol
                       </label>
                       <select
                         value={selectedRoleFilter}
                         onChange={(e) => setSelectedRoleFilter(e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="todos">Todos los roles</option>
                         {Object.entries(roles).map(([key, label]) => {
-                          const roleCount = getVisibleUsers().filter((u) => u.role === key).length;
+                          const roleCount = getVisibleUsers().filter((u: any) => u.role === key).length;
                           if (roleCount === 0) return null;
                           return (
                             <option key={key} value={key}>
@@ -2940,48 +3301,57 @@ if (!isAuthenticated) {
               )}
             </div>
 
-            {/* Tabla de usuarios */}
-            <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden">
+            {/* Tabla de usuarios con filtros y ordenamiento */}
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-slate-700">
+                  <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Usuario</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Rol</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Equipo</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Estado</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase">Performance</th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-slate-300 uppercase">Acciones</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Usuario
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Rol
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Equipo
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Estado
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Performance
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                        Acciones
+                      </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-slate-800 border border-slate-700 divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-gray-200">
                     {getFilteredAndSortedUsers().length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
+                        <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
                           {userSearchText.trim() || selectedTeamFilter !== "todos" || selectedRoleFilter !== "todos"
-                            ? "No se encontraron usuarios con los filtros aplicados"
+                            ? "No se encontraron usuarios que coincidan con los filtros aplicados"
                             : "No hay usuarios para mostrar"}
                         </td>
                       </tr>
                     ) : (
-                      getFilteredAndSortedUsers().map((user) => {
+                      getFilteredAndSortedUsers().map((user: any) => {
                         const userLeads = leads.filter((l) => l.vendedor === user.id);
                         const userSales = userLeads.filter((l) => l.estado === "vendido").length;
                         const manager = user.reportsTo ? userById.get(user.reportsTo) : null;
 
                         return (
-                          <tr key={user.id} className="hover:bg-slate-800 transition-colors">
+                          <tr key={user.id} className="hover:bg-gray-50">
                             <td className="px-4 py-4">
                               <div>
-                                <div className="font-medium text-white
-
-
-">{user.name}</div>
+                                <div className="font-medium text-gray-900">{user.name}</div>
                                 <div className="text-sm text-gray-500">{user.email}</div>
                               </div>
                             </td>
                             <td className="px-4 py-4">
-                              <span className="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
                                 {roles[user.role] || user.role}
                               </span>
                             </td>
@@ -2989,14 +3359,11 @@ if (!isAuthenticated) {
                               <div className="text-sm">
                                 {manager ? (
                                   <div>
-                                    <span className="font-medium text-white
-
-
-">
+                                    <span className="font-medium text-gray-900">
                                       Equipo {manager.name}
                                     </span>
                                     <div className="text-xs text-gray-500">
-                                      Reporta a: {manager.name}
+                                      Reporta a: {manager.name} ({roles[manager.role] || manager.role})
                                     </div>
                                   </div>
                                 ) : (
@@ -3007,9 +3374,9 @@ if (!isAuthenticated) {
                             <td className="px-4 py-4">
                               <div className="flex items-center space-x-2">
                                 <span
-                                  className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+                                  className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                                     user.active
-                                      ? "bg-emerald-100 text-emerald-800"
+                                      ? "bg-green-100 text-green-800"
                                       : "bg-red-100 text-red-800"
                                   }`}
                                 >
@@ -3024,33 +3391,36 @@ if (!isAuthenticated) {
                                           active: user.active ? 0 : 1,
                                         });
                                         setUsers((prev) =>
-                                          prev.map((u) => (u.id === user.id ? updated : u))
+                                          prev.map((u: any) => (u.id === user.id ? updated : u))
                                         );
                                       } catch (e) {
-                                        console.error("Error al cambiar estado", e);
+                                        console.error("No pude cambiar estado del usuario", e);
                                       }
                                     }}
-                                    className={`px-2 py-1 text-xs rounded-lg font-medium transition-colors ${
+                                    className={`px-2 py-1 text-xs rounded ${
                                       user.active
                                         ? "bg-red-100 text-red-700 hover:bg-red-200"
-                                        : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                                        : "bg-green-100 text-green-700 hover:bg-green-200"
                                     }`}
+                                    title={user.active ? "Desactivar vendedor" : "Activar vendedor"}
                                   >
                                     {user.active ? "Desactivar" : "Activar"}
                                   </button>
                                 )}
                               </div>
+                              {user.role === "vendedor" && !user.active && (
+                                <div className="text-xs text-orange-600 mt-1">
+                                  No recibe leads nuevos
+                                </div>
+                              )}
                             </td>
                             <td className="px-4 py-4">
                               {user.role === "vendedor" ? (
                                 <div className="text-sm">
                                   <div className="flex items-center space-x-2">
-                                    <span className="text-white
-
-
-">{userLeads.length} leads</span>
+                                    <span>{userLeads.length} leads</span>
                                     <span className="text-gray-400">•</span>
-                                    <span className="text-emerald-600 font-medium">
+                                    <span className="text-green-600 font-medium">
                                       {userSales} ventas
                                     </span>
                                   </div>
@@ -3068,16 +3438,16 @@ if (!isAuthenticated) {
                               <div className="flex items-center justify-center space-x-2">
                                 <button
                                   onClick={() => openEditUser(user)}
-                                  className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
-                                  title="Editar"
+                                  className="p-1 text-blue-600 hover:text-blue-800"
+                                  title="Editar usuario"
                                 >
                                   <Edit3 size={16} />
                                 </button>
                                 {isOwner() && user.id !== currentUser?.id && (
                                   <button
                                     onClick={() => openDeleteConfirm(user)}
-                                    className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
-                                    title="Eliminar"
+                                    className="p-1 text-red-600 hover:text-red-800"
+                                    title="Eliminar usuario"
                                   >
                                     <Trash2 size={16} />
                                   </button>
@@ -3094,36 +3464,162 @@ if (!isAuthenticated) {
             </div>
           </div>
         )}
+    {/* Sección Presupuestos */}
+{activeSection === "presupuestos" && (
+  <div className="space-y-6">
+    <div className="flex items-center justify-between">
+      <h2 className="text-3xl font-bold text-gray-800">Plantillas de Presupuesto</h2>
+      {isOwner() && (
+        <button
+          onClick={() => {
+            setEditingPresupuesto(null);
+            setShowPresupuestoModal(true);
+          }}
+          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          <Plus size={20} />
+          <span>Nueva Plantilla</span>
+        </button>
+      )}
+    </div>
+
+    {!isOwner() && (
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <p className="text-sm text-blue-700">
+          <strong>Nota:</strong> Solo puedes ver las plantillas de presupuesto. 
+          Para enviar un presupuesto a un cliente, usa el botón de WhatsApp en la tabla de leads.
+        </p>
       </div>
+    )}
 
-      {/* ===== MODALES ===== */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {presupuestos.length === 0 ? (
+        <div className="col-span-full text-center py-12">
+          <FileText size={48} className="mx-auto text-gray-300 mb-4" />
+          <p className="text-gray-500">No hay plantillas de presupuesto creadas</p>
+          {isOwner() && (
+            <button
+              onClick={() => {
+                setEditingPresupuesto(null);
+                setShowPresupuestoModal(true);
+              }}
+              className="mt-4 text-blue-600 hover:text-blue-800"
+            >
+              Crear la primera plantilla
+            </button>
+          )}
+        </div>
+      ) : (
+        presupuestos.map((presupuesto) => (
+          <div
+            key={presupuesto.id}
+            className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+          >
+            {presupuesto.imagen_url && (
+              <div className="h-48 bg-gray-200 overflow-hidden">
+                <img
+                  src={presupuesto.imagen_url}
+                  alt={presupuesto.modelo}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Sin+Imagen';
+                  }}
+                />
+              </div>
+            )}
+            <div className="p-4">
+              <div className="flex items-start justify-between mb-2">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">
+                    {presupuesto.modelo}
+                  </h3>
+                  <p className="text-sm text-gray-600">{presupuesto.marca}</p>
+                </div>
+              </div>
+              
+              {presupuesto.precio_contado && (
+                <div className="mt-3 p-3 bg-green-50 rounded-lg">
+                  <p className="text-sm text-gray-600">Precio Contado</p>
+                  <p className="text-xl font-bold text-green-600">
+                    {presupuesto.precio_contado}
+                  </p>
+                </div>
+              )}
 
-        {/* Modal: Confirmación Eliminar Lead */}
+              {presupuesto.anticipo && (
+                <div className="mt-2 text-sm text-gray-600">
+                  <strong>Anticipo:</strong> {presupuesto.anticipo}
+                </div>
+              )}
+
+              {isOwner() && (
+                <div className="mt-4 flex space-x-2">
+                  <button
+                    onClick={() => {
+                      setEditingPresupuesto(presupuesto);
+                      setShowPresupuestoModal(true);
+                    }}
+                    className="flex-1 px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200"
+                  >
+                    <Edit3 size={14} className="inline mr-1" />
+                    Editar
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (confirm(`¿Eliminar plantilla de ${presupuesto.modelo}?`)) {
+                        try {
+                          await apiDeletePresupuesto(presupuesto.id);
+                          setPresupuestos(prev => prev.filter(p => p.id !== presupuesto.id));
+                        } catch (error) {
+                          console.error('Error al eliminar:', error);
+                          alert('Error al eliminar la plantilla');
+                        }
+                      }
+                    }}
+                    className="px-3 py-2 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  </div>
+)}
+         {/* MODALES */}
+        
+        {/* Modal de Confirmación para Eliminar Lead */}
         {showDeleteLeadConfirmModal && leadToDelete && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-md shadow-2xl">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center mb-6">
                 <div className="bg-red-100 p-3 rounded-full mr-4">
                   <Trash2 className="h-6 w-6 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-200">
+                  <h3 className="text-lg font-semibold text-gray-800">
                     Eliminar Lead
                   </h3>
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-gray-600">
                     Esta acción no se puede deshacer
                   </p>
                 </div>
               </div>
 
-              <div className="bg-slate-800 rounded-lg p-4 mb-6">
-                <h4 className="font-medium text-slate-200 mb-2">Lead a eliminar:</h4>
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <h4 className="font-medium text-gray-800 mb-2">Lead a eliminar:</h4>
                 <div className="text-sm space-y-1">
                   <div><strong>Cliente:</strong> {leadToDelete.nombre}</div>
                   <div><strong>Teléfono:</strong> {leadToDelete.telefono}</div>
                   <div><strong>Modelo:</strong> {leadToDelete.modelo}</div>
                   <div><strong>Estado:</strong> {estados[leadToDelete.estado]?.label || leadToDelete.estado}</div>
                   <div><strong>Vendedor:</strong> {leadToDelete.vendedor ? userById.get(leadToDelete.vendedor)?.name : 'Sin asignar'}</div>
+                  {leadToDelete.created_by && (
+                    <div><strong>Creado por:</strong> {userById.get(leadToDelete.created_by)?.name || 'Usuario eliminado'}</div>
+                  )}
                 </div>
               </div>
 
@@ -3141,6 +3637,7 @@ if (!isAuthenticated) {
                         <li>El lead se eliminará permanentemente del sistema</li>
                         <li>Se perderán todos los datos y el historial</li>
                         <li>Esta acción no se puede revertir</li>
+                        <li>El vendedor asignado perderá el acceso al lead</li>
                       </ul>
                     </div>
                   </div>
@@ -3150,7 +3647,7 @@ if (!isAuthenticated) {
               <div className="flex space-x-3">
                 <button
                   onClick={confirmDeleteLead}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 font-medium shadow-md transition-all"
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
                 >
                   Sí, Eliminar Lead
                 </button>
@@ -3159,7 +3656,7 @@ if (!isAuthenticated) {
                     setShowDeleteLeadConfirmModal(false);
                     setLeadToDelete(null);
                   }}
-                  className="flex-1 px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
@@ -3168,26 +3665,26 @@ if (!isAuthenticated) {
           </div>
         )}
 
-        {/* Modal: Confirmación Eliminar Usuario */}
+        {/* Modal de Confirmación para Eliminar Usuario */}
         {showDeleteConfirmModal && userToDelete && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-md shadow-2xl">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center mb-6">
                 <div className="bg-red-100 p-3 rounded-full mr-4">
                   <Trash2 className="h-6 w-6 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-200">
+                  <h3 className="text-lg font-semibold text-gray-800">
                     Confirmar Eliminación
                   </h3>
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-gray-600">
                     Esta acción no se puede deshacer
                   </p>
                 </div>
               </div>
 
-              <div className="bg-slate-800 rounded-lg p-4 mb-6">
-                <h4 className="font-medium text-slate-200 mb-2">Usuario a eliminar:</h4>
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <h4 className="font-medium text-gray-800 mb-2">Usuario a eliminar:</h4>
                 <div className="text-sm space-y-1">
                   <div><strong>Nombre:</strong> {userToDelete.name}</div>
                   <div><strong>Email:</strong> {userToDelete.email}</div>
@@ -3209,6 +3706,7 @@ if (!isAuthenticated) {
                         <li>Se eliminará permanentemente del sistema</li>
                         <li>Se perderá acceso a todas las funcionalidades</li>
                         <li>No podrá recuperar su cuenta</li>
+                        <li>Los datos históricos se mantendrán para auditoría</li>
                       </ul>
                     </div>
                   </div>
@@ -3218,7 +3716,7 @@ if (!isAuthenticated) {
               <div className="flex space-x-3">
                 <button
                   onClick={confirmDeleteUser}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 font-medium shadow-md transition-all"
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
                 >
                   Sí, Eliminar Usuario
                 </button>
@@ -3227,7 +3725,7 @@ if (!isAuthenticated) {
                     setShowDeleteConfirmModal(false);
                     setUserToDelete(null);
                   }}
-                  className="flex-1 px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
@@ -3236,12 +3734,12 @@ if (!isAuthenticated) {
           </div>
         )}
 
-        {/* Modal: Reasignar Lead */}
+        {/* Modal: Reasignación de Lead */}
         {showReassignModal && leadToReassign && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-2xl">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-slate-200">
+                <h3 className="text-xl font-semibold text-gray-800">
                   Reasignar Lead - {leadToReassign.nombre}
                 </h3>
                 <button
@@ -3250,50 +3748,64 @@ if (!isAuthenticated) {
                     setLeadToReassign(null);
                     setSelectedVendorForReassign(null);
                   }}
-                  className="text-gray-400 hover:text-slate-400 transition-colors"
                 >
-                  <X size={24} />
+                  <X size={24} className="text-gray-600" />
                 </button>
               </div>
 
               <div className="mb-6">
-                <div className="bg-slate-700 rounded-lg p-4 mb-4">
-                  <h4 className="font-medium text-slate-200 mb-3">Información del Lead</h4>
+                <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                  <h4 className="font-medium text-gray-800 mb-2">Información del Lead</h4>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="font-medium text-slate-400">Cliente:</span>{" "}
+                      <span className="font-medium text-gray-600">Cliente:</span>{" "}
                       {leadToReassign.nombre}
                     </div>
                     <div>
-                      <span className="font-medium text-slate-400">Teléfono:</span>{" "}
+                      <span className="font-medium text-gray-600">Teléfono:</span>{" "}
                       {leadToReassign.telefono}
                     </div>
                     <div>
-                      <span className="font-medium text-slate-400">Vehículo:</span>{" "}
+                      <span className="font-medium text-gray-600">Vehículo:</span>{" "}
                       {leadToReassign.modelo}
                     </div>
                     <div>
-                      <span className="font-medium text-slate-400">Estado:</span>
+                      <span className="font-medium text-gray-600">Estado:</span>
                       <span
                         className={`ml-2 px-2 py-1 rounded-full text-xs font-medium text-white ${estados[leadToReassign.estado].color}`}
                       >
                         {estados[leadToReassign.estado].label}
                       </span>
                     </div>
+                    <div>
+                      <span className="font-medium text-gray-600">Fuente:</span>
+                      <span className="ml-2">
+                        {fuentes[leadToReassign.fuente as string]?.icon || "❓"}{" "}
+                        {fuentes[leadToReassign.fuente as string]?.label ||
+                          String(leadToReassign.fuente)}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-600">Vendedor actual:</span>{" "}
+                      {leadToReassign.vendedor
+                        ? userById.get(leadToReassign.vendedor)?.name
+                        : "Sin asignar"}
+                    </div>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
                     Seleccionar nuevo vendedor (solo vendedores activos)
                   </label>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {/* Opción para no asignar */}
                     <div
                       onClick={() => setSelectedVendorForReassign(null)}
-                      className={`p-3 border rounded-lg cursor-pointer transition-all ${
+                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                         selectedVendorForReassign === null
-                          ? "border-purple-500 bg-purple-50 shadow-sm"
-                          : "border-slate-600 hover:bg-slate-800 hover:border-gray-300"
+                          ? "border-blue-500 bg-blue-50"
+                          : "border-gray-200 hover:bg-gray-50"
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -3302,24 +3814,22 @@ if (!isAuthenticated) {
                             <span className="text-white font-medium text-sm">--</span>
                           </div>
                           <div>
-                            <p className="font-medium text-white
-
-
-">Sin asignar</p>
+                            <p className="font-medium text-gray-900">Sin asignar</p>
                             <p className="text-sm text-gray-500">
                               Dejar el lead sin vendedor asignado
                             </p>
                           </div>
                         </div>
                         {selectedVendorForReassign === null && (
-                          <div className="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center">
-                            <div className="w-2 h-2 bg-slate-800 border border-slate-700 rounded-full"></div>
+                          <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    {getAvailableVendorsForReassign().map((vendedor) => {
+                    {/* Lista de vendedores disponibles */}
+                    {getAvailableVendorsForReassign().map((vendedor: any) => {
                       const vendedorLeads = leads.filter((l) => l.vendedor === vendedor.id);
                       const vendedorVentas = vendedorLeads.filter(
                         (l) => l.estado === "vendido"
@@ -3333,29 +3843,26 @@ if (!isAuthenticated) {
                         <div
                           key={vendedor.id}
                           onClick={() => setSelectedVendorForReassign(vendedor.id)}
-                          className={`p-3 border rounded-lg cursor-pointer transition-all ${
+                          className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                             selectedVendorForReassign === vendedor.id
-                              ? "border-purple-500 bg-purple-50 shadow-sm"
-                              : "border-slate-600 hover:bg-slate-800 hover:border-gray-300"
+                              ? "border-blue-500 bg-blue-50"
+                              : "border-gray-200 hover:bg-gray-50"
                           }`}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-700 rounded-full flex items-center justify-center shadow-md">
+                              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
                                 <span className="text-white font-medium text-sm">
                                   {vendedor.name
                                     .split(" ")
-                                    .map((n) => n[0])
+                                    .map((n: string) => n[0])
                                     .join("")
                                     .toUpperCase()
                                     .substring(0, 2)}
                                 </span>
                               </div>
                               <div>
-                                <p className="font-medium text-white
-
-
-">{vendedor.name}</p>
+                                <p className="font-medium text-gray-900">{vendedor.name}</p>
                                 <p className="text-sm text-gray-500">
                                   {vendedorLeads.length} leads • {vendedorVentas} ventas •{" "}
                                   {conversion}% conversión
@@ -3363,14 +3870,14 @@ if (!isAuthenticated) {
                                 <p className="text-xs text-gray-400">
                                   Equipo de {userById.get(vendedor.reportsTo)?.name || "—"}
                                 </p>
-                                <p className="text-xs text-emerald-600 font-medium">
+                                <p className="text-xs text-green-600 font-medium">
                                   ✓ Activo - Recibe leads nuevos
                                 </p>
                               </div>
                             </div>
                             {selectedVendorForReassign === vendedor.id && (
-                              <div className="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center">
-                                <div className="w-2 h-2 bg-slate-800 border border-slate-700 rounded-full"></div>
+                              <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                                <div className="w-2 h-2 bg-white rounded-full"></div>
                               </div>
                             )}
                           </div>
@@ -3380,9 +3887,9 @@ if (!isAuthenticated) {
                   </div>
 
                   {getAvailableVendorsForReassign().length === 0 && (
-                    <div className="text-center py-8 bg-slate-800 rounded-lg border">
+                    <div className="text-center py-8 bg-gray-50 rounded-lg border">
                       <p className="text-gray-500">
-                        No hay vendedores activos disponibles
+                        No hay vendedores activos disponibles en tu scope para reasignar
                       </p>
                     </div>
                   )}
@@ -3393,13 +3900,15 @@ if (!isAuthenticated) {
                 <button
                   onClick={handleReassignLead}
                   disabled={selectedVendorForReassign === leadToReassign.vendedor}
-                  className={`flex-1 px-4 py-2.5 rounded-lg font-medium shadow-md transition-all ${
+                  className={`flex-1 px-4 py-2 rounded-lg font-medium ${
                     selectedVendorForReassign === leadToReassign.vendedor
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
+                      : "bg-blue-600 text-white hover:bg-blue-700"
                   }`}
                 >
-                  Reasignar Lead
+                  {selectedVendorForReassign === leadToReassign.vendedor
+                    ? "Ya está asignado a este vendedor"
+                    : "Reasignar Lead"}
                 </button>
                 <button
                   onClick={() => {
@@ -3407,7 +3916,7 @@ if (!isAuthenticated) {
                     setLeadToReassign(null);
                     setSelectedVendorForReassign(null);
                   }}
-                  className="flex-1 px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
@@ -3416,12 +3925,12 @@ if (!isAuthenticated) {
           </div>
         )}
 
-        {/* Modal: Observaciones */}
+        {/* Modal: Observaciones del Lead */}
         {showObservacionesModal && editingLeadObservaciones && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-2xl shadow-2xl">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-2xl">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-slate-200">
+                <h3 className="text-xl font-semibold text-gray-800">
                   Observaciones - {editingLeadObservaciones.nombre}
                 </h3>
                 <button
@@ -3429,14 +3938,13 @@ if (!isAuthenticated) {
                     setShowObservacionesModal(false);
                     setEditingLeadObservaciones(null);
                   }}
-                  className="text-gray-400 hover:text-slate-400 transition-colors"
                 >
-                  <X size={24} />
+                  <X size={24} className="text-gray-600" />
                 </button>
               </div>
 
-              <div className="mb-4 bg-slate-700 rounded-lg p-3">
-                <p className="text-sm text-slate-400">
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-2">
                   <span className="font-medium">Cliente:</span>{" "}
                   {editingLeadObservaciones.nombre} |{" "}
                   <span className="font-medium ml-2">Teléfono:</span>{" "}
@@ -3444,17 +3952,25 @@ if (!isAuthenticated) {
                   <span className="font-medium ml-2">Vehículo:</span>{" "}
                   {editingLeadObservaciones.modelo}
                 </p>
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">Estado actual:</span>
+                  <span
+                    className={`ml-2 px-2 py-1 rounded-full text-xs font-medium text-white ${estados[editingLeadObservaciones.estado].color}`}
+                  >
+                    {estados[editingLeadObservaciones.estado].label}
+                  </span>
+                </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Observaciones
                 </label>
                 <textarea
                   id="observaciones-textarea"
                   defaultValue={editingLeadObservaciones.notas || ""}
-                  placeholder="Agregar observaciones sobre el cliente, llamadas realizadas, intereses, objeciones..."
-                  className="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                  placeholder="Agregar observaciones sobre el cliente, llamadas realizadas, intereses, objeciones, etc..."
+                  className="w-full h-32 px-3 py-2 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
 
@@ -3463,7 +3979,7 @@ if (!isAuthenticated) {
                   onClick={() => {
                     const textarea = document.getElementById(
                       "observaciones-textarea"
-                    );
+                    ) as HTMLTextAreaElement;
                     if (textarea && editingLeadObservaciones) {
                       handleUpdateObservaciones(
                         editingLeadObservaciones.id,
@@ -3471,7 +3987,7 @@ if (!isAuthenticated) {
                       );
                     }
                   }}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md transition-all"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   Guardar Observaciones
                 </button>
@@ -3480,7 +3996,7 @@ if (!isAuthenticated) {
                     setShowObservacionesModal(false);
                     setEditingLeadObservaciones(null);
                   }}
-                  className="flex-1 px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
@@ -3489,12 +4005,12 @@ if (!isAuthenticated) {
           </div>
         )}
 
-        {/* Modal: Historial */}
+        {/* Modal: Historial del Lead */}
         {showHistorialModal && viewingLeadHistorial && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-2xl shadow-2xl">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-2xl">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-slate-200">
+                <h3 className="text-xl font-semibold text-gray-800">
                   Historial - {viewingLeadHistorial.nombre}
                 </h3>
                 <button
@@ -3502,14 +4018,13 @@ if (!isAuthenticated) {
                     setShowHistorialModal(false);
                     setViewingLeadHistorial(null);
                   }}
-                  className="text-gray-400 hover:text-slate-400 transition-colors"
                 >
-                  <X size={24} />
+                  <X size={24} className="text-gray-600" />
                 </button>
               </div>
 
-              <div className="mb-4 bg-slate-700 rounded-lg p-3">
-                <p className="text-sm text-slate-400">
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-2">
                   <span className="font-medium">Cliente:</span>{" "}
                   {viewingLeadHistorial.nombre} |{" "}
                   <span className="font-medium ml-2">Teléfono:</span>{" "}
@@ -3527,10 +4042,10 @@ if (!isAuthenticated) {
                 ) : (
                   <div className="space-y-3">
                     {viewingLeadHistorial.historial?.map((entry, index) => (
-                      <div key={index} className="border-l-4 border-purple-600 pl-4 py-2 bg-slate-800 rounded-r-lg">
+                      <div key={index} className="border-l-4 border-blue-500 pl-4 py-2">
                         <div className="flex items-center justify-between">
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium text-white ${
+                            className={`px-2 py-1 rounded-full text-xs font-medium text-white ${
                               estados[entry.estado]?.color || "bg-gray-500"
                             }`}
                           >
@@ -3541,7 +4056,7 @@ if (!isAuthenticated) {
                             {new Date(entry.timestamp).toLocaleTimeString("es-AR")}
                           </span>
                         </div>
-                        <p className="text-sm text-slate-300 mt-1">
+                        <p className="text-sm text-gray-700 mt-1">
                           Actualizado por: {entry.usuario}
                         </p>
                       </div>
@@ -3556,7 +4071,7 @@ if (!isAuthenticated) {
                     setShowHistorialModal(false);
                     setViewingLeadHistorial(null);
                   }}
-                  className="px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                 >
                   Cerrar
                 </button>
@@ -3567,88 +4082,85 @@ if (!isAuthenticated) {
 
         {/* Modal: Nuevo Lead */}
         {showNewLeadModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-3xl shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-3xl">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-slate-200">Nuevo Lead</h3>
-                <button 
-                  onClick={() => setShowNewLeadModal(false)}
-                  className="text-gray-400 hover:text-slate-400 transition-colors"
-                >
-                  <X size={24} />
+                <h3 className="text-xl font-semibold text-gray-800">Nuevo Lead</h3>
+                <button onClick={() => setShowNewLeadModal(false)}>
+                  <X size={24} className="text-gray-600" />
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Nombre *
                   </label>
                   <input
                     type="text"
                     id="new-nombre"
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Teléfono *
                   </label>
                   <input
                     type="text"
                     id="new-telefono"
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Modelo *
                   </label>
                   <input
                     type="text"
                     id="new-modelo"
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Forma de Pago
                   </label>
                   <select
                     id="new-formaPago"
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="Contado">Contado</option>
                     <option value="Financiado">Financiado</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Info Usado
                   </label>
                   <input
                     type="text"
                     id="new-infoUsado"
                     placeholder="Marca Modelo Año"
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Fecha
                   </label>
                   <input
                     type="date"
                     id="new-fecha"
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div className="col-span-2 flex items-center space-x-3">
                   <input
                     type="checkbox"
                     id="new-entrega"
-                    className="rounded border-gray-300 text-purple-600 focus:ring-2 focus:ring-purple-600"
+                    className="rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
                   />
-                  <span className="text-sm text-slate-300">
+                  <span className="text-sm text-gray-700">
                     Entrega de vehículo usado
                   </span>
                 </div>
@@ -3657,48 +4169,67 @@ if (!isAuthenticated) {
                     type="checkbox"
                     id="new-autoassign"
                     defaultChecked
-                    className="rounded border-gray-300 text-purple-600 focus:ring-2 focus:ring-purple-600"
+                    className="rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
                   />
-                  <span className="text-sm text-slate-300">
-                    Asignación automática y equitativa
+                  <span className="text-sm text-gray-700">
+                    Asignación automática y equitativa a vendedores activos de mi equipo
                   </span>
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Asignar a vendedor específico (opcional)
                   </label>
                   <select
                     id="new-vendedor"
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Sin asignar</option>
-                    {getAvailableVendorsForAssignment().map((u) => (
+                    {getAvailableVendorsForAssignment().map((u: any) => (
                       <option key={u.id} value={u.id}>
                         {u.name} - {userById.get(u.reportsTo)?.name ? `Equipo ${userById.get(u.reportsTo)?.name}` : 'Sin equipo'} ✓ Activo
                       </option>
                     ))}
                   </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Si está activada la "Asignación automática", se ignorará esta selección.
+                    Solo puedes asignar a vendedores activos de tu equipo.
+                  </p>
                 </div>
 
                 {getAvailableVendorsForAssignment().length === 0 && (
-                  <div className="col-span-2 bg-amber-50 border border-amber-200 rounded-lg p-3">
-                    <p className="text-sm text-amber-700">
-                      <strong>Atención:</strong> No hay vendedores activos disponibles
+                  <div className="col-span-2 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <p className="text-sm text-yellow-700">
+                      <strong>Atención:</strong> No hay vendedores activos disponibles en tu equipo. 
+                      El lead se creará sin asignar.
                     </p>
                   </div>
                 )}
+
+                <div className="col-span-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <h4 className="text-sm font-medium text-blue-800 mb-2">
+                    Información sobre la creación de leads:
+                  </h4>
+                  <ul className="text-xs text-blue-700 space-y-1">
+                    <li>• Este lead aparecerá marcado como "Creado por {currentUser?.name}"</li>
+                    <li>• La fuente se establecerá automáticamente como "Creado por"</li>
+                    <li>• Solo puedes asignar a vendedores activos de tu scope/equipo</li>
+                    {currentUser?.role === "vendedor" && (
+                      <li>• Como vendedor, puedes crear leads pero solo asignártelos a ti mismo</li>
+                    )}
+                  </ul>
+                </div>
               </div>
 
               <div className="flex space-x-3 pt-6">
                 <button
                   onClick={handleCreateLead}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md transition-all"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
                 >
                   Crear Lead
                 </button>
                 <button
                   onClick={() => setShowNewLeadModal(false)}
-                  className="flex-1 px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
@@ -3709,63 +4240,60 @@ if (!isAuthenticated) {
 
         {/* Modal: Nuevo Evento */}
         {showNewEventModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-lg shadow-2xl">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-lg">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-slate-200">Nuevo Evento</h3>
-                <button 
-                  onClick={() => setShowNewEventModal(false)}
-                  className="text-gray-400 hover:text-slate-400 transition-colors"
-                >
-                  <X size={24} />
+                <h3 className="text-xl font-semibold text-gray-800">Nuevo Evento</h3>
+                <button onClick={() => setShowNewEventModal(false)}>
+                  <X size={24} className="text-gray-600" />
                 </button>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Título *
                   </label>
                   <input
                     type="text"
                     id="ev-title"
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Fecha *
                   </label>
                   <input
                     type="date"
                     id="ev-date"
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Hora
                   </label>
                   <input
                     type="time"
                     id="ev-time"
                     defaultValue="09:00"
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Usuario
                   </label>
                   <select
                     id="ev-user"
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     defaultValue={currentUser?.id}
                   >
                     <option value={currentUser?.id}>{currentUser?.name} (Yo)</option>
                     {visibleUsers
-                      .filter((u) => u.id !== currentUser?.id)
-                      .map((u) => (
+                      .filter((u: any) => u.id !== currentUser?.id)
+                      .map((u: any) => (
                         <option key={u.id} value={u.id}>
                           {u.name}
                         </option>
@@ -3777,13 +4305,13 @@ if (!isAuthenticated) {
               <div className="flex space-x-3 pt-6">
                 <button
                   onClick={createEvent}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md transition-all"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   Crear Evento
                 </button>
                 <button
                   onClick={() => setShowNewEventModal(false)}
-                  className="flex-1 px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
@@ -3794,71 +4322,73 @@ if (!isAuthenticated) {
 
         {/* Modal: Usuario */}
         {showUserModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-lg shadow-2xl">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-lg">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-slate-200">
+                <h3 className="text-xl font-semibold text-gray-800">
                   {editingUser ? "Editar Usuario" : "Nuevo Usuario"}
                 </h3>
-                <button 
-                  onClick={() => setShowUserModal(false)}
-                  className="text-gray-400 hover:text-slate-400 transition-colors"
-                >
-                  <X size={24} />
+                <button onClick={() => setShowUserModal(false)}>
+                  <X size={24} className="text-gray-600" />
                 </button>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Nombre *
                   </label>
                   <input
                     type="text"
                     id="u-name"
                     defaultValue={editingUser?.name || ""}
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Email *
                   </label>
                   <input
                     type="email"
                     id="u-email"
                     defaultValue={editingUser?.email || ""}
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Contraseña {editingUser ? "(dejar vacío para mantener)" : "*"}
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Contraseña {editingUser ? "(dejar vacío para mantener actual)" : "*"}
                   </label>
                   <input
                     type="password"
                     id="u-pass"
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder={
                       editingUser ? "Nueva contraseña (opcional)" : "Contraseña obligatoria"
                     }
                   />
+                  {!editingUser && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      La contraseña es obligatoria para usuarios nuevos
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Rol
                   </label>
                   <select
                     value={modalRole}
                     onChange={(e) => {
-                      const newRole = e.target.value;
+                      const newRole = e.target.value as typeof modalRole;
                       setModalRole(newRole);
                       const validManagers = validManagersByRole(newRole);
                       setModalReportsTo(validManagers[0]?.id ?? null);
                     }}
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
-                    {validRolesByUser(currentUser).map((role) => (
+                    {validRolesByUser(currentUser).map((role: string) => (
                       <option key={role} value={role}>
                         {roles[role] || role}
                       </option>
@@ -3867,7 +4397,7 @@ if (!isAuthenticated) {
                 </div>
                 {modalRole !== "owner" && (
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Reporta a *
                     </label>
                     <select
@@ -3877,9 +4407,9 @@ if (!isAuthenticated) {
                           e.target.value ? parseInt(e.target.value, 10) : null
                         )
                       }
-                      className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     >
-                      {validManagersByRole(modalRole).map((manager) => (
+                      {validManagersByRole(modalRole).map((manager: any) => (
                         <option key={manager.id} value={manager.id}>
                           {manager.name} ({roles[manager.role] || manager.role})
                         </option>
@@ -3892,24 +4422,77 @@ if (!isAuthenticated) {
                     type="checkbox"
                     id="u-active"
                     defaultChecked={editingUser?.active !== false}
-                    className="rounded border-gray-300 text-purple-600 focus:ring-2 focus:ring-purple-600"
+                    className="rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
                   />
-                  <label htmlFor="u-active" className="text-sm text-slate-300">
+                  <label htmlFor="u-active" className="text-sm text-gray-700">
                     Usuario activo
                   </label>
+                </div>
+                {modalRole === "vendedor" && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p className="text-sm text-blue-700">
+                      <strong>Nota:</strong> Los vendedores desactivados pueden seguir usando el CRM 
+                      para gestionar sus leads existentes, pero no recibirán leads nuevos automáticamente.
+                    </p>
+                  </div>
+                )}
+
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                  <h4 className="text-sm font-medium text-gray-800 mb-2">
+                    Permisos del rol {roles[modalRole] || modalRole}:
+                  </h4>
+                  <ul className="text-xs text-gray-600 space-y-1">
+                    {modalRole === "owner" && (
+                      <>
+                        <li>• Acceso completo al sistema</li>
+                        <li>• Gestión total de usuarios y equipos</li>
+                        <li>• Visualización de todos los datos</li>
+                        <li>• Puede eliminar leads</li>
+                      </>
+                    )}
+                    {modalRole === "gerente_general" && (
+                      <>
+                        <li>• Gestión de gerentes, supervisores y vendedores</li>
+                        <li>• Visualización de todos los equipos</li>
+                        <li>• Creación y asignación de leads</li>
+                        <li>• Puede eliminar leads</li>
+                      </>
+                    )}
+                    {modalRole === "gerente" && (
+                      <>
+                        <li>• Gestión de supervisores y vendedores de su equipo</li>
+                        <li>• Visualización de su equipo completo</li>
+                        <li>• Creación y asignación de leads a su equipo</li>
+                      </>
+                    )}
+                    {modalRole === "supervisor" && (
+                      <>
+                        <li>• Gestión de vendedores directos</li>
+                        <li>• Visualización de su equipo directo</li>
+                        <li>• Creación y asignación de leads a su equipo</li>
+                      </>
+                    )}
+                    {modalRole === "vendedor" && (
+                      <>
+                        <li>• Gestión de sus propios leads</li>
+                        <li>• Creación de leads (autoasignados)</li>
+                        <li>• Visualización de su propio ranking</li>
+                      </>
+                    )}
+                  </ul>
                 </div>
               </div>
 
               <div className="flex space-x-3 pt-6">
                 <button
                   onClick={saveUser}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md transition-all"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
                 >
                   {editingUser ? "Actualizar" : "Crear"} Usuario
                 </button>
                 <button
                   onClick={() => setShowUserModal(false)}
-                  className="flex-1 px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
@@ -3917,336 +4500,350 @@ if (!isAuthenticated) {
             </div>
           </div>
         )}
+{/* Modal: Seleccionar Presupuesto para enviar por WhatsApp */}
+{showPresupuestoSelectModal && selectedLeadForPresupuesto && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h3 className="text-xl font-semibold text-gray-800">
+            Enviar Presupuesto a {selectedLeadForPresupuesto.nombre}
+          </h3>
+          <p className="text-sm text-gray-600">
+            Selecciona una plantilla para enviar por WhatsApp
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            setShowPresupuestoSelectModal(false);
+            setSelectedLeadForPresupuesto(null);
+          }}
+        >
+          <X size={24} className="text-gray-600" />
+        </button>
+      </div>
 
-        {/* Modal: Seleccionar Presupuesto */}
-        {showPresupuestoSelectModal && selectedLeadForPresupuesto && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <h3 className="text-xl font-semibold text-slate-200">
-                    Enviar Presupuesto a {selectedLeadForPresupuesto.nombre}
-                  </h3>
-                  <p className="text-sm text-slate-400">
-                    Selecciona una plantilla para enviar por WhatsApp
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setShowPresupuestoSelectModal(false);
-                    setSelectedLeadForPresupuesto(null);
-                  }}
-                  className="text-gray-400 hover:text-slate-400 transition-colors"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-
-              {presupuestos.length === 0 ? (
-                <div className="text-center py-12">
-                  <FileText size={48} className="mx-auto text-gray-300 mb-4" />
-                  <p className="text-gray-500">No hay plantillas disponibles</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {presupuestos.map((presupuesto) => (
-                    <div
-                      key={presupuesto.id}
-                      onClick={() => {
-                        const lead = selectedLeadForPresupuesto;
-                        
-                        let mensaje = `Hola ${lead.nombre}! 👋\n\n`;
-                        mensaje += `Te envío la cotización del *${presupuesto.marca} ${presupuesto.modelo}*\n\n`;
-                        
-                        if (presupuesto.precio_contado) {
-                          mensaje += `💰 *PRECIO CONTADO:* ${presupuesto.precio_contado}\n`;
-                        }
-                        
-                        if (presupuesto.anticipo) {
-                          mensaje += `📊 *ANTICIPO:* ${presupuesto.anticipo}\n`;
-                        }
-                        
-                        if (presupuesto.planes_cuotas) {
-                          mensaje += `\n💳 *PLANES DE FINANCIACIÓN:*\n`;
-                          const planes = typeof presupuesto.planes_cuotas === 'string' 
-                            ? JSON.parse(presupuesto.planes_cuotas) 
-                            : presupuesto.planes_cuotas;
-                          
-                          Object.entries(planes).forEach(([cuotas, valor]) => {
-                            mensaje += `   • ${cuotas} cuotas: ${valor}\n`;
-                          });
-                        }
-                        
-                        if (presupuesto.bonificaciones) {
-                          mensaje += `\n🎁 *BONIFICACIONES:*\n${presupuesto.bonificaciones}\n`;
-                        }
-                        
-                        mensaje += `\n¿Te gustaría coordinar una visita al showroom?\n\n`;
-                        mensaje += `Saludos desde Alluma CRM! 🚙`;
-                        
-                        const phoneNumber = lead.telefono.replace(/\D/g, '');
-                        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(mensaje)}`;
-                        window.open(whatsappUrl, '_blank');
-                        
-                        setShowPresupuestoSelectModal(false);
-                        setSelectedLeadForPresupuesto(null);
-                      }}
-                      className="cursor-pointer border-2 border-slate-600 rounded-xl overflow-hidden hover:border-purple-500 hover:shadow-lg transition-all"
-                    >
-                      {presupuesto.imagen_url && (
-                        <div className="h-40 bg-gray-200 overflow-hidden">
-                          <img
-                            src={presupuesto.imagen_url}
-                            alt={presupuesto.modelo}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.target.src = 'https://via.placeholder.com/400x300?text=Sin+Imagen';
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div className="p-4">
-                        <h4 className="text-lg font-bold text-white
-
-
-">
-                          {presupuesto.marca} {presupuesto.modelo}
-                        </h4>
-                        
-                        {presupuesto.precio_contado && (
-                          <div className="mt-2 p-2 bg-emerald-50 rounded">
-                            <p className="text-xs text-slate-400">Precio Contado</p>
-                            <p className="text-lg font-bold text-emerald-600">
-                              {presupuesto.precio_contado}
-                            </p>
-                          </div>
-                        )}
-                        
-                        <div className="mt-3 flex items-center justify-between">
-                          <span className="text-xs text-gray-500">
-                            Click para enviar
-                          </span>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-emerald-600">
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.89 3.587"/>
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+      {presupuestos.length === 0 ? (
+        <div className="text-center py-12">
+          <FileText size={48} className="mx-auto text-gray-300 mb-4" />
+          <p className="text-gray-500">No hay plantillas de presupuesto disponibles</p>
+          <p className="text-sm text-gray-400 mt-2">
+            Contacta al administrador para crear plantillas
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {presupuestos.map((presupuesto) => (
+            <div
+              key={presupuesto.id}
+              onClick={() => {
+                // Generar mensaje de WhatsApp
+                const lead = selectedLeadForPresupuesto;
+                
+                let mensaje = `Hola ${lead.nombre}! 👋\n\n`;
+                mensaje += `Te envío la cotización del *${presupuesto.marca} ${presupuesto.modelo}*\n\n`;
+                
+                if (presupuesto.precio_contado) {
+                  mensaje += `💰 *PRECIO CONTADO:* ${presupuesto.precio_contado}\n`;
+                }
+                
+                if (presupuesto.anticipo) {
+                  mensaje += `📊 *ANTICIPO:* ${presupuesto.anticipo}\n`;
+                }
+                
+                if (presupuesto.planes_cuotas) {
+                  mensaje += `\n💳 *PLANES DE FINANCIACIÓN:*\n`;
+                  const planes = typeof presupuesto.planes_cuotas === 'string' 
+                    ? JSON.parse(presupuesto.planes_cuotas) 
+                    : presupuesto.planes_cuotas;
+                  
+                  Object.entries(planes).forEach(([cuotas, valor]) => {
+                    mensaje += `   • ${cuotas} cuotas: ${valor}\n`;
+                  });
+                }
+                
+                if (presupuesto.bonificaciones) {
+                  mensaje += `\n🎁 *BONIFICACIONES:*\n${presupuesto.bonificaciones}\n`;
+                }
+                
+                if (presupuesto.especificaciones_tecnicas) {
+                  mensaje += `\n📋 *CARACTERÍSTICAS:*\n${presupuesto.especificaciones_tecnicas}\n`;
+                }
+                
+                if (lead.infoUsado) {
+                  mensaje += `\n🚗 *TU VEHÍCULO USADO:* ${lead.infoUsado}\n`;
+                  mensaje += `(Se considera como parte de pago)\n`;
+                }
+                
+                mensaje += `\n¿Te gustaría coordinar una visita al showroom para verlo personalmente?\n\n`;
+                mensaje += `Saludos! 😊`;
+                
+                // Abrir WhatsApp
+                const phoneNumber = lead.telefono.replace(/\D/g, '');
+                const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(mensaje)}`;
+                window.open(whatsappUrl, '_blank');
+                
+                // Cerrar modal
+                setShowPresupuestoSelectModal(false);
+                setSelectedLeadForPresupuesto(null);
+              }}
+              className="cursor-pointer border-2 border-gray-200 rounded-xl overflow-hidden hover:border-purple-500 hover:shadow-lg transition-all"
+            >
+              {presupuesto.imagen_url && (
+                <div className="h-40 bg-gray-200 overflow-hidden">
+                  <img
+                    src={presupuesto.imagen_url}
+                    alt={presupuesto.modelo}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Sin+Imagen';
+                    }}
+                  />
                 </div>
               )}
-
-              <div className="mt-6 flex justify-end">
-                <button
-                  onClick={() => {
-                    setShowPresupuestoSelectModal(false);
-                    setSelectedLeadForPresupuesto(null);
-                  }}
-                  className="px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Modal: Presupuesto */}
-        {showPresupuestoModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-slate-200">
-                  {editingPresupuesto ? "Editar Plantilla" : "Nueva Plantilla de Presupuesto"}
-                </h3>
-                <button onClick={() => {
-                  setShowPresupuestoModal(false);
-                  setEditingPresupuesto(null);
-                }}
-                className="text-gray-400 hover:text-slate-400 transition-colors"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">
-                      Marca *
-                    </label>
-                    <input
-                      type="text"
-                      id="pres-marca"
-                      defaultValue={editingPresupuesto?.marca || ""}
-                      className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
-                      placeholder="ej: ALLUMA"
-                    />
+              <div className="p-4">
+                <h4 className="text-lg font-bold text-gray-900">
+                  {presupuesto.marca} {presupuesto.modelo}
+                </h4>
+                
+                {presupuesto.precio_contado && (
+                  <div className="mt-2 p-2 bg-green-50 rounded">
+                    <p className="text-xs text-gray-600">Precio Contado</p>
+                    <p className="text-lg font-bold text-green-600">
+                      {presupuesto.precio_contado}
+                    </p>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">
-                      Modelo *
-                    </label>
-                    <input
-                      type="text"
-                      id="pres-modelo"
-                      defaultValue={editingPresupuesto?.modelo || ""}
-                      className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
-                      placeholder="ej: Cronos 1.3"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
-                    URL de Imagen
-                  </label>
-                  <input
-                    type="url"
-                    id="pres-imagen"
-                    defaultValue={editingPresupuesto?.imagen_url || ""}
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
-                    placeholder="https://ejemplo.com/imagen.jpg"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Precio Contado
-                  </label>
-                  <input
-                    type="text"
-                    id="pres-precio"
-                    defaultValue={editingPresupuesto?.precio_contado || ""}
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
-                    placeholder="ej: $25.000.000"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Anticipo
-                  </label>
-                  <input
-                    type="text"
-                    id="pres-anticipo"
-                    defaultValue={editingPresupuesto?.anticipo || ""}
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 transition-all"
-                    placeholder="ej: 30% - $7.500.000"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Bonificaciones
-                  </label>
-                  <textarea
-                    id="pres-bonificaciones"
-                    defaultValue={editingPresupuesto?.bonificaciones || ""}
-                    className="w-full px-4 py-3 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 h-20 resize-none transition-all"
-                    placeholder="Bonificaciones disponibles"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Especificaciones Técnicas
-                  </label>
-                  <textarea
-                    id="pres-specs"
-                    defaultValue={editingPresupuesto?.especificaciones_tecnicas || ""}
-                    className="w-full px-4 py-3 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 h-24 resize-none transition-all"
-                    placeholder="Motor, transmisión, equipamiento..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Planes de Cuotas (JSON)
-                  </label>
-                  <textarea
-                    id="pres-cuotas"
-                    defaultValue={editingPresupuesto?.planes_cuotas ? JSON.stringify(editingPresupuesto.planes_cuotas, null, 2) : ""}
-                    className="w-full px-4 py-3 bg-slate-900 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-purple-600 h-24 resize-none font-mono text-xs transition-all"
-                    placeholder='{"12": "cuota de $2.000.000", "24": "cuota de $1.100.000"}'
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Formato JSON. Ejemplo: {`{"12": "cuota $X", "24": "cuota $Y"}`}
+                )}
+                
+                {presupuesto.anticipo && (
+                  <p className="mt-2 text-sm text-gray-600">
+                    <strong>Anticipo:</strong> {presupuesto.anticipo}
                   </p>
+                )}
+                
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="text-xs text-gray-500">
+                    Click para enviar por WhatsApp
+                  </span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-green-600">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.89 3.587"/>
+                  </svg>
                 </div>
               </div>
-
-              <div className="flex space-x-3 pt-6">
-                <button
-                  onClick={async () => {
-                    const marca = document.getElementById("pres-marca")?.value?.trim();
-                    const modelo = document.getElementById("pres-modelo")?.value?.trim();
-                    const imagen_url = document.getElementById("pres-imagen")?.value?.trim();
-                    const precio_contado = document.getElementById("pres-precio")?.value?.trim();
-                    const anticipo = document.getElementById("pres-anticipo")?.value?.trim();
-                    const bonificaciones = document.getElementById("pres-bonificaciones")?.value?.trim();
-                    const especificaciones_tecnicas = document.getElementById("pres-specs")?.value?.trim();
-                    const cuotasStr = document.getElementById("pres-cuotas")?.value?.trim();
-
-                    if (!marca || !modelo) {
-                      alert("Marca y Modelo son obligatorios");
-                      return;
-                    }
-
-                    let planes_cuotas = null;
-                    if (cuotasStr) {
-                      try {
-                        planes_cuotas = JSON.parse(cuotasStr);
-                      } catch (e) {
-                        alert("El formato de Planes de Cuotas no es JSON válido");
-                        return;
-                      }
-                    }
-
-                    const data = {
-                      marca,
-                      modelo,
-                      imagen_url: imagen_url || null,
-                      precio_contado: precio_contado || null,
-                      anticipo: anticipo || null,
-                      bonificaciones: bonificaciones || null,
-                      especificaciones_tecnicas: especificaciones_tecnicas || null,
-                      planes_cuotas,
-                      activo: true,
-                    };
-
-                    try {
-                      if (editingPresupuesto) {
-                        const updated = await apiUpdatePresupuesto(editingPresupuesto.id, data);
-                        setPresupuestos(prev => prev.map(p => p.id === editingPresupuesto.id ? updated : p));
-                      } else {
-                        const created = await apiCreatePresupuesto(data);
-                        setPresupuestos(prev => [created, ...prev]);
-                      }
-                      setShowPresupuestoModal(false);
-                      setEditingPresupuesto(null);
-                    } catch (e) {
-                      console.error("Error al guardar presupuesto:", e);
-                      alert(`Error: ${e?.response?.data?.error || e.message}`);
-                    }
-                  }}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md transition-all"
-                >
-                  {editingPresupuesto ? "Actualizar" : "Crear"} Plantilla
-                </button>
-                <button
-                  onClick={() => {
-                    setShowPresupuestoModal(false);
-                    setEditingPresupuesto(null);
-                  }}
-                  className="flex-1 px-4 py-2.5 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-800 font-medium transition-colors"
-                >
-                  Cancelar
-                </button>
-              </div>
             </div>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-6 flex justify-end">
+        <button
+          onClick={() => {
+            setShowPresupuestoSelectModal(false);
+            setSelectedLeadForPresupuesto(null);
+          }}
+          className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+       {/* Modal: Presupuesto */}
+{showPresupuestoModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-xl font-semibold text-gray-800">
+          {editingPresupuesto ? "Editar Plantilla" : "Nueva Plantilla de Presupuesto"}
+        </h3>
+        <button onClick={() => {
+          setShowPresupuestoModal(false);
+          setEditingPresupuesto(null);
+        }}>
+          <X size={24} className="text-gray-600" />
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Marca *
+            </label>
+            <input
+              type="text"
+              id="pres-marca"
+              defaultValue={editingPresupuesto?.marca || ""}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholder="ej: Chevrolet"
+            />
           </div>
-        )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Modelo *
+            </label>
+            <input
+              type="text"
+              id="pres-modelo"
+              defaultValue={editingPresupuesto?.modelo || ""}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholder="ej: Cruze LT"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            URL de Imagen
+          </label>
+          <input
+            type="url"
+            id="pres-imagen"
+            defaultValue={editingPresupuesto?.imagen_url || ""}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            placeholder="https://ejemplo.com/imagen.jpg"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Precio Contado
+          </label>
+          <input
+            type="text"
+            id="pres-precio"
+            defaultValue={editingPresupuesto?.precio_contado || ""}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            placeholder="ej: $25.000.000"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Anticipo
+          </label>
+          <input
+            type="text"
+            id="pres-anticipo"
+            defaultValue={editingPresupuesto?.anticipo || ""}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            placeholder="ej: 30% - $7.500.000"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Bonificaciones
+          </label>
+          <textarea
+            id="pres-bonificaciones"
+            defaultValue={editingPresupuesto?.bonificaciones || ""}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 h-20 resize-none"
+            placeholder="ej: Bonificación por pago contado: $500.000"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Especificaciones Técnicas
+          </label>
+          <textarea
+            id="pres-specs"
+            defaultValue={editingPresupuesto?.especificaciones_tecnicas || ""}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 h-24 resize-none"
+            placeholder="Motor, transmisión, equipamiento, etc."
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Planes de Cuotas (JSON)
+          </label>
+          <textarea
+            id="pres-cuotas"
+            defaultValue={editingPresupuesto?.planes_cuotas ? JSON.stringify(editingPresupuesto.planes_cuotas, null, 2) : ""}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 h-24 resize-none font-mono text-xs"
+            placeholder='{"12": "cuota de $2.000.000", "24": "cuota de $1.100.000"}'
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Formato JSON opcional. Ejemplo: {`{"12": "cuota $X", "24": "cuota $Y"}`}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex space-x-3 pt-6">
+        <button
+          onClick={async () => {
+            const marca = (document.getElementById("pres-marca") as HTMLInputElement)?.value?.trim();
+            const modelo = (document.getElementById("pres-modelo") as HTMLInputElement)?.value?.trim();
+            const imagen_url = (document.getElementById("pres-imagen") as HTMLInputElement)?.value?.trim();
+            const precio_contado = (document.getElementById("pres-precio") as HTMLInputElement)?.value?.trim();
+            const anticipo = (document.getElementById("pres-anticipo") as HTMLInputElement)?.value?.trim();
+            const bonificaciones = (document.getElementById("pres-bonificaciones") as HTMLTextAreaElement)?.value?.trim();
+            const especificaciones_tecnicas = (document.getElementById("pres-specs") as HTMLTextAreaElement)?.value?.trim();
+            const cuotasStr = (document.getElementById("pres-cuotas") as HTMLTextAreaElement)?.value?.trim();
+
+            if (!marca || !modelo) {
+              alert("Marca y Modelo son obligatorios");
+              return;
+            }
+
+            let planes_cuotas = null;
+            if (cuotasStr) {
+              try {
+                planes_cuotas = JSON.parse(cuotasStr);
+              } catch (e) {
+                alert("El formato de Planes de Cuotas no es JSON válido");
+                return;
+              }
+            }
+
+            const data: any = {
+              marca,
+              modelo,
+              imagen_url: imagen_url || null,
+              precio_contado: precio_contado || null,
+              anticipo: anticipo || null,
+              bonificaciones: bonificaciones || null,
+              especificaciones_tecnicas: especificaciones_tecnicas || null,
+              planes_cuotas,
+              activo: true,
+            };
+
+            try {
+              if (editingPresupuesto) {
+                const updated = await apiUpdatePresupuesto(editingPresupuesto.id, data);
+                setPresupuestos(prev => prev.map(p => p.id === editingPresupuesto.id ? updated : p));
+              } else {
+                const created = await apiCreatePresupuesto(data);
+                setPresupuestos(prev => [created, ...prev]);
+              }
+              setShowPresupuestoModal(false);
+              setEditingPresupuesto(null);
+            } catch (e: any) {
+              console.error("Error al guardar presupuesto:", e);
+              alert(`Error: ${e?.response?.data?.error || e.message}`);
+            }
+          }}
+          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+        >
+          {editingPresupuesto ? "Actualizar" : "Crear"} Plantilla
+        </button>
+        <button
+          onClick={() => {
+            setShowPresupuestoModal(false);
+            setEditingPresupuesto(null);
+          }}
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+      </div>
     </div>
   );
 }
