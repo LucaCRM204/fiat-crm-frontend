@@ -1346,7 +1346,7 @@ if (!isAuthenticated) {
 }
   // ===== UI autenticada =====
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-slate-900">
       {/* Sidebar mejorado */}
       <div className="w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white shadow-2xl flex flex-col">
         <div className="p-6 border-b border-slate-700/50">
@@ -1434,7 +1434,7 @@ if (!isAuthenticated) {
       </div>
 
       {/* Área de contenido principal */}
-      <div className="flex-1 p-8 overflow-y-auto bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="flex-1 p-8 overflow-y-auto bg-slate-900">
         {activeSection === "dashboard" && (
           <div className="space-y-8">
             <div className="flex items-center justify-between">
