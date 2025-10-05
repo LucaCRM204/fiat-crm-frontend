@@ -1257,81 +1257,93 @@ export default function CRM() {
   };
 
   // ===== UI: Login =====
-  if (!isAuthenticated) {
+  // Reemplazar la sección del login (líneas 1260-1335) con esto:
+if (!isAuthenticated) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-md transform transition-all hover:scale-[1.02]">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl mb-6 shadow-2xl">
-            <span className="text-5xl">⚡</span>
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-slate-800 rounded-2xl mb-6">
+            <span className="text-6xl">🚗</span>
           </div>
-          <h1 className="text-5xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
-            Alluma
-          </h1>
-          <p className="text-gray-600 text-lg font-semibold">CRM Inteligente</p>
+          <h1 className="text-4xl font-bold text-white mb-2">Alluma CRM</h1>
+          <p className="text-slate-400">Concesionario Fiat</p>
         </div>
 
-        <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-3">Email</label>
-            <input
-              type="email"
-              id="email"
-              placeholder="tu@alluma.com"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleLogin(
-                    document.getElementById("email").value,
-                    document.getElementById("password").value
-                  );
-                }
-              }}
-              className="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all text-lg"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-3">Contraseña</label>
-            <input
-              type="password"
-              id="password"
-              placeholder="••••••••"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleLogin(
-                    document.getElementById("email").value,
-                    document.getElementById("password").value
-                  );
-                }
-              }}
-              className="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all text-lg"
-            />
-          </div>
-
-          {loginError && (
-            <div className="bg-red-50 border-2 border-red-300 text-red-700 px-5 py-4 rounded-2xl text-sm font-semibold shadow-sm">
-              {loginError}
+        <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700">
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-bold text-slate-300 mb-2">
+                Correo Electrónico
+              </label>
+              <input
+                type="email"
+                id="email"
+                placeholder="nombre@alluma.com"
+                className="w-full px-4 py-3 bg-slate-900 border-2 border-slate-700 text-white rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleLogin(
+                      document.getElementById("email").value,
+                      document.getElementById("password").value
+                    );
+                  }
+                }}
+              />
             </div>
-          )}
 
-          <button
-            onClick={() => handleLogin(document.getElementById("email").value, document.getElementById("password").value)}
-            className="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white py-5 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transform hover:scale-[1.03] transition-all"
-          >
-            Iniciar Sesión
-          </button>
+            <div>
+              <label className="block text-sm font-bold text-slate-300 mb-2">
+                Contraseña
+              </label>
+              <input
+                type="password"
+                id="password"
+                placeholder="••••••••"
+                className="w-full px-4 py-3 bg-slate-900 border-2 border-slate-700 text-white rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleLogin(
+                      document.getElementById("email").value,
+                      document.getElementById("password").value
+                    );
+                  }
+                }}
+              />
+            </div>
 
-          <div className="text-center pt-6 border-t-2 border-gray-100">
-            <button className="text-sm font-semibold text-purple-600 hover:text-purple-800 transition-colors">
-              ¿Olvidaste tu contraseña?
+            {loginError && (
+              <div className="bg-red-900 border-2 border-red-700 text-red-300 px-4 py-3 rounded-xl text-sm">
+                {loginError}
+              </div>
+            )}
+
+            <button
+              onClick={() => handleLogin(
+                document.getElementById("email").value,
+                document.getElementById("password").value
+              )}
+              className="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl font-bold"
+            >
+              Iniciar Sesión
             </button>
+
+            <div className="text-center pt-4">
+              <button className="text-sm text-slate-400 hover:text-red-500">
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
           </div>
+        </div>
+
+        <div className="mt-8 text-center">
+          <p className="text-slate-500 text-sm">Sistema de Gestión de Clientes y Ventas</p>
+          <p className="text-slate-600 text-xs mt-2">Fiat Argentina - Alluma CRM © 2025</p>
         </div>
       </div>
     </div>
   );
 }
-
   // ===== UI autenticada =====
   return (
     <div className="flex h-screen bg-gray-50">
