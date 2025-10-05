@@ -2546,7 +2546,7 @@ if (!isAuthenticated) {
                         </div>
                         <div>
                           <p className={`font-medium ${
-                            vendedor.id === currentUser?.id ? "text-purple-900" : "text-white
+                            vendedor.id === currentUser?.id ? "text-purple-900" : "text-white"
 
 
 "
