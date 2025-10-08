@@ -1988,7 +1988,7 @@ const getDashboardStats = (teamFilter?: string) => {
                                         onClick={() => {
                                           const phoneNumber = lead.telefono.replace(/\D/g, '');
                                           const message = encodeURIComponent(
-                                            `Hola ${lead.nombre}, me contacto desde GRUPO ALRA por su consulta sobre el vehiculo ${lead.modelo}. ¿Cómo está? ¿Tiene un minuto?`
+                                            `Hola ${lead.nombre}, me contacto desde FIAT por su consulta sobre el vehiculo ${lead.modelo}. ¿Cómo está? ¿Tiene un minuto?`
                                           );
                                           const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
                                           window.open(whatsappUrl, '_blank');
@@ -2419,7 +2419,7 @@ const getDashboardStats = (teamFilter?: string) => {
                                   onClick={() => {
                                     const phoneNumber = lead.telefono.replace(/\D/g, '');
                                     const message = encodeURIComponent(
-                                      `Hola ${lead.nombre}, me contacto desde Alra por su consulta sobre el ${lead.modelo}. ¿Cómo está?`
+                                      `Hola ${lead.nombre}, me contacto desde FIAT por su consulta sobre el ${lead.modelo}. ¿Cómo está?`
                                     );
                                     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
                                     window.open(whatsappUrl, '_blank');
