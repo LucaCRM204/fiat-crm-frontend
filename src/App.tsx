@@ -538,50 +538,66 @@ const abrirPresupuestoPersonalizado = (lead: LeadRow): void => {
 const handleGenerarPresupuestoPDF = async (): Promise<void> => {
   if (!leadParaPresupuesto) return;
 
-  const nombreVehiculo = (document.getElementById('plan-pensado') as HTMLInputElement)?.value;
-  const valorMovil = (document.getElementById('valor-plan') as HTMLInputElement)?.value;
-  const anticipo = (document.getElementById('anticipo') as HTMLInputElement)?.value;
-  const cuota1 = (document.getElementById('cuota-1-valor') as HTMLInputElement)?.value;
-  const cuota2a12 = (document.getElementById('cuota-2-12') as HTMLInputElement)?.value;
-  const cuota13a84 = (document.getElementById('cuota-13-84') as HTMLInputElement)?.value;
-  const adjudicacion = (document.getElementById('adjudicacion') as HTMLInputElement)?.value;
-  const modeloUsado = (document.getElementById('modelo-usado') as HTMLInputElement)?.value;
-  const anioUsado = (document.getElementById('anio-usado') as HTMLInputElement)?.value;
-  const kilometros = (document.getElementById('kilometros') as HTMLInputElement)?.value;
-  const valorEstimado = (document.getElementById('valor-estimado') as HTMLInputElement)?.value;
-  const observaciones = (document.getElementById('observaciones') as HTMLTextAreaElement)?.value;
+  // Leer valores de los inputs
+  const nombreVehiculo = (document.getElementById('nombre-vehiculo') as HTMLInputElement)?.value?.trim();
+  const valorMovil = (document.getElementById('valor-movil') as HTMLInputElement)?.value?.trim();
+  const anticipo = (document.getElementById('anticipo-input') as HTMLInputElement)?.value?.trim();
+  const cuota1 = (document.getElementById('cuota-1') as HTMLInputElement)?.value?.trim();
+  const cuota2a12 = (document.getElementById('cuota-2-12-input') as HTMLInputElement)?.value?.trim();
+  const cuota13a84 = (document.getElementById('cuota-13-84-input') as HTMLInputElement)?.value?.trim();
+  const adjudicacion = (document.getElementById('adjudicacion-input') as HTMLInputElement)?.value?.trim();
+  const modeloUsado = (document.getElementById('modelo-usado-input') as HTMLInputElement)?.value?.trim();
+  const anioUsado = (document.getElementById('anio-usado-input') as HTMLInputElement)?.value?.trim();
+  const kilometros = (document.getElementById('kilometros-input') as HTMLInputElement)?.value?.trim();
+  const valorEstimado = (document.getElementById('valor-estimado-input') as HTMLInputElement)?.value?.trim();
+  const observaciones = (document.getElementById('observaciones-input') as HTMLTextAreaElement)?.value?.trim();
 
-  if (!nombreVehiculo || !valorMovil) {
-    alert('Por favor completá al menos el nombre del vehículo y el valor móvil');
+  // Validación mejorada
+  if (!nombreVehiculo) {
+    alert('❌ Por favor completá el nombre del vehículo');
+    document.getElementById('nombre-vehiculo')?.focus();
     return;
   }
 
-  // Crear array de cuotas en el formato esperado
+  if (!valorMovil) {
+    alert('❌ Por favor completá el valor móvil');
+    document.getElementById('valor-movil')?.focus();
+    return;
+  }
+
+  // Construir array de cuotas solo con las que tienen valor
   const cuotasValidas = [];
   if (cuota2a12) cuotasValidas.push({ cantidad: '2-12', valor: cuota2a12 });
   if (cuota13a84) cuotasValidas.push({ cantidad: '13-84', valor: cuota13a84 });
 
   const data = {
     nombreVehiculo,
-    valorMinimo: valorMovil, // Cambiar de valorMovil a valorMinimo
-    anticipo,
-    bonificacionCuota: cuota1, // Usar cuota1 como bonificación
-    cuotas: cuotasValidas, // Usar el array de cuotas
-    adjudicacion,
-    marcaModelo: modeloUsado,
-    anio: anioUsado,
-    kilometros,
-    valorEstimado,
-    observaciones,
+    valorMinimo: valorMovil,
+    anticipo: anticipo || undefined,
+    bonificacionCuota: cuota1 || undefined,
+    cuotas: cuotasValidas,
+    adjudicacion: adjudicacion || undefined,
+    marcaModelo: modeloUsado || undefined,
+    anio: anioUsado || undefined,
+    kilometros: kilometros || undefined,
+    valorEstimado: valorEstimado || undefined,
+    observaciones: observaciones || undefined,
     vendedor: currentUser?.name || 'Vendedor',
     cliente: leadParaPresupuesto.nombre,
     telefono: leadParaPresupuesto.telefono
   };
 
   try {
+    // Mostrar loading
+    const btnGenerar = document.querySelector('button[onclick*="handleGenerarPresupuestoPDF"]') as HTMLButtonElement;
+    if (btnGenerar) {
+      btnGenerar.disabled = true;
+      btnGenerar.textContent = '⏳ Generando PDF...';
+    }
+
     await generarPresupuestoPDF(data);
     
-    const enviarWhatsApp = confirm('PDF generado exitosamente. ¿Querés enviarlo por WhatsApp?');
+    const enviarWhatsApp = confirm('✅ PDF generado exitosamente.\n\n¿Querés enviarlo por WhatsApp?');
     
     if (enviarWhatsApp) {
       const phoneNumber = leadParaPresupuesto.telefono.replace(/\D/g, '');
@@ -591,12 +607,20 @@ const handleGenerarPresupuestoPDF = async (): Promise<void> => {
       window.open(whatsappUrl, '_blank');
     }
     
+    // Cerrar modal
     setShowPresupuestoPersonalizadoModal(false);
     setLeadParaPresupuesto(null);
     
   } catch (error) {
     console.error('Error al generar PDF:', error);
-    alert('Error al generar el presupuesto. Por favor intentá de nuevo.');
+    alert('❌ Error al generar el presupuesto. Por favor intentá de nuevo.');
+  } finally {
+    // Restaurar botón
+    const btnGenerar = document.querySelector('button[onclick*="handleGenerarPresupuestoPDF"]') as HTMLButtonElement;
+    if (btnGenerar) {
+      btnGenerar.disabled = false;
+      btnGenerar.textContent = '✅ Generar este PDF';
+    }
   }
 };
   // ===== Funciones para filtrar y ordenar usuarios =====
