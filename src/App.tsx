@@ -109,7 +109,12 @@ const fuentes: Record<
 
 // Configuración de bots
 const botConfig: Record<string, { targetTeam: string | null; label: string }> =
- type LeadRow = {
+  {
+    whatsapp_bot_cm1: { targetTeam: null, label: "Bot CM 1" },
+    whatsapp_bot_cm2: { targetTeam: null, label: "Bot CM 2" },
+    whatsapp_100: { targetTeam: null, label: "Bot 100" }, // null = distribución general
+  };
+type LeadRow = {
   id: number;
   nombre: string;
   telefono: string;
