@@ -1,4 +1,4 @@
-import { api } from './api';
+import { api } from '../api';
 
 export interface Presupuesto {
   id: number;
@@ -40,15 +40,12 @@ export interface UpdatePresupuestoData {
   activo?: boolean;
 }
 
-export interface GenerarPresupuestoPDFData {
+type PresupuestoData = {
   nombreVehiculo: string;
   valorMinimo: string;
   anticipo?: string;
   bonificacionCuota?: string;
-  cuotas?: Array<{
-    cantidad: string;
-    valor: string;
-  }>;
+  cuotas: Array<{ cantidad: string; valor: string }>;
   adjudicacion?: string;
   marcaModelo?: string;
   anio?: string;
@@ -58,8 +55,26 @@ export interface GenerarPresupuestoPDFData {
   vendedor: string;
   cliente: string;
   telefono: string;
+  bonificaciones?: string[];
+};
+
+// Función para generar PDF personalizado
+export async function generarPresupuestoPDF(data: PresupuestoData): Promise<void> {
+  const response = await api.post('/presupuestos/generar-pdf', data, {
+    responseType: 'blob'
+  });
+  
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', `presupuesto_${data.cliente.replace(/\s+/g, '_')}_${Date.now()}.pdf`);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
 }
 
+// Funciones CRUD de plantillas
 export async function listPresupuestos(): Promise<Presupuesto[]> {
   const response = await api.get('/presupuestos');
   return response.data;
@@ -83,27 +98,4 @@ export async function updatePresupuesto(id: number, data: UpdatePresupuestoData)
 export async function deletePresupuesto(id: number): Promise<{ ok: boolean; message: string }> {
   const response = await api.delete(`/presupuestos/${id}`);
   return response.data;
-}
-
-export async function generarPresupuestoPDF(data: GenerarPresupuestoPDFData): Promise<{ success: boolean }> {
-  try {
-    const response = await api.post('/presupuestos/generar-pdf', data, {
-      responseType: 'blob'
-    });
-    
-    // Crear URL del blob y descargar
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `presupuesto_${data.cliente.replace(/\s+/g, '_')}_${Date.now()}.pdf`);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
-    
-    return { success: true };
-  } catch (error) {
-    console.error('Error generando PDF:', error);
-    throw error;
-  }
 }
