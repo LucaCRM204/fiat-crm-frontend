@@ -1,66 +1,3 @@
-import { api } from './api';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-
-export interface Presupuesto {
-  id: number;
-  modelo: string;
-  marca: string;
-  imagen_url?: string;
-  precio_contado?: string;
-  especificaciones_tecnicas?: string;
-  planes_cuotas?: any;
-  bonificaciones?: string;
-  anticipo?: string;
-  activo: boolean;
-  created_by?: number;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface CreatePresupuestoData {
-  modelo: string;
-  marca: string;
-  imagen_url?: string;
-  precio_contado?: string;
-  especificaciones_tecnicas?: string;
-  planes_cuotas?: any;
-  bonificaciones?: string;
-  anticipo?: string;
-  activo?: boolean;
-}
-
-export interface UpdatePresupuestoData {
-  modelo?: string;
-  marca?: string;
-  imagen_url?: string;
-  precio_contado?: string;
-  especificaciones_tecnicas?: string;
-  planes_cuotas?: any;
-  bonificaciones?: string;
-  anticipo?: string;
-  activo?: boolean;
-}
-
-type PresupuestoData = {
-  nombreVehiculo: string;
-  valorMinimo: string;
-  anticipo?: string;
-  bonificacionCuota?: string;
-  cuotas: Array<{ cantidad: string; valor: string }>;
-  adjudicacion?: string;
-  marcaModelo?: string;
-  anio?: string;
-  kilometros?: string;
-  valorEstimado?: string;
-  observaciones?: string;
-  vendedor: string;
-  cliente: string;
-  telefono: string;
-  bonificaciones?: string[];
-};
-
-// Función para generar PDF desde el modal visual
 export async function generarPresupuestoPDFDesdeModal(elementId: string, cliente: string): Promise<void> {
   try {
     const element = document.getElementById(elementId);
@@ -68,22 +5,51 @@ export async function generarPresupuestoPDFDesdeModal(elementId: string, cliente
       throw new Error('Elemento no encontrado');
     }
 
-    // Ocultar botones antes de capturar
+    // Ocultar scroll y botones antes de capturar
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    
     const botones = element.querySelectorAll('button');
     botones.forEach(btn => (btn as HTMLElement).style.display = 'none');
 
-    // Capturar el contenido del modal como imagen
+    // IMPORTANTE: Esperar a que se renderice todo
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Scroll al inicio del modal
+    const modal = element.closest('.overflow-y-auto');
+    if (modal) {
+      modal.scrollTop = 0;
+    }
+
+    // Esperar otro momento
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Capturar con configuración mejorada
     const canvas = await html2canvas(element, {
       scale: 2,
       useCORS: true,
+      allowTaint: true,
       logging: false,
-      backgroundColor: '#ffffff'
+      backgroundColor: '#ffffff',
+      windowWidth: element.scrollWidth,
+      windowHeight: element.scrollHeight,
+      imageTimeout: 15000,
+      onclone: (clonedDoc) => {
+        const clonedElement = clonedDoc.getElementById(elementId);
+        if (clonedElement) {
+          // Asegurar que el ancho sea fijo
+          clonedElement.style.width = '1200px';
+          clonedElement.style.maxWidth = '1200px';
+          clonedElement.style.minWidth = '1200px';
+        }
+      }
     });
 
-    // Restaurar botones
+    // Restaurar botones y scroll
     botones.forEach(btn => (btn as HTMLElement).style.display = '');
+    document.body.style.overflow = originalOverflow;
 
-    // Crear PDF
+    // Crear PDF con mejor calidad
     const imgWidth = 210; // A4 ancho en mm
     const pageHeight = 297; // A4 alto en mm
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -92,78 +58,25 @@ export async function generarPresupuestoPDFDesdeModal(elementId: string, cliente
     let heightLeft = imgHeight;
     let position = 0;
 
-    // Agregar primera página
-    pdf.addImage(
-      canvas.toDataURL('image/png'),
-      'PNG',
-      0,
-      position,
-      imgWidth,
-      imgHeight
-    );
+    // Agregar imagen al PDF
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    
+    // Primera página
+    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
     heightLeft -= pageHeight;
 
-    // Si necesita más páginas
+    // Páginas adicionales si es necesario
     while (heightLeft > 0) {
       position = heightLeft - imgHeight;
       pdf.addPage();
-      pdf.addImage(
-        canvas.toDataURL('image/png'),
-        'PNG',
-        0,
-        position,
-        imgWidth,
-        imgHeight
-      );
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
       heightLeft -= pageHeight;
     }
 
-    // Descargar PDF
+    // Descargar
     pdf.save(`presupuesto_${cliente.replace(/\s+/g, '_')}_${Date.now()}.pdf`);
   } catch (error) {
     console.error('Error generando PDF:', error);
     throw error;
   }
-}
-
-// Función alternativa que usa el backend (mantener por compatibilidad)
-export async function generarPresupuestoPDF(data: PresupuestoData): Promise<void> {
-  const response = await api.post('/presupuestos/generar-pdf', data, {
-    responseType: 'blob'
-  });
-  
-  const url = window.URL.createObjectURL(new Blob([response.data]));
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', `presupuesto_${data.cliente.replace(/\s+/g, '_')}_${Date.now()}.pdf`);
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  window.URL.revokeObjectURL(url);
-}
-
-// Funciones CRUD de plantillas
-export async function listPresupuestos(): Promise<Presupuesto[]> {
-  const response = await api.get('/presupuestos');
-  return response.data;
-}
-
-export async function getPresupuesto(id: number): Promise<Presupuesto> {
-  const response = await api.get(`/presupuestos/${id}`);
-  return response.data;
-}
-
-export async function createPresupuesto(data: CreatePresupuestoData): Promise<Presupuesto> {
-  const response = await api.post('/presupuestos', data);
-  return response.data;
-}
-
-export async function updatePresupuesto(id: number, data: UpdatePresupuestoData): Promise<Presupuesto> {
-  const response = await api.put(`/presupuestos/${id}`, data);
-  return response.data;
-}
-
-export async function deletePresupuesto(id: number): Promise<{ ok: boolean; message: string }> {
-  const response = await api.delete(`/presupuestos/${id}`);
-  return response.data;
 }
