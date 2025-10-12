@@ -39,6 +39,7 @@ import {
   updatePresupuesto as apiUpdatePresupuesto,
   deletePresupuesto as apiDeletePresupuesto,
 } from "./services/presupuestos";
+import { generarPresupuestoPDF } from "./services/presupuestos";
 // ===== Utilidades de jerarquía =====
 function buildIndex(users: any[]) {
   const byId = new Map(users.map((u: any) => [u.id, u]));
@@ -70,7 +71,7 @@ function getDescendantUserIds(
 
 const roles: Record<string, string> = {
   owner: "Dueño",
-  gerente_general: "Gerente General",
+  director: "Director",
   gerente: "Gerente",
   supervisor: "Supervisor",
   vendedor: "Vendedor",
@@ -108,13 +109,7 @@ const fuentes: Record<
 
 // Configuración de bots
 const botConfig: Record<string, { targetTeam: string | null; label: string }> =
-  {
-    whatsapp_bot_cm1: { targetTeam: null, label: "Bot CM 1" },
-    whatsapp_bot_cm2: { targetTeam: null, label: "Bot CM 2" },
-    whatsapp_100: { targetTeam: null, label: "Bot 100" }, // null = distribución general
-  };
-
-type LeadRow = {
+ type LeadRow = {
   id: number;
   nombre: string;
   telefono: string;
@@ -159,6 +154,7 @@ type Presupuesto = {
   created_at?: string;
   updated_at?: string;
 };
+
 // ===== Funciones de descarga Excel =====
 const formatDate = (dateString: string): string => {
   if (!dateString) return "Sin fecha";
@@ -307,7 +303,9 @@ export default function CRM() {
   const [selectedRoleFilter, setSelectedRoleFilter] = useState<string>("todos");
   const [userSortBy, setUserSortBy] = useState<"name" | "role" | "team" | "performance">("team");
   const [showUserFilters, setShowUserFilters] = useState(false);
-
+  const [selectedLeads, setSelectedLeads] = useState<Set<number>>(new Set());
+  const [showBulkReassignModal, setShowBulkReassignModal] = useState(false);
+  const [bulkReassignVendorId, setBulkReassignVendorId] = useState<number | null>(null);
   // Estados para reasignación
   const [showReassignModal, setShowReassignModal] = useState(false);
   const [leadToReassign, setLeadToReassign] = useState<LeadRow | null>(null);
@@ -340,7 +338,7 @@ export default function CRM() {
   const [showUserModal, setShowUserModal] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [modalRole, setModalRole] = useState<
-    "owner" | "gerente_general" | "gerente" | "supervisor" | "vendedor"
+    "owner" | "director" | "gerente" | "supervisor" | "vendedor"
   >("vendedor");
   const [modalReportsTo, setModalReportsTo] = useState<number | null>(null);
   // Estados para presupuestos
@@ -349,6 +347,10 @@ const [showPresupuestoModal, setShowPresupuestoModal] = useState(false);
 const [editingPresupuesto, setEditingPresupuesto] = useState<Presupuesto | null>(null);
 const [showPresupuestoSelectModal, setShowPresupuestoSelectModal] = useState(false);
 const [selectedLeadForPresupuesto, setSelectedLeadForPresupuesto] = useState<LeadRow | null>(null);
+// Estados para modal de presupuesto personalizado
+const [showPresupuestoPersonalizadoModal, setShowPresupuestoPersonalizadoModal] = useState<boolean>(false);
+const [leadParaPresupuesto, setLeadParaPresupuesto] = useState<LeadRow | null>(null);
+
   // ===== Login contra backend =====
   const handleLogin = async (email: string, password: string) => {
   try {
@@ -419,7 +421,7 @@ const [selectedLeadForPresupuesto, setSelectedLeadForPresupuesto] = useState<Lea
   // ===== Acceso por rol =====
   const getAccessibleUserIds = (user: any) => {
     if (!user) return [] as number[];
-    if (["owner", "gerente_general", "dueño"].includes(user.role))
+    if (["owner", "director", "dueño"].includes(user.role))
       return users.map((u: any) => u.id);
     const ids = [user.id, ...getDescendantUserIds(user.id, childrenIndex)];
     console.log('=== getAccessibleUserIds ===');
@@ -440,14 +442,14 @@ console.log('Leads filtrados:', leads.filter(l => l.vendedor && ids.includes(l.v
   };
   
   const canCreateUsers = () =>
-    currentUser && ["owner", "gerente_general", "gerente"].includes(currentUser.role);
+    currentUser && ["owner", "director", "gerente"].includes(currentUser.role);
 
   const canManageUsers = () =>
-    currentUser && ["owner", "gerente_general", "gerente", "dueño"].includes(currentUser.role);
+    currentUser && ["owner", "director", "gerente", "dueño"].includes(currentUser.role);
   const isOwner = () => currentUser?.role === "owner" || currentUser?.role === "dueño";
 
   const canCreateLeads = () =>
-    currentUser && ["owner", "gerente_general", "gerente", "supervisor", "vendedor"].includes(currentUser.role);
+    currentUser && ["owner", "director", "gerente", "supervisor", "vendedor"].includes(currentUser.role);
 
   const canDeleteLeads = () => {
   const canDelete = currentUser && ["owner", "dueño"].includes(currentUser.role);
@@ -474,7 +476,7 @@ console.log('Leads filtrados:', leads.filter(l => l.vendedor && ids.includes(l.v
   const getFilteredLeadsByTeam = (teamId?: string) => {
     if (!currentUser) return [] as LeadRow[];
 
-    if (teamId && teamId !== "todos" && ["owner", "gerente_general", "dueño"].includes(currentUser.role)) {
+    if (teamId && teamId !== "todos" && ["owner", "director", "dueño"].includes(currentUser.role)) {
       const teamUserIds = getTeamUserIds(teamId);
       return leads.filter((l) => l.vendedor && teamUserIds.includes(l.vendedor));
     }
@@ -500,7 +502,7 @@ console.log('Leads filtrados:', leads.filter(l => l.vendedor && ids.includes(l.v
     return users.filter((u: any) => {
       if (currentUser.role === "owner") return true;
 
-      if (currentUser.role === "gerente_general") return u.role !== "owner";
+      if (currentUser.role === "director") return u.role !== "owner";
 
       if (currentUser.role === "gerente") {
         if (u.id === currentUser.id) return true;
@@ -523,7 +525,75 @@ console.log('Leads filtrados:', leads.filter(l => l.vendedor && ids.includes(l.v
       return false;
     });
   };
+const abrirPresupuestoPersonalizado = (lead: LeadRow): void => {
+  setLeadParaPresupuesto(lead);
+  setShowPresupuestoPersonalizadoModal(true);
+};
 
+const handleGenerarPresupuestoPDF = async (): Promise<void> => {
+  if (!leadParaPresupuesto) return;
+
+  const nombreVehiculo = (document.getElementById('plan-pensado') as HTMLInputElement)?.value;
+  const valorMovil = (document.getElementById('valor-plan') as HTMLInputElement)?.value;
+  const anticipo = (document.getElementById('anticipo') as HTMLInputElement)?.value;
+  const cuota1 = (document.getElementById('cuota-1-valor') as HTMLInputElement)?.value;
+  const cuota2a12 = (document.getElementById('cuota-2-12') as HTMLInputElement)?.value;
+  const cuota13a84 = (document.getElementById('cuota-13-84') as HTMLInputElement)?.value;
+  const adjudicacion = (document.getElementById('adjudicacion') as HTMLInputElement)?.value;
+  const modeloUsado = (document.getElementById('modelo-usado') as HTMLInputElement)?.value;
+  const anioUsado = (document.getElementById('anio-usado') as HTMLInputElement)?.value;
+  const kilometros = (document.getElementById('kilometros') as HTMLInputElement)?.value;
+  const valorEstimado = (document.getElementById('valor-estimado') as HTMLInputElement)?.value;
+  const observaciones = (document.getElementById('observaciones') as HTMLTextAreaElement)?.value;
+
+  if (!nombreVehiculo || !valorMovil) {
+    alert('Por favor completá al menos el nombre del vehículo y el valor móvil');
+    return;
+  }
+
+  // Crear array de cuotas en el formato esperado
+  const cuotasValidas = [];
+  if (cuota2a12) cuotasValidas.push({ cantidad: '2-12', valor: cuota2a12 });
+  if (cuota13a84) cuotasValidas.push({ cantidad: '13-84', valor: cuota13a84 });
+
+  const data = {
+    nombreVehiculo,
+    valorMinimo: valorMovil, // Cambiar de valorMovil a valorMinimo
+    anticipo,
+    bonificacionCuota: cuota1, // Usar cuota1 como bonificación
+    cuotas: cuotasValidas, // Usar el array de cuotas
+    adjudicacion,
+    marcaModelo: modeloUsado,
+    anio: anioUsado,
+    kilometros,
+    valorEstimado,
+    observaciones,
+    vendedor: currentUser?.name || 'Vendedor',
+    cliente: leadParaPresupuesto.nombre,
+    telefono: leadParaPresupuesto.telefono
+  };
+
+  try {
+    await generarPresupuestoPDF(data);
+    
+    const enviarWhatsApp = confirm('PDF generado exitosamente. ¿Querés enviarlo por WhatsApp?');
+    
+    if (enviarWhatsApp) {
+      const phoneNumber = leadParaPresupuesto.telefono.replace(/\D/g, '');
+      const mensaje = `Hola ${leadParaPresupuesto.nombre}! 👋\n\nTe acabo de generar el presupuesto personalizado del ${nombreVehiculo}.\n\nTe lo descargué en PDF para que lo puedas revisar con tranquilidad.\n\n¿Tenés alguna consulta sobre el presupuesto? Estoy para ayudarte! 😊`;
+      
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(mensaje)}`;
+      window.open(whatsappUrl, '_blank');
+    }
+    
+    setShowPresupuestoPersonalizadoModal(false);
+    setLeadParaPresupuesto(null);
+    
+  } catch (error) {
+    console.error('Error al generar PDF:', error);
+    alert('Error al generar el presupuesto. Por favor intentá de nuevo.');
+  }
+};
   // ===== Funciones para filtrar y ordenar usuarios =====
   const getFilteredAndSortedUsers = () => {
     let filteredUsers = getVisibleUsers();
@@ -565,7 +635,7 @@ console.log('Leads filtrados:', leads.filter(l => l.vendedor && ids.includes(l.v
         case "name":
           return a.name.localeCompare(b.name);
         case "role":
-          const roleOrder = ["owner", "gerente_general", "gerente", "supervisor", "vendedor"];
+          const roleOrder = ["owner", "director", "gerente", "supervisor", "vendedor"];
           const aRoleIndex = roleOrder.indexOf(a.role);
           const bRoleIndex = roleOrder.indexOf(b.role);
           if (aRoleIndex !== bRoleIndex) {
@@ -745,25 +815,109 @@ const getFilteredAndSearchedLeads = () => {
     }
   };
 
+  // AGREGAR LAS 3 FUNCIONES NUEVAS AQUÍ (FUERA de handleReassignLead)
+  const toggleLeadSelection = (leadId: number) => {
+    setSelectedLeads(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(leadId)) {
+        newSet.delete(leadId);
+      } else {
+        newSet.add(leadId);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleAllLeads = () => {
+    const filteredLeads = getFilteredLeadsByDate();
+    if (selectedLeads.size === filteredLeads.length) {
+      setSelectedLeads(new Set());
+    } else {
+      setSelectedLeads(new Set(filteredLeads.map(l => l.id)));
+    }
+  };
+
+  const handleBulkReassign = async () => {
+    if (bulkReassignVendorId === undefined) {
+      alert("Selecciona un vendedor");
+      return;
+    }
+
+    const leadsToReassign = Array.from(selectedLeads);
+    
+    if (leadsToReassign.length === 0) {
+      alert("No hay leads seleccionados");
+      return;
+    }
+
+    const confirmMsg = `¿Reasignar ${leadsToReassign.length} leads a ${
+      bulkReassignVendorId ? userById.get(bulkReassignVendorId)?.name : "Sin asignar"
+    }?`;
+    
+    if (!confirm(confirmMsg)) return;
+
+    try {
+      const promises = leadsToReassign.map(leadId =>
+        apiUpdateLead(leadId, { vendedor: bulkReassignVendorId } as any)
+      );
+      
+      await Promise.all(promises);
+
+      setLeads(prev =>
+        prev.map(l =>
+          selectedLeads.has(l.id)
+            ? { ...l, vendedor: bulkReassignVendorId }
+            : l
+        )
+      );
+
+      if (bulkReassignVendorId) {
+        pushAlert(
+          bulkReassignVendorId,
+          "lead_assigned",
+          `${leadsToReassign.length} leads asignados masivamente`
+        );
+      }
+
+      leadsToReassign.forEach(leadId => {
+        addHistorialEntry(
+          leadId,
+          `Reasignación masiva a ${
+            bulkReassignVendorId
+              ? userById.get(bulkReassignVendorId)?.name
+              : "Sin asignar"
+          }`
+        );
+      });
+
+      alert(`${leadsToReassign.length} leads reasignados exitosamente`);
+      setShowBulkReassignModal(false);
+      setSelectedLeads(new Set());
+      setBulkReassignVendorId(null);
+    } catch (error) {
+      console.error("Error en reasignación masiva:", error);
+      alert("Error al reasignar los leads");
+    }
+  };
+
   const openDeleteLeadConfirm = (lead: LeadRow) => {
     setLeadToDelete(lead);
     setShowDeleteLeadConfirmModal(true);
   };
 
-  const confirmDeleteLead = async () => {
-    if (!leadToDelete) return;
+ const confirmDeleteLead = async () => {
+  if (!leadToDelete) return;
 
-    try {
-      await apiDeleteLead(leadToDelete.id);
-      setLeads((prev) => prev.filter((l) => l.id !== leadToDelete.id));
-      setShowDeleteLeadConfirmModal(false);
-      setLeadToDelete(null);
-      alert("Lead eliminado exitosamente");
-    } catch (e: any) {
-      console.error("No pude eliminar el lead", e);
-      alert(`Error al eliminar el lead: ${e?.response?.data?.error || e.message}`);
-    }
-  };
+  try {
+    await apiDeleteLead(leadToDelete.id);
+    setLeads((prev) => prev.filter((l) => l.id !== leadToDelete.id));
+    setShowDeleteLeadConfirmModal(false);
+    setLeadToDelete(null);
+  } catch (e) {
+    console.error("No pude eliminar el lead", e);
+    alert("Error al eliminar el lead. Por favor, intenta nuevamente.");
+  }
+};
 
   // ===== Round-robin con soporte para bots específicos =====
   const [rrIndex, setRrIndex] = useState(0);
@@ -956,7 +1110,7 @@ const pushAlertToChain = (
 const getDashboardStats = (teamFilter?: string) => {
     let filteredLeads: LeadRow[];
     
-    if (teamFilter && teamFilter !== "todos" && ["owner", "gerente_general", "dueño"].includes(currentUser?.role)) {
+    if (teamFilter && teamFilter !== "todos" && ["owner", "director", "dueño"].includes(currentUser?.role)) {
       const teamUserIds = getTeamUserIds(teamFilter);
       filteredLeads = leads.filter((l) => l.vendedor && teamUserIds.includes(l.vendedor));
     } else {
@@ -990,7 +1144,7 @@ const getDashboardStats = (teamFilter?: string) => {
   const getSourceMetrics = (teamFilter?: string) => {
     let filteredLeads: LeadRow[];
     
-    if (teamFilter && teamFilter !== "todos" && ["owner", "gerente_general", "dueño"].includes(currentUser?.role)) {
+    if (teamFilter && teamFilter !== "todos" && ["owner", "director", "dueño"].includes(currentUser?.role)) {
       const teamUserIds = getTeamUserIds(teamFilter);
       filteredLeads = leads.filter((l) => l.vendedor && teamUserIds.includes(l.vendedor));
     } else {
@@ -1284,8 +1438,8 @@ const getDashboardStats = (teamFilter?: string) => {
     if (!user) return [];
     switch (user.role) {
       case "owner":
-        return ["gerente_general", "gerente", "supervisor", "vendedor"];
-      case "gerente_general":
+        return ["director", "gerente", "supervisor", "vendedor"];
+      case "director":
         return ["gerente", "supervisor", "vendedor"];
       case "gerente":
         return ["supervisor", "vendedor"];
@@ -1297,10 +1451,10 @@ const getDashboardStats = (teamFilter?: string) => {
     switch (role) {
       case "owner":
         return [];
-      case "gerente_general":
+      case "director":
         return users.filter((u: any) => u.role === "owner");
       case "gerente":
-        return users.filter((u: any) => u.role === "gerente_general");
+        return users.filter((u: any) => u.role === "director");
       case "supervisor":
         return users.filter((u: any) => u.role === "gerente");
       case "vendedor":
@@ -1546,7 +1700,7 @@ const getDashboardStats = (teamFilter?: string) => {
             { key: "calendar", label: "Calendario", Icon: Calendar },
             { key: "presupuestos", label: "Presupuestos", Icon: FileText },
             { key: "ranking", label: "Ranking", Icon: Trophy },
-            ...(["supervisor", "gerente", "gerente_general", "owner"].includes(currentUser?.role)
+            ...(["supervisor", "gerente", "director", "owner"].includes(currentUser?.role)
               ? [{ key: "team", label: "Mi Equipo", Icon: UserCheck }]
               : []),
             { key: "alerts", label: "Alertas", Icon: Bell, badge: unreadAlerts },
@@ -1560,7 +1714,7 @@ const getDashboardStats = (teamFilter?: string) => {
               className={`w-full flex items-center justify-between space-x-3 px-3 py-2 rounded-lg transition-colors ${
                 activeSection === (key as any)
                   ? "bg-blue-600 text-white"
-                  : "bg-transparent text-white hover:bg-slate-800"
+                  : "text-gray-300 hover:bg-slate-800"
               }`}
             >
               <div className="flex items-center space-x-3">
@@ -1625,7 +1779,7 @@ const getDashboardStats = (teamFilter?: string) => {
             <div className="flex items-center justify-between">
   <h2 className="text-3xl font-bold text-gray-800">Dashboard</h2>
   <div className="flex items-center space-x-3">
-    {["owner", "gerente_general", "dueño"].includes(currentUser?.role) && (
+    {["owner", "director", "dueño"].includes(currentUser?.role) && (
       <select
         value={selectedTeam}
         onChange={(e) => setSelectedTeam(e.target.value)}
@@ -1697,7 +1851,7 @@ const getDashboardStats = (teamFilter?: string) => {
             {/* Estadísticas principales */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {(() => {
-                const teamFilter = ["owner", "gerente_general", "dueño"].includes(currentUser?.role)
+                const teamFilter = ["owner", "director", "dueño"].includes(currentUser?.role)
                   ? selectedTeam
                   : undefined;
                 const stats = getDashboardStats(teamFilter);
@@ -1754,12 +1908,12 @@ const getDashboardStats = (teamFilter?: string) => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-semibold text-gray-800">Estados de Leads</h3>
                 <div className="flex items-center space-x-2">
-                  {["owner", "gerente_general"].includes(currentUser?.role) && (
+                  {["owner", "director"].includes(currentUser?.role) && (
                     <>
                       <span className="text-sm text-gray-600">Descargar Excel:</span>
                       <button
                         onClick={() => {
-                          const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
+                          const teamFilter = ["owner", "director"].includes(currentUser?.role)
                             ? selectedTeam
                             : undefined;
                           const filteredLeads = teamFilter && teamFilter !== "todos"
@@ -1788,7 +1942,7 @@ const getDashboardStats = (teamFilter?: string) => {
               </div>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {Object.entries(estados).map(([key, estado]) => {
-                  const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
+                  const teamFilter = ["owner", "director"].includes(currentUser?.role)
                     ? selectedTeam
                     : undefined;
                   const filteredLeads = teamFilter && teamFilter !== "todos"
@@ -1816,7 +1970,7 @@ const getDashboardStats = (teamFilter?: string) => {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
+                                const teamFilter = ["owner", "director"].includes(currentUser?.role)
                                   ? selectedTeam
                                   : undefined;
                                 const filteredLeads = teamFilter && teamFilter !== "todos"
@@ -1855,7 +2009,7 @@ const getDashboardStats = (teamFilter?: string) => {
                   </h4>
 
                   {(() => {
-                    const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
+                    const teamFilter = ["owner", "director"].includes(currentUser?.role)
                       ? selectedTeam
                       : undefined;
                     const filteredLeads = teamFilter && teamFilter !== "todos"
@@ -1988,7 +2142,7 @@ const getDashboardStats = (teamFilter?: string) => {
                                         onClick={() => {
                                           const phoneNumber = lead.telefono.replace(/\D/g, '');
                                           const message = encodeURIComponent(
-                                            `Hola ${lead.nombre}, me contacto desde GRUPO ALRA por su consulta sobre el vehiculo ${lead.modelo}. ¿Cómo está? ¿Tiene un minuto?`
+                                            `Hola ${lead.nombre}, me contacto desde Auto del sol por su consulta sobre el vehiculo ${lead.modelo}. ¿Cómo está? ¿Tiene un minuto?`
                                           );
                                           const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
                                           window.open(whatsappUrl, '_blank');
@@ -2001,17 +2155,16 @@ const getDashboardStats = (teamFilter?: string) => {
                                         </svg>
                                       </button>
                                       <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setSelectedLeadForPresupuesto(lead);
-                                          setShowPresupuestoSelectModal(true);
-                                        }}
-                                        className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700 hover:bg-purple-200 flex items-center space-x-1"
-                                        title="Enviar presupuesto por WhatsApp"
-                                      >
-                                        <FileText size={12} />
-                                        <span>Pres</span>
-                                      </button>
+  onClick={(e) => {
+    e.stopPropagation();
+    abrirPresupuestoPersonalizado(lead);
+  }}
+  className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700 hover:bg-purple-200 flex items-center space-x-1"
+  title="Generar presupuesto personalizado"
+>
+  <FileText size={12} />
+  <span>Presup</span>
+</button>
                                       <button
                                         onClick={(e) => {
                                           e.stopPropagation();
@@ -2078,7 +2231,7 @@ const getDashboardStats = (teamFilter?: string) => {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {(() => {
-                  const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
+                  const teamFilter = ["owner", "director"].includes(currentUser?.role)
                     ? selectedTeam
                     : undefined;
                   return getSourceMetrics(teamFilter).map((item) => (
@@ -2111,397 +2264,432 @@ const getDashboardStats = (teamFilter?: string) => {
           </div>
         )}
 
-        {/* Leads */}
-        {activeSection === "leads" && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-gray-800">Gestión de Leads</h2>
-              {canCreateLeads() && (
-                <button
-                  onClick={() => setShowNewLeadModal(true)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  <Plus size={20} />
-                  <span>Nuevo Lead</span>
-                </button>
-              )}
+        {/* Sección Leads */}
+{activeSection === "leads" && (
+  <div className="space-y-6">
+    <div className="flex items-center justify-between">
+      <h2 className="text-3xl font-bold text-gray-800">Gestión de Leads</h2>
+      <div className="flex items-center space-x-3">
+        {selectedLeads.size > 0 && (canManageUsers() || currentUser?.role === "supervisor") && (
+          <button
+            onClick={() => {
+              setBulkReassignVendorId(null);
+              setShowBulkReassignModal(true);
+            }}
+            className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          >
+            <UserCheck size={20} />
+            <span>Reasignar {selectedLeads.size} seleccionados</span>
+          </button>
+        )}
+        {canCreateLeads() && (
+          <button
+            onClick={() => setShowNewLeadModal(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            <Plus size={20} />
+            <span>Nuevo Lead</span>
+          </button>
+        )}
+      </div>
+    </div>
+
+    {/* Barra de búsqueda y filtros */}
+    <div className="bg-white rounded-xl shadow-lg p-6">
+      <div className="flex flex-col lg:flex-row gap-4">
+        {/* Búsqueda de texto */}
+        <div className="flex-1">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <input
+              type="text"
+              placeholder="Buscar por cliente, teléfono, modelo, vendedor, observaciones..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        {/* Botón para mostrar/ocultar filtros */}
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
+              showFilters || getActiveFiltersCount() > 0
+                ? "bg-blue-100 border-blue-300 text-blue-700"
+                : "bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            <Filter size={20} />
+            <span>Filtros</span>
+            {getActiveFiltersCount() > 0 && (
+              <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
+                {getActiveFiltersCount()}
+              </span>
+            )}
+          </button>
+
+          {getActiveFiltersCount() > 0 && (
+            <button
+              onClick={clearFilters}
+              className="flex items-center space-x-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
+            >
+              <X size={16} />
+              <span>Limpiar</span>
+            </button>
+          )}
+
+          <div className="text-sm text-gray-600">
+            <span className="font-medium">{getFilteredLeadsByDate().length}</span> leads encontrados
+          </div>
+        </div>
+      </div>
+
+      {/* Panel de filtros expandible */}
+      {showFilters && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Filtro por vendedor */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <User size={16} className="inline mr-1" />
+                Vendedor
+              </label>
+              <select
+                value={selectedVendedorFilter || ""}
+                onChange={(e) => setSelectedVendedorFilter(e.target.value ? parseInt(e.target.value, 10) : null)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Todos los vendedores</option>
+                <option value="0">Sin asignar</option>
+                {getVisibleUsers()
+                  .filter((u: any) => u.role === "vendedor")
+                  .map((vendedor: any) => {
+                    const leadsCount = leads.filter(l => l.vendedor === vendedor.id).length;
+                    return (
+                      <option key={vendedor.id} value={vendedor.id}>
+                        {vendedor.name} ({leadsCount} leads) {!vendedor.active ? " - Inactivo" : ""}
+                      </option>
+                    );
+                  })}
+              </select>
             </div>
 
-            {/* Barra de búsqueda y filtros */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex flex-col lg:flex-row gap-4">
-                {/* Búsqueda de texto */}
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                    <input
-                      type="text"
-                      placeholder="Buscar por cliente, teléfono, modelo, vendedor, observaciones..."
-                      value={searchText}
-                      onChange={(e) => setSearchText(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
+            {/* Filtro por estado */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Estado
+              </label>
+              <select
+                value={selectedEstadoFilter}
+                onChange={(e) => setSelectedEstadoFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Todos los estados</option>
+                {Object.entries(estados).map(([key, estado]) => (
+                  <option key={key} value={key}>
+                    {estado.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-                {/* Botón para mostrar/ocultar filtros */}
-                <div className="flex items-center space-x-3">
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
-                      showFilters || getActiveFiltersCount() > 0
-                        ? "bg-blue-100 border-blue-300 text-blue-700"
-                        : "bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    <Filter size={20} />
-                    <span>Filtros</span>
-                    {getActiveFiltersCount() > 0 && (
-                      <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
-                        {getActiveFiltersCount()}
-                      </span>
+            {/* Filtro por fuente */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Fuente
+              </label>
+              <select
+                value={selectedFuenteFilter}
+                onChange={(e) => setSelectedFuenteFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Todas las fuentes</option>
+                {Object.entries(fuentes).map(([key, fuente]) => (
+                  <option key={key} value={key}>
+                    {fuente.icon} {fuente.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        Filtrar por fecha
+      </label>
+      <div className="space-y-2">
+        <select
+          value={dateFilterType}
+          onChange={(e) => setDateFilterType(e.target.value as "created" | "status_change")}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+        >
+          <option value="status_change">Último cambio de estado</option>
+          <option value="created">Fecha de creación</option>
+        </select>
+        
+        <div className="flex space-x-2">
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+          >
+            <option value="">Todos los meses</option>
+            <option value="01">Enero</option>
+            <option value="02">Febrero</option>
+            <option value="03">Marzo</option>
+            <option value="04">Abril</option>
+            <option value="05">Mayo</option>
+            <option value="06">Junio</option>
+            <option value="07">Julio</option>
+            <option value="08">Agosto</option>
+            <option value="09">Septiembre</option>
+            <option value="10">Octubre</option>
+            <option value="11">Noviembre</option>
+            <option value="12">Diciembre</option>
+          </select>
+          
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+            className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+          >
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    {/* Tabla de leads con checkboxes */}
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              {(canManageUsers() || currentUser?.role === "supervisor") && (
+                <th className="px-4 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    checked={selectedLeads.size === getFilteredLeadsByDate().length && getFilteredLeadsByDate().length > 0}
+                    onChange={toggleAllLeads}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                  />
+                </th>
+              )}
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Cliente
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Contacto
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Vehículo
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Estado
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Fuente
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Vendedor
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Fecha
+              </th>
+              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                Acciones
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {getFilteredLeadsByDate().length === 0 ? (
+              <tr>
+                <td colSpan={9} className="px-4 py-8 text-center text-gray-500">
+                  {searchText.trim() || selectedVendedorFilter || selectedEstadoFilter || selectedFuenteFilter
+                    ? "No se encontraron leads que coincidan con los filtros aplicados"
+                    : "No hay leads para mostrar"}
+                </td>
+              </tr>
+            ) : (
+              getFilteredLeadsByDate().map((lead) => {
+                const vendedor = lead.vendedor ? userById.get(lead.vendedor) : null;
+                const canReassign =
+                  canManageUsers() ||
+                  (currentUser?.role === "supervisor" &&
+                    lead.vendedor &&
+                    getVisibleUsers().some((u: any) => u.id === lead.vendedor));
+
+                return (
+                  <tr key={lead.id} className={`hover:bg-gray-50 ${selectedLeads.has(lead.id) ? 'bg-blue-50' : ''}`}>
+                    {canReassign && (
+                      <td className="px-4 py-4">
+                        <input
+                          type="checkbox"
+                          checked={selectedLeads.has(lead.id)}
+                          onChange={() => toggleLeadSelection(lead.id)}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                        />
+                      </td>
                     )}
-                  </button>
-
-                  {getActiveFiltersCount() > 0 && (
-                    <button
-                      onClick={clearFilters}
-                      className="flex items-center space-x-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
-                    >
-                      <X size={16} />
-                      <span>Limpiar</span>
-                    </button>
-                  )}
-
-                  <div className="text-sm text-gray-600">
-                    <span className="font-medium">{getFilteredLeadsByDate().length}</span> leads encontrados
-                  </div>
-                </div>
-              </div>
-
-              {/* Panel de filtros expandible */}
-              {showFilters && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Filtro por vendedor */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <User size={16} className="inline mr-1" />
-                        Vendedor
-                      </label>
+                    <td className="px-4 py-4">
+                      <div className="font-medium text-gray-900">{lead.nombre}</div>
+                      {lead.created_by && (
+                        <div className="text-xs text-gray-500">
+                          Creado por: {userById.get(lead.created_by)?.name || 'Usuario eliminado'}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center space-x-1">
+                        <Phone size={12} className="text-gray-400" />
+                        <span className="text-gray-700">{lead.telefono}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div>
+                        <div className="font-medium text-gray-900">{lead.modelo}</div>
+                        <div className="text-xs text-gray-500">{lead.formaPago}</div>
+                        {lead.infoUsado && (
+                          <div className="text-xs text-orange-600">
+                            Usado: {lead.infoUsado}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4">
                       <select
-                        value={selectedVendedorFilter || ""}
-                        onChange={(e) => setSelectedVendedorFilter(e.target.value ? parseInt(e.target.value, 10) : null)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        value={lead.estado}
+                        onChange={(e) =>
+                          handleUpdateLeadStatus(lead.id, e.target.value)
+                        }
+                        className={`text-xs font-medium rounded-full px-2 py-1 border-0 text-white ${estados[lead.estado].color}`}
                       >
-                        <option value="">Todos los vendedores</option>
-                        <option value="0">Sin asignar</option>
-                        {getVisibleUsers()
-                          .filter((u: any) => u.role === "vendedor")
-                          .map((vendedor: any) => {
-                            const leadsCount = leads.filter(l => l.vendedor === vendedor.id).length;
-                            return (
-                              <option key={vendedor.id} value={vendedor.id}>
-                                {vendedor.name} ({leadsCount} leads) {!vendedor.active ? " - Inactivo" : ""}
-                              </option>
-                            );
-                          })}
-                      </select>
-                    </div>
-
-                    {/* Filtro por estado */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Estado
-                      </label>
-                      <select
-                        value={selectedEstadoFilter}
-                        onChange={(e) => setSelectedEstadoFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">Todos los estados</option>
                         {Object.entries(estados).map(([key, estado]) => (
-                          <option key={key} value={key}>
+                          <option key={key} value={key} className="text-black">
                             {estado.label}
                           </option>
                         ))}
                       </select>
-                    </div>
-
-                    {/* Filtro por fuente */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Fuente
-                      </label>
-                      <select
-                        value={selectedFuenteFilter}
-                        onChange={(e) => setSelectedFuenteFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">Todas las fuentes</option>
-                        {Object.entries(fuentes).map(([key, fuente]) => (
-                          <option key={key} value={key}>
-                            {fuente.icon} {fuente.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-{/* AGREGAR ESTE NUEVO FILTRO DE FECHA */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Filtrar por fecha
-                      </label>
-                      <div className="space-y-2">
-                        <select
-                          value={dateFilterType}
-                          onChange={(e) => setDateFilterType(e.target.value as "created" | "status_change")}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
-                        >
-                          <option value="status_change">Último cambio de estado</option>
-                          <option value="created">Fecha de creación</option>
-                        </select>
-                        
-                        <div className="flex space-x-2">
-                          <select
-                            value={selectedMonth}
-                            onChange={(e) => setSelectedMonth(e.target.value)}
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
-                          >
-                            <option value="">Todos los meses</option>
-                            <option value="01">Enero</option>
-                            <option value="02">Febrero</option>
-                            <option value="03">Marzo</option>
-                            <option value="04">Abril</option>
-                            <option value="05">Mayo</option>
-                            <option value="06">Junio</option>
-                            <option value="07">Julio</option>
-                            <option value="08">Agosto</option>
-                            <option value="09">Septiembre</option>
-                            <option value="10">Octubre</option>
-                            <option value="11">Noviembre</option>
-                            <option value="12">Diciembre</option>
-                          </select>
-                          
-                          <select
-                            value={selectedYear}
-                            onChange={(e) => setSelectedYear(e.target.value)}
-                            className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
-                          >
-                            <option value="2024">2024</option>
-                            <option value="2025">2025</option>
-                            <option value="2026">2026</option>
-                          </select>
-                        </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center space-x-1">
+                        <span className="text-sm">
+                          {fuentes[lead.fuente as string]?.icon || "❓"}
+                        </span>
+                        <span className="text-xs text-gray-600">
+                          {fuentes[lead.fuente as string]?.label || String(lead.fuente)}
+                        </span>
                       </div>
-                    </div>
-            {/* Tabla de leads con búsqueda y filtros aplicados */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Cliente
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Contacto
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Vehículo
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Estado
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Fuente
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Vendedor
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Fecha
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                        Acciones
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {getFilteredLeadsByDate().length === 0 ? (
-                      <tr>
-                        <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
-                          {searchText.trim() || selectedVendedorFilter || selectedEstadoFilter || selectedFuenteFilter
-                            ? "No se encontraron leads que coincidan con los filtros aplicados"
-                            : "No hay leads para mostrar"}
-                        </td>
-                      </tr>
-                    ) : (
-                      getFilteredLeadsByDate().map((lead) => {
-                        const vendedor = lead.vendedor ? userById.get(lead.vendedor) : null;
-                        const canReassign =
-                          canManageUsers() ||
-                          (currentUser?.role === "supervisor" &&
-                            lead.vendedor &&
-                            getVisibleUsers().some((u: any) => u.id === lead.vendedor));
-
-                        return (
-                          <tr key={lead.id} className="hover:bg-gray-50">
-                            <td className="px-4 py-4">
-                              <div className="font-medium text-gray-900">{lead.nombre}</div>
-                              {lead.created_by && (
-                                <div className="text-xs text-gray-500">
-                                  Creado por: {userById.get(lead.created_by)?.name || 'Usuario eliminado'}
-                                </div>
-                              )}
-                            </td>
-                            <td className="px-4 py-4">
-                              <div className="flex items-center space-x-1">
-                                <Phone size={12} className="text-gray-400" />
-                                <span className="text-gray-700">{lead.telefono}</span>
-                              </div>
-                            </td>
-                            <td className="px-4 py-4">
-                              <div>
-                                <div className="font-medium text-gray-900">{lead.modelo}</div>
-                                <div className="text-xs text-gray-500">{lead.formaPago}</div>
-                                {lead.infoUsado && (
-                                  <div className="text-xs text-orange-600">
-                                    Usado: {lead.infoUsado}
-                                  </div>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-4 py-4">
-                              <select
-                                value={lead.estado}
-                                onChange={(e) =>
-                                  handleUpdateLeadStatus(lead.id, e.target.value)
-                                }
-                                className={`text-xs font-medium rounded-full px-2 py-1 border-0 text-white ${estados[lead.estado].color}`}
-                              >
-                                {Object.entries(estados).map(([key, estado]) => (
-                                  <option key={key} value={key} className="text-black">
-                                    {estado.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </td>
-                            <td className="px-4 py-4">
-                              <div className="flex items-center space-x-1">
-                                <span className="text-sm">
-                                  {fuentes[lead.fuente as string]?.icon || "❓"}
-                                </span>
-                                <span className="text-xs text-gray-600">
-                                  {fuentes[lead.fuente as string]?.label || String(lead.fuente)}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="px-4 py-4 text-gray-700">
-                              <div>
-                                {vendedor?.name || "Sin asignar"}
-                                {vendedor && !vendedor.active && (
-                                  <div className="text-xs text-red-600">
-                                    (Desactivado)
-                                  </div>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-4 py-4 text-gray-500 text-xs">
-                              {lead.fecha ? String(lead.fecha).slice(0, 10) : "—"}
-                            </td>
-                            <td className="px-4 py-4 text-center">
-                              <div className="flex items-center justify-center space-x-1">
-                                <button
-                                  onClick={() => {
-                                    const phoneNumber = lead.telefono.replace(/\D/g, '');
-                                    const message = encodeURIComponent(
-                                      `Hola ${lead.nombre}, me contacto desde Alra por su consulta sobre el ${lead.modelo}. ¿Cómo está?`
-                                    );
-                                    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
-                                    window.open(whatsappUrl, '_blank');
-                                  }}
-                                  className="px-2 py-1 text-xs rounded bg-green-100 text-green-700 hover:bg-green-200 flex items-center space-x-1"
-                                  title="Chatear por WhatsApp"
-                                >
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.89 3.587"/>
-                                  </svg>
-                                </button>
-                                <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedLeadForPresupuesto(lead);
-                                            setShowPresupuestoSelectModal(true);
-                                          }}
-                                          className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700 hover:bg-purple-200 flex items-center space-x-1"
-                                          title="Enviar presupuesto por WhatsApp"
-                                        >
-                                          <FileText size={12} />
-                                          <span>Pres</span>
-                                        </button>
-
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setEditingLeadObservaciones(lead);
-                                            setShowObservacionesModal(true);
-                                          }}
-                                          className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
-                                          title="Ver/Editar observaciones"
-                                        >
-                                          {lead.notas && lead.notas.length > 0 ? "Ver" : "Obs"}
-                                        </button>
-                                {canReassign && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      openReassignModal(lead);
-                                    }}
-                                    className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700 hover:bg-purple-200"
-                                    title="Reasignar lead"
-                                  >
-                                    Reasignar
-                                  </button>
-                                )}
-                                {canDeleteLeads() && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      openDeleteLeadConfirm(lead);
-                                    }}
-                                    className="px-2 py-1 text-xs rounded bg-red-100 text-red-700 hover:bg-red-200"
-                                    title="Eliminar lead permanentemente"
-                                  >
-                                    <Trash2 size={12} />
-                                  </button>
-                                )}
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setViewingLeadHistorial(lead);
-                                    setShowHistorialModal(true);
-                                  }}
-                                  className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                  title="Ver historial"
-                                >
-                                  Historial
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
+                    </td>
+                    <td className="px-4 py-4 text-gray-700">
+                      <div>
+                        {vendedor?.name || "Sin asignar"}
+                        {vendedor && !vendedor.active && (
+                          <div className="text-xs text-red-600">
+                            (Desactivado)
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 text-gray-500 text-xs">
+                      {lead.fecha ? String(lead.fecha).slice(0, 10) : "—"}
+                    </td>
+                    <td className="px-4 py-4 text-center">
+                      <div className="flex items-center justify-center space-x-1">
+                        <button
+  onClick={() => {
+    const phoneNumber = lead.telefono.replace(/\D/g, '');
+    const message = encodeURIComponent(
+      `Hola ${lead.nombre}, me contacto desde Auto del sol por su consulta sobre el ${lead.modelo}. ¿Cómo está?`
+    );
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+    window.open(whatsappUrl, '_blank');
+  }}
+  className="px-2 py-1 text-xs rounded bg-green-100 text-green-700 hover:bg-green-200 inline-flex items-center"
+  title="Chatear por WhatsApp"
+>
+  <span className="w-4 h-4">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.89 3.587"/>
+    </svg>
+  </span>
+</button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            abrirPresupuestoPersonalizado(lead);
+                          }}
+                          className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700 hover:bg-purple-200 flex items-center space-x-1"
+                          title="Generar presupuesto personalizado"
+                        >
+                          <FileText size={12} />
+                          <span>Presup</span>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingLeadObservaciones(lead);
+                            setShowObservacionesModal(true);
+                          }}
+                          className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
+                          title="Ver/Editar observaciones"
+                        >
+                          {lead.notas && lead.notas.length > 0 ? "Ver" : "Obs"}
+                        </button>
+                        {canReassign && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openReassignModal(lead);
+                            }}
+                            className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700 hover:bg-purple-200"
+                            title="Reasignar lead"
+                          >
+                            Reasignar
+                          </button>
+                        )}
+                        {canDeleteLeads() && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openDeleteLeadConfirm(lead);
+                            }}
+                            className="px-2 py-1 text-xs rounded bg-red-100 text-red-700 hover:bg-red-200"
+                            title="Eliminar lead permanentemente"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setViewingLeadHistorial(lead);
+                            setShowHistorialModal(true);
+                          }}
+                          className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          title="Ver historial"
+                        >
+                          Historial
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+)}
 
         {/* Sección Calendario */}
         {activeSection === "calendar" && (
@@ -2718,11 +2906,11 @@ const getDashboardStats = (teamFilter?: string) => {
 
         {/* Sección Mi Equipo */}
         {activeSection === "team" &&
-          ["supervisor", "gerente", "gerente_general", "owner"].includes(currentUser?.role) && (
+          ["supervisor", "gerente", "director", "owner"].includes(currentUser?.role) && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-3xl font-bold text-gray-800">Mi Equipo</h2>
-                {["owner", "gerente_general"].includes(currentUser?.role) && (
+                {["owner", "director"].includes(currentUser?.role) && (
                   <select
                     value={selectedTeam}
                     onChange={(e) => setSelectedTeam(e.target.value)}
@@ -2740,8 +2928,8 @@ const getDashboardStats = (teamFilter?: string) => {
                 )}
               </div>
 
-              {/* Panel de Debug solo para Owner/gerente_general */}
-              {["owner", "gerente_general"].includes(currentUser?.role) && (
+              {/* Panel de Debug solo para Owner/Director */}
+              {["owner", "director"].includes(currentUser?.role) && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                   <details>
                     <summary className="cursor-pointer font-semibold text-yellow-800 mb-2">
@@ -2807,7 +2995,7 @@ const getDashboardStats = (teamFilter?: string) => {
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   {Object.entries(estados).map(([key, estado]) => {
-  const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
+  const teamFilter = ["owner", "director"].includes(currentUser?.role)
     ? selectedTeam
     : undefined;
   let filteredLeads = getFilteredLeadsByTeam(teamFilter);
@@ -2863,7 +3051,7 @@ const getDashboardStats = (teamFilter?: string) => {
                     </h4>
 
                     {(() => {
-                      const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
+                      const teamFilter = ["owner", "director"].includes(currentUser?.role)
                         ? selectedTeam
                         : undefined;
                       const filteredLeads = getFilteredLeadsByTeam(teamFilter);
@@ -2995,17 +3183,16 @@ const getDashboardStats = (teamFilter?: string) => {
                                           </svg>
                                         </button>
                                         <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedLeadForPresupuesto(lead);
-                                            setShowPresupuestoSelectModal(true);
-                                          }}
-                                          className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700 hover:bg-purple-200 flex items-center space-x-1"
-                                          title="Enviar presupuesto por WhatsApp"
-                                        >
-                                          <FileText size={12} />
-                                          <span>Pres</span>
-                                        </button>
+  onClick={(e) => {
+    e.stopPropagation();
+    abrirPresupuestoPersonalizado(lead);
+  }}
+  className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700 hover:bg-purple-200 flex items-center space-x-1"
+  title="Generar presupuesto personalizado"
+>
+  <FileText size={12} />
+  <span>Presup</span>
+</button>
 
                                         <button
                                           onClick={(e) => {
@@ -3078,7 +3265,7 @@ const getDashboardStats = (teamFilter?: string) => {
                 </h3>
                 <div className="space-y-3">
                   {(() => {
-                    const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
+                    const teamFilter = ["owner", "director"].includes(currentUser?.role)
                       ? selectedTeam
                       : undefined;
                     const filteredLeads = getFilteredLeadsByTeam(teamFilter);
@@ -3924,7 +4111,193 @@ const getDashboardStats = (teamFilter?: string) => {
             </div>
           </div>
         )}
+{/* Modal: Reasignación Masiva */}
+{showBulkReassignModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-xl font-semibold text-gray-800">
+          Reasignación Masiva de Leads
+        </h3>
+        <button
+          onClick={() => {
+            setShowBulkReassignModal(false);
+            setBulkReassignVendorId(null);
+          }}
+        >
+          <X size={24} className="text-gray-600" />
+        </button>
+      </div>
 
+      <div className="mb-6">
+        <div className="bg-blue-50 rounded-lg p-4 mb-4">
+          <h4 className="font-medium text-blue-900 mb-2">
+            📊 Resumen de la operación
+          </h4>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="font-medium text-gray-600">Leads seleccionados:</span>{" "}
+              <span className="font-bold text-blue-700">{selectedLeads.size}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-600">Vendedores únicos afectados:</span>{" "}
+              <span className="font-bold text-blue-700">
+                {new Set(
+                  Array.from(selectedLeads)
+                    .map(id => leads.find(l => l.id === id)?.vendedor)
+                    .filter(Boolean)
+                ).size}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Preview de leads seleccionados */}
+        <div className="bg-gray-50 rounded-lg p-4 mb-4 max-h-40 overflow-y-auto">
+          <h4 className="font-medium text-gray-800 mb-2 text-sm">Leads a reasignar:</h4>
+          <div className="space-y-1">
+            {Array.from(selectedLeads).slice(0, 5).map(leadId => {
+              const lead = leads.find(l => l.id === leadId);
+              if (!lead) return null;
+              return (
+                <div key={leadId} className="text-xs text-gray-600 flex items-center justify-between">
+                  <span>{lead.nombre} - {lead.modelo}</span>
+                  <span className="text-gray-400">
+                    {lead.vendedor ? userById.get(lead.vendedor)?.name : 'Sin asignar'}
+                  </span>
+                </div>
+              );
+            })}
+            {selectedLeads.size > 5 && (
+              <div className="text-xs text-gray-500 italic">
+                ... y {selectedLeads.size - 5} más
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            Seleccionar nuevo vendedor para todos los leads seleccionados
+          </label>
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            {/* Opción para desasignar */}
+            <div
+              onClick={() => setBulkReassignVendorId(null)}
+              className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                bulkReassignVendorId === null
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-gray-200 hover:bg-gray-50"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center">
+                    <span className="text-white font-medium text-sm">--</span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">Sin asignar</p>
+                    <p className="text-sm text-gray-500">
+                      Quitar asignación de todos los leads seleccionados
+                    </p>
+                  </div>
+                </div>
+                {bulkReassignVendorId === null && (
+                  <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Lista de vendedores disponibles */}
+            {getAvailableVendorsForReassign().map((vendedor: any) => {
+              const vendedorLeads = leads.filter((l) => l.vendedor === vendedor.id);
+              const vendedorVentas = vendedorLeads.filter(
+                (l) => l.estado === "vendido"
+              ).length;
+              const conversion =
+                vendedorLeads.length > 0
+                  ? ((vendedorVentas / vendedorLeads.length) * 100).toFixed(0)
+                  : "0";
+
+              return (
+                <div
+                  key={vendedor.id}
+                  onClick={() => setBulkReassignVendorId(vendedor.id)}
+                  className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                    bulkReassignVendorId === vendedor.id
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                        <span className="text-white font-medium text-sm">
+                          {vendedor.name
+                            .split(" ")
+                            .map((n: string) => n[0])
+                            .join("")
+                            .toUpperCase()
+                            .substring(0, 2)}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">{vendedor.name}</p>
+                        <p className="text-sm text-gray-500">
+                          {vendedorLeads.length} leads • {vendedorVentas} ventas •{" "}
+                          {conversion}% conversión
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          Equipo de {userById.get(vendedor.reportsTo)?.name || "—"}
+                        </p>
+                        <p className="text-xs text-green-600 font-medium">
+                          ✓ Activo - Recibe leads nuevos
+                        </p>
+                      </div>
+                    </div>
+                    {bulkReassignVendorId === vendedor.id && (
+                      <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {getAvailableVendorsForReassign().length === 0 && (
+            <div className="text-center py-8 bg-gray-50 rounded-lg border">
+              <p className="text-gray-500">
+                No hay vendedores activos disponibles en tu scope para reasignar
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex space-x-3">
+        <button
+          onClick={handleBulkReassign}
+          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+        >
+          Reasignar {selectedLeads.size} Leads
+        </button>
+        <button
+          onClick={() => {
+            setShowBulkReassignModal(false);
+            setBulkReassignVendorId(null);
+          }}
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
         {/* Modal: Observaciones del Lead */}
         {showObservacionesModal && editingLeadObservaciones && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -4450,7 +4823,7 @@ const getDashboardStats = (teamFilter?: string) => {
                         <li>• Puede eliminar leads</li>
                       </>
                     )}
-                    {modalRole === "gerente_general" && (
+                    {modalRole === "director" && (
                       <>
                         <li>• Gestión de gerentes, supervisores y vendedores</li>
                         <li>• Visualización de todos los equipos</li>
@@ -4843,6 +5216,370 @@ const getDashboardStats = (teamFilter?: string) => {
     </div>
   </div>
 )}
+{/* Modal: Presupuesto Personalizado */}
+{showPresupuestoPersonalizadoModal && leadParaPresupuesto && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-xl w-full max-w-5xl max-h-[95vh] overflow-y-auto m-4">
+      {/* Header con fondo rosa/rojo */}
+      <div className="bg-gradient-to-r from-pink-500 to-red-500 text-white text-center py-4 rounded-t-xl">
+        <p className="font-bold text-base px-4">
+          ESTÁS A UN SOLO PASO DE TENER TU PRÓXIMO 0KM!!! FELICITACIONES!!!
+        </p>
+      </div>
+
+      <div className="p-6">
+        {/* Header del modal */}
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800">
+              Generar Presupuesto para {leadParaPresupuesto.nombre}
+            </h3>
+            <p className="text-sm text-gray-600">
+              Tel: {leadParaPresupuesto.telefono}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              setShowPresupuestoPersonalizadoModal(false);
+              setLeadParaPresupuesto(null);
+            }}
+            className="text-gray-400 hover:text-gray-600"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Grid de 3 columnas */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* COLUMNA 1: Sube tus Imágenes (0KM) */}
+          <div className="space-y-4">
+            <div className="bg-blue-100 rounded-lg p-3">
+              <h4 className="font-bold text-blue-900 text-center text-sm">
+                📸 Sube tus Imágenes (0KM)
+              </h4>
+            </div>
+            
+            {[1, 2, 3].map((num) => (
+              <div key={num} className="relative">
+                <input
+                  type="file"
+                  id={`imagen-${num}`}
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        const container = document.getElementById(`upload-container-${num}`);
+                        const img = document.getElementById(`preview-${num}`) as HTMLImageElement;
+                        if (img && event.target?.result && container) {
+                          img.src = event.target.result as string;
+                          container.classList.add('hidden');
+                          img.classList.remove('hidden');
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+                <label 
+                  htmlFor={`imagen-${num}`} 
+                  className="block border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 cursor-pointer bg-gray-50 transition-colors min-h-[150px] flex items-center justify-center"
+                >
+                  <div id={`upload-container-${num}`} className="text-center">
+                    <p className="text-gray-400 text-sm mb-1">Click para subir</p>
+                    <p className="text-gray-400 text-xs">Imagen {num}</p>
+                  </div>
+                  <img
+                    id={`preview-${num}`}
+                    className="hidden w-full h-full object-cover rounded"
+                    alt={`Preview ${num}`}
+                  />
+                </label>
+              </div>
+            ))}
+          </div>
+
+          {/* COLUMNA 2: Financiación Exclusiva */}
+          <div className="space-y-4">
+            <div className="bg-blue-100 rounded-lg p-3 border-l-4 border-blue-500">
+              <h4 className="font-bold text-blue-900 text-center text-sm flex items-center justify-center">
+                <span className="mr-2">💰</span>
+                Financiación Exclusiva
+              </h4>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1">
+                Nombre del Vehículo:
+              </label>
+              <input
+                type="text"
+                id="plan-pensado"
+                defaultValue={leadParaPresupuesto.modelo}
+                placeholder="Ej: Fiat Cronos 1.3 GSE"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1">
+                Valor Móvil:
+              </label>
+              <input
+                type="text"
+                id="valor-plan"
+                placeholder="$ 0.000.000"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1">
+                Anticipo / Alicuota Extraordinaria:
+              </label>
+              <input
+                type="text"
+                id="anticipo"
+                placeholder="$ 0.000.000"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1">
+                Suscripción y Cuota 1:
+              </label>
+              <input
+                type="text"
+                id="cuota-1-valor"
+                placeholder="$ 0.000"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            {/* Cuotas dinámicas con formato correcto */}
+            
+<div>
+  <label className="block text-sm font-bold text-gray-700 mb-1">
+    Cuota 2 a la 12:
+  </label>
+  <input
+    type="text"
+    id="cuota-2-12"
+    placeholder="$ 0.000"
+    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500"
+  />
+</div>
+
+<div>
+  <label className="block text-sm font-bold text-gray-700 mb-1">
+    Cuota 13 a la 84:
+  </label>
+  <input
+    type="text"
+    id="cuota-13-84"
+    placeholder="$ 0.000"
+    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500"
+  />
+</div>
+            <button
+              onClick={() => {
+                // Lógica para agregar otra cuota
+              }}
+              className="w-full py-2 text-sm border-2 border-dashed border-gray-300 rounded-md text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors"
+            >
+              + Agregar cuota
+            </button>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1">
+                Adjudicación Asegurada:
+              </label>
+              <input
+                type="text"
+                id="adjudicacion"
+                defaultValue="De la 2 a la 24"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+
+          {/* COLUMNA 3: Cotización del Usado */}
+          <div className="space-y-4">
+            <div className="bg-purple-100 rounded-lg p-3 border-l-4 border-purple-500">
+              <h4 className="font-bold text-purple-900 text-center text-sm flex items-center justify-center">
+                <span className="mr-2">📊</span>
+                Cotizador de Usados
+              </h4>
+            </div>
+
+            <div className="relative">
+              <input
+                type="file"
+                id="imagen-cotizador"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      const container = document.getElementById('upload-container-cotizador');
+                      const img = document.getElementById('preview-cotizador') as HTMLImageElement;
+                      if (img && event.target?.result && container) {
+                        img.src = event.target.result as string;
+                        container.classList.add('hidden');
+                        img.classList.remove('hidden');
+                      }
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+              <label 
+                htmlFor="imagen-cotizador" 
+                className="block border-2 border-dashed border-purple-300 rounded-lg p-12 text-center hover:border-purple-400 cursor-pointer bg-purple-50 transition-colors min-h-[200px] flex items-center justify-center"
+              >
+                <div id="upload-container-cotizador" className="text-center">
+                  <p className="text-purple-600 text-base mb-2 font-semibold">Click para subir cotizador</p>
+                  <p className="text-purple-500 text-sm">Captura de pantalla del cotizador</p>
+                </div>
+                <img
+                  id="preview-cotizador"
+                  className="hidden w-full h-full object-contain rounded"
+                  alt="Preview cotizador"
+                />
+              </label>
+            </div>
+
+            <div className="bg-blue-100 rounded-lg p-3 border-l-4 border-blue-500 mt-6">
+              <h4 className="font-bold text-blue-900 text-center text-sm flex items-center justify-center">
+                <span className="mr-2">🚗</span>
+                Cotización del Usado
+              </h4>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1">
+                Marca y Modelo:
+              </label>
+              <input
+                type="text"
+                id="modelo-usado"
+                defaultValue={leadParaPresupuesto.infoUsado || ''}
+                placeholder="Ej: Fiat Cronos"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1">
+                Año:
+              </label>
+              <input
+                type="text"
+                id="anio-usado"
+                placeholder="2020"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1">
+                Kilómetros:
+              </label>
+              <input
+                type="text"
+                id="kilometros"
+                placeholder="50.000 km"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1">
+                Valor Estimado:
+              </label>
+              <input
+                type="text"
+                id="valor-estimado"
+                placeholder="$ 0.000.000"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Observaciones */}
+        <div className="mt-6">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
+            Observaciones / Notas adicionales:
+          </label>
+          <textarea
+            id="observaciones"
+            rows={3}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md resize-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Información adicional..."
+          />
+        </div>
+
+        {/* Advertencias amarillas */}
+        <div className="mt-4 space-y-3">
+          <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+            <div className="flex items-start">
+              <span className="text-yellow-600 mr-2">⚠️</span>
+              <div>
+                <p className="text-sm font-bold text-yellow-900">
+                  PROMOCIÓN VÁLIDA POR 72HS:
+                </p>
+                <p className="text-sm text-yellow-800 mt-1">
+                  Todas las bonificaciones especiales tendrán una vigencia de 72 horas a partir de que te haya llegado este presupuesto.
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+            <div className="flex items-start">
+              <span className="text-purple-600 mr-2">🚗</span>
+              <div>
+                <p className="text-sm font-bold text-yellow-900">
+                  IMPORTANTE:
+                </p>
+                <p className="text-sm text-yellow-800 mt-1">
+                  Si tenés un usado, por favor pedí que te lo coticen y lo incluyan en este presupuesto, ya que si no está incluido NO se tomará para la entrega del 0KM.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Botones */}
+        <div className="mt-6 flex gap-3">
+          <button
+            onClick={() => {
+              setShowPresupuestoPersonalizadoModal(false);
+              setLeadParaPresupuesto(null);
+            }}
+            className="flex-1 px-4 py-3 text-sm font-medium border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleGenerarPresupuestoPDF}
+            className="flex-1 px-4 py-3 text-sm font-bold bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg hover:from-green-600 hover:to-blue-600 transition-all shadow-md hover:shadow-lg"
+          >
+            ✅ Generar este PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
       </div>
     </div>
   );
