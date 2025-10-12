@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "errors": "npm warn exec The following package was not found and will be installed: vite@7.1.9\n\u001b[31mfailed to load config from C:\\Users\\lucac\\Downloads\\crm fiat\\frontend\\vite.config.ts\u001b[39m\n\u001b[31merror during build:\nError [ERR_MODULE_NOT_FOUND]: Cannot find package 'vite' imported from C:\\Users\\lucac\\node_modules\\.vite-temp\\vite.config.ts.timestamp-1760285765809-8dcb09c7cfd41.mjs\n    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:256:9)\n    at packageResolve (node:internal/modules/esm/resolve:768:81)\n    at moduleResolve (node:internal/modules/esm/resolve:854:18)\n    at defaultResolve (node:internal/modules/esm/resolve:984:11)\n    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:780:12)\n    at #cachedDefaultResolve (node:internal/modules/esm/loader:704:25)\n    at ModuleLoader.resolve (node:internal/modules/esm/loader:687:38)\n    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:305:38)\n    at ModuleJob._link (node:internal/modules/esm/module_job:137:49)\u001b[39m\n",
+  "timestamp": "2025-10-12 13:16:05",
+  "vite_ruby": "3.9.2",
+  "digest": "a44c7d1575dddd94dd56719c76c81a0d2ce25f01"
+}
