@@ -38,6 +38,7 @@ import {
   createPresupuesto as apiCreatePresupuesto,
   updatePresupuesto as apiUpdatePresupuesto,
   deletePresupuesto as apiDeletePresupuesto,
+  generarPresupuestoPDFDesdeModal, // AGREGAR ESTE
 } from "./services/presupuestos";
 import { generarPresupuestoPDF } from "./services/presupuestos";
 // ===== Utilidades de jerarquía =====
@@ -538,21 +539,10 @@ const abrirPresupuestoPersonalizado = (lead: LeadRow): void => {
 const handleGenerarPresupuestoPDF = async (): Promise<void> => {
   if (!leadParaPresupuesto) return;
 
-  // Leer valores de los inputs
+  // Validar campos obligatorios
   const nombreVehiculo = (document.getElementById('nombre-vehiculo') as HTMLInputElement)?.value?.trim();
   const valorMovil = (document.getElementById('valor-movil') as HTMLInputElement)?.value?.trim();
-  const anticipo = (document.getElementById('anticipo-input') as HTMLInputElement)?.value?.trim();
-  const cuota1 = (document.getElementById('cuota-1') as HTMLInputElement)?.value?.trim();
-  const cuota2a12 = (document.getElementById('cuota-2-12-input') as HTMLInputElement)?.value?.trim();
-  const cuota13a84 = (document.getElementById('cuota-13-84-input') as HTMLInputElement)?.value?.trim();
-  const adjudicacion = (document.getElementById('adjudicacion-input') as HTMLInputElement)?.value?.trim();
-  const modeloUsado = (document.getElementById('modelo-usado-input') as HTMLInputElement)?.value?.trim();
-  const anioUsado = (document.getElementById('anio-usado-input') as HTMLInputElement)?.value?.trim();
-  const kilometros = (document.getElementById('kilometros-input') as HTMLInputElement)?.value?.trim();
-  const valorEstimado = (document.getElementById('valor-estimado-input') as HTMLInputElement)?.value?.trim();
-  const observaciones = (document.getElementById('observaciones-input') as HTMLTextAreaElement)?.value?.trim();
 
-  // Validación mejorada
   if (!nombreVehiculo) {
     alert('❌ Por favor completá el nombre del vehículo');
     document.getElementById('nombre-vehiculo')?.focus();
@@ -565,37 +555,17 @@ const handleGenerarPresupuestoPDF = async (): Promise<void> => {
     return;
   }
 
-  // Construir array de cuotas solo con las que tienen valor
-  const cuotasValidas = [];
-  if (cuota2a12) cuotasValidas.push({ cantidad: '2-12', valor: cuota2a12 });
-  if (cuota13a84) cuotasValidas.push({ cantidad: '13-84', valor: cuota13a84 });
-
-  const data = {
-    nombreVehiculo,
-    valorMinimo: valorMovil,
-    anticipo: anticipo || undefined,
-    bonificacionCuota: cuota1 || undefined,
-    cuotas: cuotasValidas,
-    adjudicacion: adjudicacion || undefined,
-    marcaModelo: modeloUsado || undefined,
-    anio: anioUsado || undefined,
-    kilometros: kilometros || undefined,
-    valorEstimado: valorEstimado || undefined,
-    observaciones: observaciones || undefined,
-    vendedor: currentUser?.name || 'Vendedor',
-    cliente: leadParaPresupuesto.nombre,
-    telefono: leadParaPresupuesto.telefono
-  };
-
   try {
     // Mostrar loading
-    const btnGenerar = document.querySelector('button[onclick*="handleGenerarPresupuestoPDF"]') as HTMLButtonElement;
+    const btnGenerar = document.querySelector('.btn-generar-pdf') as HTMLButtonElement;
+    const originalText = btnGenerar?.textContent;
     if (btnGenerar) {
       btnGenerar.disabled = true;
       btnGenerar.textContent = '⏳ Generando PDF...';
     }
 
-    await generarPresupuestoPDF(data);
+    // Generar PDF desde el modal visual
+    await generarPresupuestoPDFDesdeModal('contenido-presupuesto', leadParaPresupuesto.nombre);
     
     const enviarWhatsApp = confirm('✅ PDF generado exitosamente.\n\n¿Querés enviarlo por WhatsApp?');
     
@@ -615,15 +585,14 @@ const handleGenerarPresupuestoPDF = async (): Promise<void> => {
     console.error('Error al generar PDF:', error);
     alert('❌ Error al generar el presupuesto. Por favor intentá de nuevo.');
   } finally {
-    // Restaurar botón
-    const btnGenerar = document.querySelector('button[onclick*="handleGenerarPresupuestoPDF"]') as HTMLButtonElement;
+    const btnGenerar = document.querySelector('.btn-generar-pdf') as HTMLButtonElement;
     if (btnGenerar) {
       btnGenerar.disabled = false;
       btnGenerar.textContent = '✅ Generar este PDF';
     }
   }
-};
-  // ===== Funciones para filtrar y ordenar usuarios =====
+};  
+// ===== Funciones para filtrar y ordenar usuarios =====
   const getFilteredAndSortedUsers = () => {
     let filteredUsers = getVisibleUsers();
 
@@ -5256,7 +5225,7 @@ const getDashboardStats = (teamFilter?: string) => {
         </p>
       </div>
 
-      <div className="p-6">
+      <div id="contenido-presupuesto" className="p-6">
         {/* Header del modal */}
         <div className="flex justify-between items-start mb-6">
           <div>
