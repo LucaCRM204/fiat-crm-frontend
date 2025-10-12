@@ -5223,11 +5223,11 @@ const getDashboardStats = (teamFilter?: string) => {
 )}
 {/* Modal: Presupuesto Personalizado */}
 {showPresupuestoPersonalizadoModal && leadParaPresupuesto && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-white rounded-xl w-full max-w-5xl max-h-[95vh] overflow-y-auto m-4">
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-xl w-full max-w-7xl max-h-[95vh] overflow-y-auto shadow-2xl">
       {/* Header con fondo rosa/rojo */}
-      <div className="bg-gradient-to-r from-pink-500 to-red-500 text-white text-center py-4 rounded-t-xl">
-        <p className="font-bold text-base px-4">
+      <div className="bg-gradient-to-r from-pink-500 to-red-500 text-white text-center py-4 px-4">
+        <p className="font-bold text-lg">
           ESTÁS A UN SOLO PASO DE TENER TU PRÓXIMO 0KM!!! FELICITACIONES!!!
         </p>
       </div>
@@ -5236,11 +5236,11 @@ const getDashboardStats = (teamFilter?: string) => {
         {/* Header del modal */}
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800">
-              Generar Presupuesto para {leadParaPresupuesto.nombre}
+            <h3 className="text-xl font-semibold text-gray-800">
+              Generar Presupuesto para Lead Incompleto
             </h3>
-            <p className="text-sm text-gray-600">
-              Tel: {leadParaPresupuesto.telefono}
+            <p className="text-sm text-gray-600 mt-1">
+              Tel: +{leadParaPresupuesto.telefono}
             </p>
           </div>
           <button
@@ -5248,18 +5248,31 @@ const getDashboardStats = (teamFilter?: string) => {
               setShowPresupuestoPersonalizadoModal(false);
               setLeadParaPresupuesto(null);
             }}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 transition-colors"
           >
             <X size={24} />
           </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex border-b border-gray-200 mb-6">
+          <div className="flex-1 text-center py-3 border-b-2 border-blue-500 text-blue-600 font-medium cursor-pointer">
+            📸 Sube tus Imágenes (0KM)
+          </div>
+          <div className="flex-1 text-center py-3 text-gray-500 font-medium cursor-pointer hover:text-gray-700">
+            🔥 Financiación Exclusiva
+          </div>
+          <div className="flex-1 text-center py-3 text-gray-500 font-medium cursor-pointer hover:text-gray-700">
+            📊 Cotizador de Usados
+          </div>
         </div>
 
         {/* Grid de 3 columnas */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* COLUMNA 1: Sube tus Imágenes (0KM) */}
-          <div className="space-y-4">
-            <div className="bg-blue-100 rounded-lg p-3">
+          <div className="space-y-4 bg-blue-50 p-4 rounded-lg">
+            <div className="bg-blue-100 rounded-lg p-3 border-l-4 border-blue-500">
               <h4 className="font-bold text-blue-900 text-center text-sm">
                 📸 Sube tus Imágenes (0KM)
               </h4>
@@ -5291,7 +5304,7 @@ const getDashboardStats = (teamFilter?: string) => {
                 />
                 <label 
                   htmlFor={`imagen-${num}`} 
-                  className="block border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 cursor-pointer bg-gray-50 transition-colors min-h-[150px] flex items-center justify-center"
+                  className="block border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 cursor-pointer bg-white transition-colors min-h-[120px] flex items-center justify-center"
                 >
                   <div id={`upload-container-${num}`} className="text-center">
                     <p className="text-gray-400 text-sm mb-1">Click para subir</p>
@@ -5308,116 +5321,114 @@ const getDashboardStats = (teamFilter?: string) => {
           </div>
 
           {/* COLUMNA 2: Financiación Exclusiva */}
-          <div className="space-y-4">
-            <div className="bg-blue-100 rounded-lg p-3 border-l-4 border-blue-500">
-              <h4 className="font-bold text-blue-900 text-center text-sm flex items-center justify-center">
-                <span className="mr-2">💰</span>
-                Financiación Exclusiva
+          <div className="space-y-3 bg-orange-50 p-4 rounded-lg">
+            <div className="bg-orange-100 rounded-lg p-3 border-l-4 border-orange-500">
+              <h4 className="font-bold text-orange-900 text-center text-sm">
+                🔥 Financiación Exclusiva
               </h4>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">
+              <label className="block text-xs font-bold text-gray-700 mb-1">
                 Nombre del Vehículo:
               </label>
               <input
                 type="text"
-                id="plan-pensado"
+                id="nombre-vehiculo"
                 defaultValue={leadParaPresupuesto.modelo}
                 placeholder="Ej: Fiat Cronos 1.3 GSE"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">
+              <label className="block text-xs font-bold text-gray-700 mb-1">
                 Valor Móvil:
               </label>
               <input
                 type="text"
-                id="valor-plan"
+                id="valor-movil"
                 placeholder="$ 0.000.000"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">
+              <label className="block text-xs font-bold text-gray-700 mb-1">
                 Anticipo / Alicuota Extraordinaria:
               </label>
               <input
                 type="text"
-                id="anticipo"
+                id="anticipo-input"
                 placeholder="$ 0.000.000"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">
+              <label className="block text-xs font-bold text-gray-700 mb-1">
                 Suscripción y Cuota 1:
               </label>
               <input
                 type="text"
-                id="cuota-1-valor"
+                id="cuota-1"
                 placeholder="$ 0.000"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
-            {/* Cuotas dinámicas con formato correcto */}
-            
-<div>
-  <label className="block text-sm font-bold text-gray-700 mb-1">
-    Cuota 2 a la 12:
-  </label>
-  <input
-    type="text"
-    id="cuota-2-12"
-    placeholder="$ 0.000"
-    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500"
-  />
-</div>
+            <div>
+              <label className="block text-xs font-bold text-gray-700 mb-1">
+                Cuota 2 a la 12:
+              </label>
+              <input
+                type="text"
+                id="cuota-2-12-input"
+                placeholder="$ 0.000"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              />
+            </div>
 
-<div>
-  <label className="block text-sm font-bold text-gray-700 mb-1">
-    Cuota 13 a la 84:
-  </label>
-  <input
-    type="text"
-    id="cuota-13-84"
-    placeholder="$ 0.000"
-    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500"
-  />
-</div>
+            <div>
+              <label className="block text-xs font-bold text-gray-700 mb-1">
+                Cuota 13 a la 84:
+              </label>
+              <input
+                type="text"
+                id="cuota-13-84-input"
+                placeholder="$ 0.000"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              />
+            </div>
+
             <button
               onClick={() => {
-                // Lógica para agregar otra cuota
+                // Lógica para agregar más cuotas
+                alert('Funcionalidad para agregar más cuotas');
               }}
-              className="w-full py-2 text-sm border-2 border-dashed border-gray-300 rounded-md text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors"
+              className="w-full py-2 text-xs border-2 border-dashed border-gray-300 rounded-md text-gray-600 hover:border-orange-400 hover:text-orange-600 transition-colors"
             >
               + Agregar cuota
             </button>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">
+              <label className="block text-xs font-bold text-gray-700 mb-1">
                 Adjudicación Asegurada:
               </label>
               <input
                 type="text"
-                id="adjudicacion"
+                id="adjudicacion-input"
                 defaultValue="De la 2 a la 24"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
           </div>
 
           {/* COLUMNA 3: Cotización del Usado */}
-          <div className="space-y-4">
+          <div className="space-y-3 bg-purple-50 p-4 rounded-lg">
             <div className="bg-purple-100 rounded-lg p-3 border-l-4 border-purple-500">
-              <h4 className="font-bold text-purple-900 text-center text-sm flex items-center justify-center">
-                <span className="mr-2">📊</span>
-                Cotizador de Usados
+              <h4 className="font-bold text-purple-900 text-center text-sm">
+                📊 Cotizador de Usados
               </h4>
             </div>
 
@@ -5446,11 +5457,11 @@ const getDashboardStats = (teamFilter?: string) => {
               />
               <label 
                 htmlFor="imagen-cotizador" 
-                className="block border-2 border-dashed border-purple-300 rounded-lg p-12 text-center hover:border-purple-400 cursor-pointer bg-purple-50 transition-colors min-h-[200px] flex items-center justify-center"
+                className="block border-2 border-dashed border-purple-300 rounded-lg p-8 text-center hover:border-purple-400 cursor-pointer bg-white transition-colors min-h-[150px] flex items-center justify-center"
               >
                 <div id="upload-container-cotizador" className="text-center">
-                  <p className="text-purple-600 text-base mb-2 font-semibold">Click para subir cotizador</p>
-                  <p className="text-purple-500 text-sm">Captura de pantalla del cotizador</p>
+                  <p className="text-purple-600 text-sm mb-2 font-semibold">Click para subir cotizador</p>
+                  <p className="text-purple-500 text-xs">Captura de pantalla del cotizador</p>
                 </div>
                 <img
                   id="preview-cotizador"
@@ -5460,59 +5471,58 @@ const getDashboardStats = (teamFilter?: string) => {
               </label>
             </div>
 
-            <div className="bg-blue-100 rounded-lg p-3 border-l-4 border-blue-500 mt-6">
-              <h4 className="font-bold text-blue-900 text-center text-sm flex items-center justify-center">
-                <span className="mr-2">🚗</span>
-                Cotización del Usado
+            <div className="bg-blue-100 rounded-lg p-3 border-l-4 border-blue-500 mt-4">
+              <h4 className="font-bold text-blue-900 text-center text-sm">
+                🚗 Cotización del Usado
               </h4>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">
+              <label className="block text-xs font-bold text-gray-700 mb-1">
                 Marca y Modelo:
               </label>
               <input
                 type="text"
-                id="modelo-usado"
+                id="modelo-usado-input"
                 defaultValue={leadParaPresupuesto.infoUsado || ''}
                 placeholder="Ej: Fiat Cronos"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">
+              <label className="block text-xs font-bold text-gray-700 mb-1">
                 Año:
               </label>
               <input
                 type="text"
-                id="anio-usado"
+                id="anio-usado-input"
                 placeholder="2020"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">
+              <label className="block text-xs font-bold text-gray-700 mb-1">
                 Kilómetros:
               </label>
               <input
                 type="text"
-                id="kilometros"
+                id="kilometros-input"
                 placeholder="50.000 km"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">
+              <label className="block text-xs font-bold text-gray-700 mb-1">
                 Valor Estimado:
               </label>
               <input
                 type="text"
-                id="valor-estimado"
+                id="valor-estimado-input"
                 placeholder="$ 0.000.000"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               />
             </div>
           </div>
@@ -5524,23 +5534,23 @@ const getDashboardStats = (teamFilter?: string) => {
             Observaciones / Notas adicionales:
           </label>
           <textarea
-            id="observaciones"
+            id="observaciones-input"
             rows={3}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md resize-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="Información adicional..."
           />
         </div>
 
         {/* Advertencias amarillas */}
-        <div className="mt-4 space-y-3">
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
             <div className="flex items-start">
-              <span className="text-yellow-600 mr-2">⚠️</span>
+              <span className="text-yellow-600 mr-2 text-xl">⚠️</span>
               <div>
                 <p className="text-sm font-bold text-yellow-900">
                   PROMOCIÓN VÁLIDA POR 72HS:
                 </p>
-                <p className="text-sm text-yellow-800 mt-1">
+                <p className="text-xs text-yellow-800 mt-1">
                   Todas las bonificaciones especiales tendrán una vigencia de 72 horas a partir de que te haya llegado este presupuesto.
                 </p>
               </div>
@@ -5549,12 +5559,12 @@ const getDashboardStats = (teamFilter?: string) => {
           
           <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
             <div className="flex items-start">
-              <span className="text-purple-600 mr-2">🚗</span>
+              <span className="text-purple-600 mr-2 text-xl">🚗</span>
               <div>
                 <p className="text-sm font-bold text-yellow-900">
                   IMPORTANTE:
                 </p>
-                <p className="text-sm text-yellow-800 mt-1">
+                <p className="text-xs text-yellow-800 mt-1">
                   Si tenés un usado, por favor pedí que te lo coticen y lo incluyan en este presupuesto, ya que si no está incluido NO se tomará para la entrega del 0KM.
                 </p>
               </div>
@@ -5563,19 +5573,19 @@ const getDashboardStats = (teamFilter?: string) => {
         </div>
 
         {/* Botones */}
-        <div className="mt-6 flex gap-3">
+        <div className="mt-6 flex gap-4">
           <button
             onClick={() => {
               setShowPresupuestoPersonalizadoModal(false);
               setLeadParaPresupuesto(null);
             }}
-            className="flex-1 px-4 py-3 text-sm font-medium border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            className="flex-1 px-6 py-3 text-sm font-medium border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
           >
             Cancelar
           </button>
           <button
             onClick={handleGenerarPresupuestoPDF}
-            className="flex-1 px-4 py-3 text-sm font-bold bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg hover:from-green-600 hover:to-blue-600 transition-all shadow-md hover:shadow-lg"
+            className="flex-1 px-6 py-3 text-sm font-bold bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg hover:from-green-600 hover:to-blue-600 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             ✅ Generar este PDF
           </button>
@@ -5584,7 +5594,6 @@ const getDashboardStats = (teamFilter?: string) => {
     </div>
   </div>
 )}
-
       </div>
     </div>
   );
