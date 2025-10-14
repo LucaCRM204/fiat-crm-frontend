@@ -38,7 +38,7 @@ import {
   createPresupuesto as apiCreatePresupuesto,
   updatePresupuesto as apiUpdatePresupuesto,
   deletePresupuesto as apiDeletePresupuesto,
-  generarPresupuestoPDFDesdeModal, // AGREGAR ESTE
+  generarPresupuestoPDFBackend, // AGREGAR ESTE
 } from "./services/presupuestos";
 import { generarPresupuestoPDF } from "./services/presupuestos";
 // ===== Utilidades de jerarquía =====
@@ -564,8 +564,49 @@ const handleGenerarPresupuestoPDF = async (): Promise<void> => {
       btnGenerar.textContent = '⏳ Generando PDF...';
     }
 
-    // Generar PDF desde el modal visual
-    await generarPresupuestoPDFDesdeModal('contenido-presupuesto', leadParaPresupuesto.nombre);
+    // Recolectar todos los datos del formulario
+    const anticipo = (document.getElementById('anticipo-input') as HTMLInputElement)?.value?.trim();
+    const cuota1 = (document.getElementById('cuota-1') as HTMLInputElement)?.value?.trim();
+    const cuota2a12 = (document.getElementById('cuota-2-12-input') as HTMLInputElement)?.value?.trim();
+    const cuota13a84 = (document.getElementById('cuota-13-84-input') as HTMLInputElement)?.value?.trim();
+    const adjudicacion = (document.getElementById('adjudicacion-input') as HTMLInputElement)?.value?.trim();
+    const observaciones = (document.getElementById('observaciones-input') as HTMLTextAreaElement)?.value?.trim();
+
+    // Datos del usado
+    const modeloUsado = (document.getElementById('modelo-usado-input') as HTMLInputElement)?.value?.trim();
+    const anioUsado = (document.getElementById('anio-usado-input') as HTMLInputElement)?.value?.trim();
+    const kilometrosUsado = (document.getElementById('kilometros-input') as HTMLInputElement)?.value?.trim();
+    const valorUsado = (document.getElementById('valor-estimado-input') as HTMLInputElement)?.value?.trim();
+
+    // Preparar datos para el PDF
+    const pdfData = {
+      cliente: leadParaPresupuesto.nombre,
+      vehiculo: {
+        marca: nombreVehiculo.split(' ')[0] || 'Vehículo',
+        modelo: nombreVehiculo,
+        año: '2025',
+      },
+      financiacion: {
+        precio_contado: valorMovil,
+        anticipo: anticipo,
+        planes_cuotas: {
+          suscripcion_cuota1: cuota1,
+          cuota_2_12: cuota2a12,
+          cuota_13_84: cuota13a84,
+          adjudicacion_asumida: adjudicacion,
+        },
+        bonificaciones: 'Bonificación especial - Válida por 72hs',
+      },
+      especificaciones_tecnicas: modeloUsado && valorUsado
+        ? `USADO EN PARTE DE PAGO:\n${modeloUsado} ${anioUsado || ''}\n${kilometrosUsado ? `Kilometraje: ${kilometrosUsado}` : ''}\nValor estimado: ${valorUsado}`
+        : '',
+      observaciones: observaciones,
+      vendedor: currentUser?.name,
+      fecha: new Date().toLocaleDateString('es-AR'),
+    };
+
+    // Generar PDF usando el backend
+    await generarPresupuestoPDFBackend(pdfData);
     
     const enviarWhatsApp = confirm('✅ PDF generado exitosamente.\n\n¿Querés enviarlo por WhatsApp?');
     
