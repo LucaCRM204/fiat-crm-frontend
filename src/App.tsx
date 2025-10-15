@@ -5265,7 +5265,7 @@ const getDashboardStats = (teamFilter?: string) => {
         </p>
       </div>
 
-      <div id="contenido-presupuesto" className="p-8" style={{ width: '1200px', minWidth: '1200px' }}>
+      <div id="contenido-presupuesto" className="p-8" style={{ width: '210mm', maxWidth: '210mm', minWidth: '210mm' }}>
         {/* Header del modal */}
         <div className="flex justify-between items-start mb-6">
           <div>
