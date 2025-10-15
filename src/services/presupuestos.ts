@@ -71,51 +71,53 @@ export async function generarPresupuestoPDFDesdeModal(elementId: string, cliente
       allowTaint: false,
       logging: false,
       backgroundColor: '#ffffff',
-      windowWidth: 794, // Ancho A4 en pixels (210mm)
+      windowWidth: element.scrollWidth,
       windowHeight: element.scrollHeight,
       imageTimeout: 15000,
       onclone: (clonedDoc) => {
         const clonedElement = clonedDoc.getElementById(elementId);
         if (clonedElement) {
-          // Ajustar a tamaño A4
-          clonedElement.style.width = '794px'; // 210mm en pixels
-          clonedElement.style.maxWidth = '794px';
-          clonedElement.style.minWidth = '794px';
-          clonedElement.style.padding = '20px';
-          clonedElement.style.boxSizing = 'border-box';
+          // CRÍTICO: Convertir todos los inputs a divs con el texto visible
+          const inputs = clonedElement.querySelectorAll('input, textarea');
+          inputs.forEach((input: any) => {
+            const value = input.value || input.placeholder || '';
+            const div = clonedDoc.createElement('div');
+            
+            // Copiar estilos del input
+            div.style.cssText = window.getComputedStyle(input).cssText;
+            div.style.border = '1px solid #d1d5db';
+            div.style.borderRadius = '0.375rem';
+            div.style.padding = '0.5rem 0.75rem';
+            div.style.backgroundColor = '#ffffff';
+            div.style.minHeight = input.tagName === 'TEXTAREA' ? '80px' : '42px';
+            div.style.display = 'flex';
+            div.style.alignItems = 'center';
+            div.style.fontSize = '14px';
+            div.style.lineHeight = '1.5';
+            div.style.color = '#000000';
+            div.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif';
+            div.style.whiteSpace = input.tagName === 'TEXTAREA' ? 'pre-wrap' : 'nowrap';
+            div.style.wordBreak = 'break-word';
+            
+            div.textContent = value;
+            
+            // Reemplazar el input por el div
+            input.parentNode?.replaceChild(div, input);
+          });
           
-          // Reducir tamaño de fuentes y espaciados
-          const allElements = clonedElement.querySelectorAll('*');
-          allElements.forEach((el: any) => {
-            // Ajustar font sizes
-            const currentFontSize = window.getComputedStyle(el).fontSize;
-            if (currentFontSize) {
-              const sizeInPx = parseFloat(currentFontSize);
-              if (sizeInPx > 0) {
-                el.style.fontSize = `${sizeInPx * 0.85}px`; // Reducir 15%
-              }
-            }
-            
-            // Ajustar paddings
-            const currentPadding = window.getComputedStyle(el).padding;
-            if (currentPadding && currentPadding !== '0px') {
-              el.style.padding = '8px';
-            }
-            
-            // Asegurar UTF-8 correcto
+          // Ajustar tamaño general
+          clonedElement.style.width = '1200px';
+          clonedElement.style.maxWidth = '1200px';
+          clonedElement.style.minWidth = '1200px';
+          
+          // Asegurar UTF-8 en todos los elementos de texto
+          const allTextElements = clonedElement.querySelectorAll('*');
+          allTextElements.forEach((el: any) => {
             if (el.textContent) {
               el.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
               el.style.textRendering = 'optimizeLegibility';
               el.style.webkitFontSmoothing = 'antialiased';
             }
-          });
-          
-          // Cambiar grids de 3 columnas a 2 para que quepa mejor
-          const grids = clonedElement.querySelectorAll('.grid-cols-3, .lg\\:grid-cols-3');
-          grids.forEach((grid: any) => {
-            grid.style.display = 'grid';
-            grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
-            grid.style.gap = '12px';
           });
         }
       }
