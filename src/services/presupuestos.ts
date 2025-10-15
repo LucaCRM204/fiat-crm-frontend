@@ -1,4 +1,6 @@
 import { api } from './api';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 export interface Presupuesto {
   id: number;
@@ -40,80 +42,85 @@ export interface UpdatePresupuestoData {
   activo?: boolean;
 }
 
-export interface GenerarPDFData {
-  cliente: string;
-  vehiculo: {
-    marca: string;
-    modelo: string;
-    año?: string;
-    imagen_url?: string;
-  };
-  financiacion: {
-    precio_contado?: string;
-    anticipo?: string;
-    planes_cuotas?: any;
-    bonificaciones?: string;
-  };
-  especificaciones_tecnicas?: string;
-  observaciones?: string;
-  vendedor?: string;
-  fecha?: string;
-}
-
-// Función PRINCIPAL para generar PDF desde el backend
-export async function generarPresupuestoPDFBackend(data: GenerarPDFData): Promise<void> {
+// Función para generar PDF desde el modal visual con encoding correcto
+export async function generarPresupuestoPDFDesdeModal(elementId: string, cliente: string): Promise<void> {
   try {
-    console.log('📄 Solicitando PDF al backend con datos:', data);
-    
-    const response = await api.post('/presupuestos/generar-pdf', data, {
-      responseType: 'blob',
-      timeout: 30000 // 30 segundos de timeout
-    });
-    
-    // Crear blob del PDF
-    const blob = new Blob([response.data], { type: 'application/pdf' });
-    const url = window.URL.createObjectURL(blob);
-    
-    // Crear link temporal y descargar
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `presupuesto_${data.cliente.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    
-    // Limpiar
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-    
-    console.log('✅ PDF descargado correctamente');
-  } catch (error) {
-    console.error('❌ Error generando PDF desde backend:', error);
-    throw new Error('No se pudo generar el PDF. Por favor intenta nuevamente.');
-  }
-}
+    const element = document.getElementById(elementId);
+    if (!element) {
+      throw new Error('Elemento no encontrado');
+    }
 
-// Función alternativa para vista previa del PDF en nueva pestaña
-export async function previsualizarPresupuestoPDF(data: GenerarPDFData): Promise<void> {
-  try {
-    const response = await api.post('/presupuestos/generar-pdf', data, {
-      responseType: 'blob',
-      timeout: 30000
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    
+    const botones = element.querySelectorAll('button');
+    botones.forEach(btn => (btn as HTMLElement).style.display = 'none');
+
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    const modal = element.closest('.overflow-y-auto');
+    if (modal) {
+      modal.scrollTop = 0;
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    const canvas = await html2canvas(element, {
+      scale: 3,
+      useCORS: true,
+      allowTaint: false,
+      logging: false,
+      backgroundColor: '#ffffff',
+      windowWidth: element.scrollWidth,
+      windowHeight: element.scrollHeight,
+      imageTimeout: 15000,
+      onclone: (clonedDoc) => {
+        const clonedElement = clonedDoc.getElementById(elementId);
+        if (clonedElement) {
+          clonedElement.style.width = '1200px';
+          clonedElement.style.maxWidth = '1200px';
+          clonedElement.style.minWidth = '1200px';
+          
+          // Asegurar UTF-8 en todos los elementos de texto
+          const allTextElements = clonedElement.querySelectorAll('*');
+          allTextElements.forEach((el: any) => {
+            if (el.textContent) {
+              el.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+              el.style.textRendering = 'optimizeLegibility';
+              el.style.webkitFontSmoothing = 'antialiased';
+            }
+          });
+        }
+      }
     });
+
+    botones.forEach(btn => (btn as HTMLElement).style.display = '');
+    document.body.style.overflow = originalOverflow;
+
+    const imgWidth = 210;
+    const pageHeight = 297;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
     
-    const blob = new Blob([response.data], { type: 'application/pdf' });
-    const url = window.URL.createObjectURL(blob);
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    const imgData = canvas.toDataURL('image/png', 1.0);
     
-    // Abrir en nueva pestaña
-    window.open(url, '_blank');
-    
-    // Limpiar después de 1 minuto
-    setTimeout(() => {
-      window.URL.revokeObjectURL(url);
-    }, 60000);
-    
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+      heightLeft -= pageHeight;
+    }
+
+    pdf.save(`presupuesto_${cliente.replace(/\s+/g, '_')}_${Date.now()}.pdf`);
   } catch (error) {
-    console.error('Error previsualizando PDF:', error);
-    throw new Error('No se pudo previsualizar el PDF.');
+    console.error('Error generando PDF:', error);
+    throw error;
   }
 }
 

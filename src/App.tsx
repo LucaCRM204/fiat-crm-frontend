@@ -38,7 +38,7 @@ import {
   createPresupuesto as apiCreatePresupuesto,
   updatePresupuesto as apiUpdatePresupuesto,
   deletePresupuesto as apiDeletePresupuesto,
-  generarPresupuestoPDFBackend, // AGREGAR ESTE
+  generarPresupuestoPDFDesdeModal,
 } from "./services/presupuestos";
 import { generarPresupuestoPDF } from "./services/presupuestos";
 // ===== Utilidades de jerarquía =====
