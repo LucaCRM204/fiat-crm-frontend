@@ -40,7 +40,7 @@ import {
   deletePresupuesto as apiDeletePresupuesto,
   generarPresupuestoPDFDesdeModal,
 } from "./services/presupuestos";
-import { generarPresupuestoPDF } from "./services/presupuestos";
+
 // ===== Utilidades de jerarquía =====
 function buildIndex(users: any[]) {
   const byId = new Map(users.map((u: any) => [u.id, u]));
@@ -605,8 +605,7 @@ const handleGenerarPresupuestoPDF = async (): Promise<void> => {
       fecha: new Date().toLocaleDateString('es-AR'),
     };
 
-    // Generar PDF usando el backend
-    await generarPresupuestoPDFBackend(pdfData);
+   await generarPresupuestoPDFDesdeModal('contenido-presupuesto', leadParaPresupuesto.nombre);
     
     const enviarWhatsApp = confirm('✅ PDF generado exitosamente.\n\n¿Querés enviarlo por WhatsApp?');
     
