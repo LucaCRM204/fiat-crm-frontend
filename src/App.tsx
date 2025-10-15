@@ -605,8 +605,7 @@ const handleGenerarPresupuestoPDF = async (): Promise<void> => {
       fecha: new Date().toLocaleDateString('es-AR'),
     };
 
-    // Generar PDF usando el backend
-    await generarPresupuestoPDFBackend(pdfData);
+   await generarPresupuestoPDFDesdeModal('contenido-presupuesto', leadParaPresupuesto.nombre);
     
     const enviarWhatsApp = confirm('✅ PDF generado exitosamente.\n\n¿Querés enviarlo por WhatsApp?');
     
