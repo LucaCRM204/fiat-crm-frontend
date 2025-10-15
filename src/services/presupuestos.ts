@@ -66,29 +66,56 @@ export async function generarPresupuestoPDFDesdeModal(elementId: string, cliente
     await new Promise(resolve => setTimeout(resolve, 100));
 
     const canvas = await html2canvas(element, {
-      scale: 3,
+      scale: 2.5,
       useCORS: true,
       allowTaint: false,
       logging: false,
       backgroundColor: '#ffffff',
-      windowWidth: element.scrollWidth,
+      windowWidth: 794, // Ancho A4 en pixels (210mm)
       windowHeight: element.scrollHeight,
       imageTimeout: 15000,
       onclone: (clonedDoc) => {
         const clonedElement = clonedDoc.getElementById(elementId);
         if (clonedElement) {
-          clonedElement.style.width = '1200px';
-          clonedElement.style.maxWidth = '1200px';
-          clonedElement.style.minWidth = '1200px';
+          // Ajustar a tamaño A4
+          clonedElement.style.width = '794px'; // 210mm en pixels
+          clonedElement.style.maxWidth = '794px';
+          clonedElement.style.minWidth = '794px';
+          clonedElement.style.padding = '20px';
+          clonedElement.style.boxSizing = 'border-box';
           
-          // Asegurar UTF-8 en todos los elementos de texto
-          const allTextElements = clonedElement.querySelectorAll('*');
-          allTextElements.forEach((el: any) => {
+          // Reducir tamaño de fuentes y espaciados
+          const allElements = clonedElement.querySelectorAll('*');
+          allElements.forEach((el: any) => {
+            // Ajustar font sizes
+            const currentFontSize = window.getComputedStyle(el).fontSize;
+            if (currentFontSize) {
+              const sizeInPx = parseFloat(currentFontSize);
+              if (sizeInPx > 0) {
+                el.style.fontSize = `${sizeInPx * 0.85}px`; // Reducir 15%
+              }
+            }
+            
+            // Ajustar paddings
+            const currentPadding = window.getComputedStyle(el).padding;
+            if (currentPadding && currentPadding !== '0px') {
+              el.style.padding = '8px';
+            }
+            
+            // Asegurar UTF-8 correcto
             if (el.textContent) {
               el.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
               el.style.textRendering = 'optimizeLegibility';
               el.style.webkitFontSmoothing = 'antialiased';
             }
+          });
+          
+          // Cambiar grids de 3 columnas a 2 para que quepa mejor
+          const grids = clonedElement.querySelectorAll('.grid-cols-3, .lg\\:grid-cols-3');
+          grids.forEach((grid: any) => {
+            grid.style.display = 'grid';
+            grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+            grid.style.gap = '12px';
           });
         }
       }
