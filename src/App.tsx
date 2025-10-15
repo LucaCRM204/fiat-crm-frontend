@@ -40,7 +40,7 @@ import {
   deletePresupuesto as apiDeletePresupuesto,
   generarPresupuestoPDFDesdeModal,
 } from "./services/presupuestos";
-import { generarPresupuestoPDF } from "./services/presupuestos";
+
 // ===== Utilidades de jerarquía =====
 function buildIndex(users: any[]) {
   const byId = new Map(users.map((u: any) => [u.id, u]));
