@@ -447,13 +447,13 @@ const [leadParaNotas, setLeadParaNotas] = useState<LeadRow | null>(null);
 // Estados para Plantillas WhatsApp
 const [showPlantillasModal, setShowPlantillasModal] = useState(false);
 const [leadParaWhatsApp, setLeadParaWhatsApp] = useState<LeadRow | null>(null);
-// ✅ AGREGAR ESTE USEEFFECT - Registrar Service Worker
-useEffect(() => {
-  console.log('🚀 Registrando Service Worker...');
-  if ('serviceWorker' in navigator) {
-    pushService.registerServiceWorker();
-  }
-}, []);
+// Service Worker desactivado temporalmente
+// useEffect(() => {
+//   console.log('🚀 Registrando Service Worker...');
+//   if ('serviceWorker' in navigator) {
+//     pushService.registerServiceWorker();
+//   }
+// }, []);
 
   // ===== Login contra backend =====
   const handleLogin = async (email: string, password: string) => {
