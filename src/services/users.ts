@@ -1,55 +1,28 @@
-import { api } from './api';
+﻿import { api } from "../api";
 
-export interface User {
+export type User = {
   id: number;
   name: string;
   email: string;
-  role: 'owner' | 'director' | 'gerente' | 'supervisor' | 'vendedor';
-  reportsTo: number | null;
-  active: boolean;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface CreateUserData {
-  name: string;
-  email: string;
-  password: string;
   role: string;
-  reportsTo?: number | null;
-  active?: number;
-}
+  reportsTo: number | null;
+  active: number | boolean;
+};
 
-export interface UpdateUserData {
-  name?: string;
-  email?: string;
-  password?: string;
-  role?: string;
-  reportsTo?: number | null;
-  active?: number;
-}
+export const listUsers = async (): Promise<User[]> => {
+  const response = await api.get("/users");
+  return response.data.users || response.data || [];
+};
 
-export async function listUsers(): Promise<User[]> {
-  const response = await api.get('/users');
-  return response.data;
-}
+export const createUser = async (p: Partial<User> & { password?: string }) => {
+  const response = await api.post("/users", p);
+  return response.data.user || response.data;
+};
 
-export async function getUser(id: number): Promise<User> {
-  const response = await api.get(`/users/${id}`);
-  return response.data;
-}
+export const deleteUser = async (id: number) =>
+  (await api.delete(`/users/${id}`)).data;
 
-export async function createUser(data: CreateUserData): Promise<User> {
-  const response = await api.post('/users', data);
-  return response.data;
-}
-
-export async function updateUser(id: number, data: UpdateUserData): Promise<User> {
-  const response = await api.put(`/users/${id}`, data);
-  return response.data;
-}
-
-export async function deleteUser(id: number): Promise<{ ok: boolean; message: string }> {
-  const response = await api.delete(`/users/${id}`);
-  return response.data;
-}
+export const updateUser = async (id: number, p: Partial<User> & { password?: string }) => {
+  const response = await api.put(`/users/${id}`, p);
+  return response.data.user || response.data;
+};
