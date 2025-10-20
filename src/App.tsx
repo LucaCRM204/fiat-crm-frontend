@@ -145,7 +145,7 @@ type LeadRow = {
     usuario: string;
   }>;
   created_by?: number;
-  created_at?: string;
+  created_at?: string;  // AGREGAR ESTA LÍNEA
   last_status_change?: string;
   recordatorios?: Array<{
     id: number;
@@ -556,7 +556,7 @@ const plantillasWhatsApp = {
     nombre: "Primer Contacto",
     emoji: "👋",
     plantilla: (nombre: string, modelo: string, vendedor: string) =>
-      `Hola ${nombre}! 👋 Soy ${vendedor} de ALRA.\n\nVi que consultaste por el ${modelo}. Justo tenemos unidades disponibles 🚗\n\n¿Tenés 5 minutos para una llamada o preferís que te envíe la cotización por acá?`,
+      `Hola ${nombre}! 👋 Soy ${vendedor} de auto del sol.\n\nVi que consultaste por el ${modelo}. Justo tenemos unidades disponibles 🚗\n\n¿Tenés 5 minutos para una llamada o preferís que te envíe la cotización por acá?`,
   },
   cotizacion: {
     nombre: "Enviar Cotización",
@@ -3904,7 +3904,7 @@ const getProgresoMes = (vendedor_id: number) => {
                             onClick={() => {
                               const phoneNumber = tarea.lead?.telefono.replace(/\D/g, '');
                               const mensaje = encodeURIComponent(
-                                `Hola ${tarea.lead?.nombre}, me contacto desde Alra`
+                                `Hola ${tarea.lead?.nombre}, me contacto desde auto del sol`
                               );
                               window.open(`https://wa.me/${phoneNumber}?text=${mensaje}`, '_blank');
                             }}
@@ -8997,7 +8997,7 @@ mensaje += `   Total: $${(plan.valorCuota * plan.cuotas).toLocaleString('es-AR')
         <button
           onClick={() => {
             const phoneNumber = leadParaWhatsApp.telefono.replace(/\D/g, '');
-            const mensaje = `Hola ${leadParaWhatsApp.nombre}! Soy ${currentUser?.name} de ALRA. `;
+            const mensaje = `Hola ${leadParaWhatsApp.nombre}! Soy ${currentUser?.name} de auto del sol. `;
             const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(mensaje)}`;
             window.open(whatsappUrl, '_blank');
             setShowPlantillasModal(false);
