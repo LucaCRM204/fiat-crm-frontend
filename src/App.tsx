@@ -495,7 +495,7 @@ const [leadParaWhatsApp, setLeadParaWhatsApp] = useState<LeadRow | null>(null);
         entrega: L.entrega,
         fecha: L.fecha || L.created_at || "",
         estado: (L.estado || "nuevo") as LeadRow["estado"],
-        vendedor: L.assigned_to ?? null,
+        vendedor: L.vendedor ?? null,
         notas: L.notas || "",
         fuente: (L.fuente || "otro") as LeadRow["fuente"],
         historial: L.historial || [],
@@ -1023,46 +1023,57 @@ const getFilteredAndSearchedLeads = () => {
   };
 
   const handleReassignLead = async () => {
-    if (!leadToReassign) return;
+  if (!leadToReassign) return;
 
-    try {
-      await apiUpdateLead(
-        leadToReassign.id,
-        { vendedor: selectedVendorForReassign } as any
+  try {
+    // CAMBIO: Ahora actualiza el estado a "nuevo" y la fecha al día actual
+    await apiUpdateLead(
+      leadToReassign.id,
+      { 
+        vendedor: selectedVendorForReassign,
+        estado: "nuevo",  // ✅ NUEVO: Cambiar estado a "nuevo"
+        fecha: new Date().toISOString().split('T')[0]  // ✅ NUEVO: Fecha del día
+      } as any
+    );
+
+    setLeads((prev) =>
+      prev.map((l) =>
+        l.id === leadToReassign.id
+        ? { 
+            ...l, 
+            vendedor: selectedVendorForReassign,
+            estado: "nuevo",  // ✅ Actualizar estado en el frontend
+            fecha: new Date().toISOString().split('T')[0]  // ✅ Actualizar fecha en el frontend
+          }
+        : l
+      )
+    );
+
+    if (selectedVendorForReassign) {
+      pushAlert(
+        selectedVendorForReassign,
+        "lead_assigned",
+        `Lead reasignado: ${leadToReassign.nombre} - ${leadToReassign.modelo}`
       );
-
-      setLeads((prev) =>
-        prev.map((l) =>
-          l.id === leadToReassign.id
-          ? { ...l, vendedor: selectedVendorForReassign }
-          : l
-        )
-      );
-
-      if (selectedVendorForReassign) {
-        pushAlert(
-          selectedVendorForReassign,
-          "lead_assigned",
-          `Lead reasignado: ${leadToReassign.nombre} - ${leadToReassign.modelo}`
-        );
-      }
-
-      addHistorialEntry(
-        leadToReassign.id,
-        `Reasignado a ${
-          selectedVendorForReassign
-            ? userById.get(selectedVendorForReassign)?.name
-            : "Sin asignar"
-        }`
-      );
-
-      setShowReassignModal(false);
-      setLeadToReassign(null);
-      setSelectedVendorForReassign(null);
-    } catch (e) {
-      console.error("No pude reasignar el lead", e);
     }
-  };
+
+    // Actualizar historial con la información completa
+    addHistorialEntry(
+      leadToReassign.id,
+      `Reasignado a ${
+        selectedVendorForReassign
+          ? userById.get(selectedVendorForReassign)?.name
+          : "Sin asignar"
+      } - Estado: Nuevo`
+    );
+
+    setShowReassignModal(false);
+    setLeadToReassign(null);
+    setSelectedVendorForReassign(null);
+  } catch (e) {
+    console.error("No pude reasignar el lead", e);
+  }
+};
 
   // AGREGAR LAS 3 FUNCIONES NUEVAS AQUÍ (FUERA de handleReassignLead)
   const toggleLeadSelection = (leadId: number) => {
@@ -1087,67 +1098,78 @@ const getFilteredAndSearchedLeads = () => {
   };
 
   const handleBulkReassign = async () => {
-    if (bulkReassignVendorId === undefined) {
-      alert("Selecciona un vendedor");
-      return;
-    }
+  if (bulkReassignVendorId === undefined) {
+    alert("Selecciona un vendedor");
+    return;
+  }
 
-    const leadsToReassign = Array.from(selectedLeads);
+  const leadsToReassign = Array.from(selectedLeads);
+  
+  if (leadsToReassign.length === 0) {
+    alert("No hay leads seleccionados");
+    return;
+  }
+
+  const confirmMsg = `¿Reasignar ${leadsToReassign.length} leads a ${
+    bulkReassignVendorId ? userById.get(bulkReassignVendorId)?.name : "Sin asignar"
+  }? Los leads se marcarán como NUEVOS con la fecha de hoy.`;
+  
+  if (!confirm(confirmMsg)) return;
+
+  try {
+    const fechaHoy = new Date().toISOString().split('T')[0];
     
-    if (leadsToReassign.length === 0) {
-      alert("No hay leads seleccionados");
-      return;
-    }
-
-    const confirmMsg = `¿Reasignar ${leadsToReassign.length} leads a ${
-      bulkReassignVendorId ? userById.get(bulkReassignVendorId)?.name : "Sin asignar"
-    }?`;
+    const promises = leadsToReassign.map(leadId =>
+      apiUpdateLead(leadId, { 
+        vendedor: bulkReassignVendorId,
+        estado: "nuevo",  // ✅ NUEVO: Estado a "nuevo"
+        fecha: fechaHoy   // ✅ NUEVO: Fecha del día
+      } as any)
+    );
     
-    if (!confirm(confirmMsg)) return;
+    await Promise.all(promises);
 
-    try {
-      const promises = leadsToReassign.map(leadId =>
-        apiUpdateLead(leadId, { vendedor: bulkReassignVendorId } as any)
+    setLeads(prev =>
+      prev.map(l =>
+        selectedLeads.has(l.id)
+          ? { 
+              ...l, 
+              vendedor: bulkReassignVendorId,
+              estado: "nuevo",  // ✅ Actualizar estado
+              fecha: fechaHoy    // ✅ Actualizar fecha
+            }
+          : l
+      )
+    );
+
+    if (bulkReassignVendorId) {
+      pushAlert(
+        bulkReassignVendorId,
+        "lead_assigned",
+        `${leadsToReassign.length} leads asignados masivamente con estado NUEVO`
       );
-      
-      await Promise.all(promises);
-
-      setLeads(prev =>
-        prev.map(l =>
-          selectedLeads.has(l.id)
-            ? { ...l, vendedor: bulkReassignVendorId }
-            : l
-        )
-      );
-
-      if (bulkReassignVendorId) {
-        pushAlert(
-          bulkReassignVendorId,
-          "lead_assigned",
-          `${leadsToReassign.length} leads asignados masivamente`
-        );
-      }
-
-      leadsToReassign.forEach(leadId => {
-        addHistorialEntry(
-          leadId,
-          `Reasignación masiva a ${
-            bulkReassignVendorId
-              ? userById.get(bulkReassignVendorId)?.name
-              : "Sin asignar"
-          }`
-        );
-      });
-     
-   setShowBulkReassignModal(false);
-      setBulkReassignVendorId(null);
-      setSelectedLeads(new Set());
-      
-    } catch (error) {
-      console.error('Error en reasignación masiva:', error);
-      alert('Error al reasignar los leads. Por favor intenta nuevamente.');
     }
-  };
+
+    leadsToReassign.forEach(leadId => {
+      addHistorialEntry(
+        leadId,
+        `Reasignación masiva a ${
+          bulkReassignVendorId
+            ? userById.get(bulkReassignVendorId)?.name
+            : "Sin asignar"
+        } - Estado: Nuevo - Fecha: ${fechaHoy}`
+      );
+    });
+ 
+    setShowBulkReassignModal(false);
+    setBulkReassignVendorId(null);
+    setSelectedLeads(new Set());
+    
+  } catch (error) {
+    console.error('Error en reasignación masiva:', error);
+    alert('Error al reasignar los leads. Por favor intenta nuevamente.');
+  }
+};
 
   // Función para agregar recordatorio
   const handleAgregarRecordatorio = () => {
@@ -1813,7 +1835,7 @@ const getDashboardStats = (teamFilter?: string) => {
   entrega: L.entrega,
   fecha: L.fecha || L.created_at || "",
   estado: (L.estado || "nuevo") as LeadRow["estado"],
-  vendedor: L.assigned_to ?? null,
+  vendedor: L.vendedor ?? null,
   notas: L.notas || "",
   fuente: (L.fuente || "otro") as LeadRow["fuente"],
   historial: L.historial || [],
