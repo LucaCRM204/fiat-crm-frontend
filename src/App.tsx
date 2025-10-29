@@ -82,7 +82,7 @@ function getDescendantUserIds(
 
 const roles: Record<string, string> = {
   owner: "Dueño",
-  director: "Director",
+  gerente_general: "gerente_general",
   gerente: "Gerente",
   supervisor: "Supervisor",
   vendedor: "Vendedor",
@@ -407,7 +407,7 @@ export default function CRM() {
   const [showUserModal, setShowUserModal] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [modalRole, setModalRole] = useState<
-    "owner" | "director" | "gerente" | "supervisor" | "vendedor"
+    "owner" | "gerente_general" | "gerente" | "supervisor" | "vendedor"
   >("vendedor");
   const [modalReportsTo, setModalReportsTo] = useState<number | null>(null);
   // Estados para presupuestos
@@ -598,7 +598,7 @@ const plantillasWhatsApp = {
   // ===== Acceso por rol =====
   const getAccessibleUserIds = (user: any) => {
     if (!user) return [] as number[];
-    if (["owner", "director", "dueño"].includes(user.role))
+    if (["owner", "gerente_general", "dueño"].includes(user.role))
       return users.map((u: any) => u.id);
     const ids = [user.id, ...getDescendantUserIds(user.id, childrenIndex)];
     console.log('=== getAccessibleUserIds ===');
@@ -619,14 +619,14 @@ console.log('Leads filtrados:', leads.filter(l => l.vendedor && ids.includes(l.v
   };
   
   const canCreateUsers = () =>
-    currentUser && ["owner", "director", "gerente"].includes(currentUser.role);
+    currentUser && ["owner", "gerente_general", "gerente"].includes(currentUser.role);
 
   const canManageUsers = () =>
-    currentUser && ["owner", "director", "gerente", "dueño"].includes(currentUser.role);
+    currentUser && ["owner", "gerente_general", "gerente", "dueño"].includes(currentUser.role);
   const isOwner = () => currentUser?.role === "owner" || currentUser?.role === "dueño";
 
   const canCreateLeads = () =>
-    currentUser && ["owner", "director", "gerente", "supervisor", "vendedor"].includes(currentUser.role);
+    currentUser && ["owner", "gerente_general", "gerente", "supervisor", "vendedor"].includes(currentUser.role);
 
   const canDeleteLeads = () => {
   const canDelete = currentUser && ["owner", "dueño"].includes(currentUser.role);
@@ -725,7 +725,7 @@ const getDailyAnalytics = (leads: LeadRow[], teamFilter?: string) => {
   const getFilteredLeadsByTeam = (teamId?: string) => {
     if (!currentUser) return [] as LeadRow[];
 
-    if (teamId && teamId !== "todos" && ["owner", "director", "dueño"].includes(currentUser.role)) {
+    if (teamId && teamId !== "todos" && ["owner", "gerente_general", "dueño"].includes(currentUser.role)) {
       const teamUserIds = getTeamUserIds(teamId);
       return leads.filter((l) => l.vendedor && teamUserIds.includes(l.vendedor));
     }
@@ -751,7 +751,7 @@ const getDailyAnalytics = (leads: LeadRow[], teamFilter?: string) => {
     return users.filter((u: any) => {
       if (currentUser.role === "owner") return true;
 
-      if (currentUser.role === "director") return u.role !== "owner";
+      if (currentUser.role === "gerente_general") return u.role !== "owner";
 
       if (currentUser.role === "gerente") {
         if (u.id === currentUser.id) return true;
@@ -884,7 +884,7 @@ const handleGenerarPresupuestoPDF = async (): Promise<void> => {
         case "name":
           return a.name.localeCompare(b.name);
         case "role":
-          const roleOrder = ["owner", "director", "gerente", "supervisor", "vendedor"];
+          const roleOrder = ["owner", "gerente_general", "gerente", "supervisor", "vendedor"];
           const aRoleIndex = roleOrder.indexOf(a.role);
           const bRoleIndex = roleOrder.indexOf(b.role);
           if (aRoleIndex !== bRoleIndex) {
@@ -1745,7 +1745,7 @@ const pushAlertToChain = (
 const getDashboardStats = (teamFilter?: string) => {
     let filteredLeads: LeadRow[];
     
-    if (teamFilter && teamFilter !== "todos" && ["owner", "director", "dueño"].includes(currentUser?.role)) {
+    if (teamFilter && teamFilter !== "todos" && ["owner", "gerente_general", "dueño"].includes(currentUser?.role)) {
       const teamUserIds = getTeamUserIds(teamFilter);
       filteredLeads = leads.filter((l) => l.vendedor && teamUserIds.includes(l.vendedor));
     } else {
@@ -1779,7 +1779,7 @@ const getDashboardStats = (teamFilter?: string) => {
   const getSourceMetrics = (teamFilter?: string) => {
     let filteredLeads: LeadRow[];
     
-    if (teamFilter && teamFilter !== "todos" && ["owner", "director", "dueño"].includes(currentUser?.role)) {
+    if (teamFilter && teamFilter !== "todos" && ["owner", "gerente_general", "dueño"].includes(currentUser?.role)) {
       const teamUserIds = getTeamUserIds(teamFilter);
       filteredLeads = leads.filter((l) => l.vendedor && teamUserIds.includes(l.vendedor));
     } else {
@@ -2073,8 +2073,8 @@ const getDashboardStats = (teamFilter?: string) => {
     if (!user) return [];
     switch (user.role) {
       case "owner":
-        return ["director", "gerente", "supervisor", "vendedor"];
-      case "director":
+        return ["gerente_general", "gerente", "supervisor", "vendedor"];
+      case "gerente_general":
         return ["gerente", "supervisor", "vendedor"];
       case "gerente":
         return ["supervisor", "vendedor"];
@@ -2086,10 +2086,10 @@ const getDashboardStats = (teamFilter?: string) => {
     switch (role) {
       case "owner":
         return [];
-      case "director":
+      case "gerente_general":
         return users.filter((u: any) => u.role === "owner");
       case "gerente":
-        return users.filter((u: any) => u.role === "director");
+        return users.filter((u: any) => u.role === "gerente_general");
       case "supervisor":
         return users.filter((u: any) => u.role === "gerente");
       case "vendedor":
@@ -2423,14 +2423,14 @@ const getProgresoMes = (vendedor_id: number) => {
     { key: "ranking", label: "Ranking", Icon: Trophy },
     
     // Gestión de Metas
-    ...((["supervisor", "gerente", "director", "owner"].includes(currentUser?.role))
+    ...((["supervisor", "gerente", "gerente_general", "owner"].includes(currentUser?.role))
       ? [{ key: "metas", label: "Gestión de Metas", Icon: Target }]
       : []),
     
-    ...(["supervisor", "gerente", "director", "owner"].includes(currentUser?.role)
+    ...(["supervisor", "gerente", "gerente_general", "owner"].includes(currentUser?.role)
       ? [{ key: "team", label: "Mi Equipo", Icon: UserCheck }]
       : []),
-    ...((["supervisor", "gerente", "director", "owner"].includes(currentUser?.role))
+    ...((["supervisor", "gerente", "gerente_general", "owner"].includes(currentUser?.role))
   ? [{ 
       key: "asignar_tareas", 
       label: "Asignar Tareas", 
@@ -2440,7 +2440,7 @@ const getProgresoMes = (vendedor_id: number) => {
       ).length
     }]
   : []),
-    ...((isOwner() || currentUser?.role === "director")
+    ...((isOwner() || currentUser?.role === "gerente_general")
       ? [{ key: "analytics", label: "Análisis Diario", Icon: BarChart3 }]
       : []),
     { key: "alerts", label: "Alertas", Icon: Bell, badge: unreadAlerts },
@@ -2519,7 +2519,7 @@ const getProgresoMes = (vendedor_id: number) => {
             <div className="flex items-center justify-between">
   <h2 className="text-3xl font-bold text-gray-800">Dashboard</h2>
   <div className="flex items-center space-x-3">
-    {["owner", "director", "dueño"].includes(currentUser?.role) && (
+    {["owner", "gerente_general", "dueño"].includes(currentUser?.role) && (
       <select
         value={selectedTeam}
         onChange={(e) => setSelectedTeam(e.target.value)}
@@ -2591,7 +2591,7 @@ const getProgresoMes = (vendedor_id: number) => {
             {/* Estadísticas principales */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {(() => {
-                const teamFilter = ["owner", "director", "dueño"].includes(currentUser?.role)
+                const teamFilter = ["owner", "gerente_general", "dueño"].includes(currentUser?.role)
                   ? selectedTeam
                   : undefined;
                 const stats = getDashboardStats(teamFilter);
@@ -2771,12 +2771,12 @@ const getProgresoMes = (vendedor_id: number) => {
   <div className="flex items-center justify-between mb-4">
     <h3 className="text-xl font-semibold text-gray-800">Estados de Leads</h3>
     <div className="flex items-center space-x-2">
-      {["owner", "director"].includes(currentUser?.role) && (
+      {["owner", "gerente_general"].includes(currentUser?.role) && (
         <>
           <span className="text-sm text-gray-600">Descargar Excel:</span>
           <button
             onClick={() => {
-              const teamFilter = ["owner", "director"].includes(currentUser?.role)
+              const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
                 ? selectedTeam
                 : undefined;
               
@@ -2825,7 +2825,7 @@ const getProgresoMes = (vendedor_id: number) => {
   </div>
   <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
     {Object.entries(estados).map(([key, estado]) => {
-      const teamFilter = ["owner", "director"].includes(currentUser?.role)
+      const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
         ? selectedTeam
         : undefined;
       
@@ -2874,7 +2874,7 @@ const getProgresoMes = (vendedor_id: number) => {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    const teamFilter = ["owner", "director"].includes(currentUser?.role)
+                    const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
                       ? selectedTeam
                       : undefined;
                     
@@ -2937,7 +2937,7 @@ const getProgresoMes = (vendedor_id: number) => {
       </h4>
 
       {(() => {
-        const teamFilter = ["owner", "director"].includes(currentUser?.role)
+        const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
           ? selectedTeam
           : undefined;
         
@@ -3226,7 +3226,7 @@ const getProgresoMes = (vendedor_id: number) => {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {(() => {
-                  const teamFilter = ["owner", "director"].includes(currentUser?.role)
+                  const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
                     ? selectedTeam
                     : undefined;
                   return getSourceMetrics(teamFilter).map((item) => (
@@ -4589,11 +4589,11 @@ const getProgresoMes = (vendedor_id: number) => {
         )}
         {/* Sección Mi Equipo */}
         {activeSection === "team" &&
-          ["supervisor", "gerente", "director", "owner"].includes(currentUser?.role) && (
+          ["supervisor", "gerente", "gerente_general", "owner"].includes(currentUser?.role) && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-3xl font-bold text-gray-800">Mi Equipo</h2>
-                {["owner", "director"].includes(currentUser?.role) && (
+                {["owner", "gerente_general"].includes(currentUser?.role) && (
                   <select
                     value={selectedTeam}
                     onChange={(e) => setSelectedTeam(e.target.value)}
@@ -4611,8 +4611,8 @@ const getProgresoMes = (vendedor_id: number) => {
                 )}
               </div>
 
-              {/* Panel de Debug solo para Owner/Director */}
-              {["owner", "director"].includes(currentUser?.role) && (
+              {/* Panel de Debug solo para Owner/gerente_general */}
+              {["owner", "gerente_general"].includes(currentUser?.role) && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                   <details>
                     <summary className="cursor-pointer font-semibold text-yellow-800 mb-2">
@@ -4678,7 +4678,7 @@ const getProgresoMes = (vendedor_id: number) => {
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   {Object.entries(estados).map(([key, estado]) => {
-  const teamFilter = ["owner", "director"].includes(currentUser?.role)
+  const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
     ? selectedTeam
     : undefined;
   let filteredLeads = getFilteredLeadsByTeam(teamFilter);
@@ -4734,7 +4734,7 @@ const getProgresoMes = (vendedor_id: number) => {
                     </h4>
 
                     {(() => {
-                      const teamFilter = ["owner", "director"].includes(currentUser?.role)
+                      const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
                         ? selectedTeam
                         : undefined;
                       const filteredLeads = getFilteredLeadsByTeam(teamFilter);
@@ -4990,7 +4990,7 @@ const getProgresoMes = (vendedor_id: number) => {
                 </h3>
                 <div className="space-y-3">
                   {(() => {
-                    const teamFilter = ["owner", "director"].includes(currentUser?.role)
+                    const teamFilter = ["owner", "gerente_general"].includes(currentUser?.role)
                       ? selectedTeam
                       : undefined;
                     const filteredLeads = getFilteredLeadsByTeam(teamFilter);
@@ -5069,7 +5069,7 @@ const getProgresoMes = (vendedor_id: number) => {
             </div>
           )}
         {/* Sección Asignar Tareas - Para Superiores */}
-{activeSection === "asignar_tareas" && (["supervisor", "gerente", "director", "owner"].includes(currentUser?.role)) && (
+{activeSection === "asignar_tareas" && (["supervisor", "gerente", "gerente_general", "owner"].includes(currentUser?.role)) && (
   <div className="space-y-6">
     <div className="flex items-center justify-between">
       <div>
@@ -5315,7 +5315,7 @@ const getProgresoMes = (vendedor_id: number) => {
 )}
 
         {/* Sección Análisis Diario - Solo Owner */}
-  {activeSection === "analytics" && (isOwner() || currentUser?.role === "director") && (
+  {activeSection === "analytics" && (isOwner() || currentUser?.role === "gerente_general") && (
   <div className="space-y-6">
     <div className="flex items-center justify-between">
       <h2 className="text-3xl font-bold text-gray-800">Análisis Diario de Leads</h2>
@@ -6290,7 +6290,7 @@ const getProgresoMes = (vendedor_id: number) => {
   </div>
 )}
 {/* Sección Gestión de Metas */}
-{activeSection === "metas" && (["supervisor", "gerente", "director", "owner"].includes(currentUser?.role)) && (
+{activeSection === "metas" && (["supervisor", "gerente", "gerente_general", "owner"].includes(currentUser?.role)) && (
   <div className="space-y-6">
     <div className="flex items-center justify-between">
       <h2 className="text-3xl font-bold text-gray-800">🎯 Gestión de Metas</h2>
@@ -7652,7 +7652,7 @@ const cumpleMeta = meta && progreso.ventas >= meta.meta_ventas;
                         <li>• Puede eliminar leads</li>
                       </>
                     )}
-                    {modalRole === "director" && (
+                    {modalRole === "gerente_general" && (
                       <>
                         <li>• Gestión de gerentes, supervisores y vendedores</li>
                         <li>• Visualización de todos los equipos</li>
