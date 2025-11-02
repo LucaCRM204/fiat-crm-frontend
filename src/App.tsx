@@ -1643,6 +1643,20 @@ const pushAlertToChain = (
     if (!currentUser) return [] as LeadRow[];
     
     const visibleUserIds = getAccessibleUserIds(currentUser);
+    
+    // Si es owner, gerente_general o dueño - puede ver TODOS los leads (con y sin vendedor)
+    if (["owner", "gerente_general", "dueño"].includes(currentUser.role)) {
+      return leads; // Ver TODOS los leads
+    }
+    
+    // Para gerentes y supervisores - ver leads de su equipo + leads sin asignar
+    if (["gerente", "supervisor"].includes(currentUser.role)) {
+      return leads.filter((l) => 
+        !l.vendedor || visibleUserIds.includes(l.vendedor)
+      );
+    }
+    
+    // Para vendedores - solo sus leads asignados
     return leads.filter((l) =>
       l.vendedor && visibleUserIds.includes(l.vendedor)
     );
